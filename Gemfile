@@ -64,7 +64,7 @@ group :development, :test do
   gem "selenium-webdriver" # Browser automation
   gem "simplecov", require: false # Code coverage analysis
   gem "database_cleaner-active_record" # Database cleaning strategies
-  gem "webdrivers", "= 5.3.0" # Automatically downloads drivers for browser automation
+  gem "webdrivers", "5.3.1" # Automatically downloads drivers for browser automation
   gem "launchy" # Opens URLs in testing
   gem "guard-rspec" # Automatically run specs when files are modified
   gem "rspec-expectations" # Express expected outcomes in examples
