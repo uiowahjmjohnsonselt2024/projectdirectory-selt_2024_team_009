@@ -28,13 +28,14 @@ gem "uglifier", "~> 4.2" # JavaScript compressor
 gem "coffee-rails", "~> 5.0" # Use CoffeeScript for .coffee assets
 gem "jquery-rails" # Use jQuery as the JavaScript library
 gem "haml" # Use Haml as the templating engine
-
+gem "cancancan" # Authorization library
 # JSON APIs
 gem "jbuilder", "~> 2.13"
-
+gem 'haml-rails'
 # Authentication
 gem "devise", "~> 4.9"
 gem "bcrypt", "~> 3.1.7" # Password hashing
+gem 'erb2haml'
 
 # Redis support (optional)
 # gem 'redis', '~> 4.7'
@@ -94,3 +95,5 @@ gem "sdoc", "~> 2.6", group: :doc # Generate API documentation
 group :development do
   gem "spring" # Speeds up development by keeping the application running in the background
 end
+
+
