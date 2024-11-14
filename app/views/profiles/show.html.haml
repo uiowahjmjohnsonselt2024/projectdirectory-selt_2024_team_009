@@ -1,0 +1,26 @@
+%h1 Profile
+
+%p
+  %strong Username:
+  = @user.username
+
+%p
+  %strong Email:
+  = @user.email
+
+%p
+  = link_to 'Edit Profile', edit_user_registration_path
+
+%p
+  = link_to 'Logout', destroy_user_session_path, method: :delete
+
+%hr/
+
+%h2 Actions
+
+%ul
+  %li= link_to 'Create Server', new_server_path
+  %li= link_to 'Your Servers', servers_path
+  %li= link_to 'Items', items_path
+  %li= link_to 'View Inventory', inventories_path
+  %li= link_to 'View Transactions', transactions_path
