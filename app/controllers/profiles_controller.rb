@@ -7,4 +7,14 @@ class ProfilesController < ApplicationController
     @user = current_user
     # Load additional resources as needed
   end
+  def checkPass(username, password)
+
+    user = User.find_by(username: username)
+
+    if user && BCrypt::Password.new(user.encrypted_password) == password
+      true
+    else
+      false
+    end
+  end
 end
