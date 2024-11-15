@@ -7,17 +7,22 @@
 
     = stylesheet_link_tag 'application', media: 'all', 'data-turbo-track': 'reload'
     = javascript_importmap_tags
+
   %body
-    %header
-      %nav
-        %ul
-          - if user_signed_in?
-            %li= link_to 'Profile', authenticated_root_path
-            %li= link_to 'Logout', destroy_user_session_path, method: :delete
-          - else
-            %li= link_to 'Login', new_user_session_path
-            %li= link_to 'Sign Up', new_user_registration_path
-    %main
+    %header.header
+      %h1.app-title Shards of the Grid
+
+    %main.container
       = yield
-    %footer
+
+    %footer.footer-nav
+      %ul.nav-links
+        - if user_signed_in?
+          %li.nav-item= link_to 'Profile', authenticated_root_path, class: 'nav-link'
+          %li.nav-item= link_to 'Logout', destroy_user_session_path, method: :delete, class: 'nav-link'
+        - else
+          %li.nav-item= link_to 'Login', new_user_session_path, class: 'nav-link'
+          %li.nav-item= link_to 'Sign Up', new_user_registration_path, class: 'nav-link'
+
+    %footer.app-footer
       %p &copy; #{Time.now.year} Shards of the Grid
