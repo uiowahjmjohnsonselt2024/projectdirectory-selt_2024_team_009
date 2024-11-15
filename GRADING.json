@@ -1,9 +1,9 @@
 {
   "GROUP": "G009",
   "ALL_SPRINTS": {
-    "SPRINT1_URL": "http://blah.blee.boo/myapp",
-    "SPRINT2_URL": "http://blah.blee.boo/myapp",
-    "SPRINT3_URL": "http://blah.blee.boo/myapp",
-    "FINAL_URL": "http://blah.blee.boo/myapp"
+    "SPRINT1_URL": "https://shards-of-the-grid-team-09-ad424e75e121.herokuapp.com",
+    "SPRINT2_URL": "https://shards-of-the-grid-team-09-ad424e75e121.herokuapp.com",
+    "SPRINT3_URL": "https://shards-of-the-grid-team-09-ad424e75e121.herokuapp.com",
+    "FINAL_URL": "https://shards-of-the-grid-team-09-ad424e75e121.herokuapp.com"
   }
 }
