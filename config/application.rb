@@ -12,17 +12,13 @@ module ProjectdirectorySelt2024Team009
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 7.2
 
-    # Please, add to the `ignore` list any other `lib` subdirectories that do
-    # not contain `.rb` files, or that should not be reloaded or eager loaded.
-    # Common ones are `templates`, `generators`, or `middleware`, for example.
+    # Ensure encrypted credentials are required
+    config.require_master_key = true
+
+    # Automatically load lib subdirectories
     config.autoload_lib(ignore: %w[assets tasks])
 
-    # Configuration for the application, engines, and railties goes here.
-    #
-    # These settings can be overridden in specific environments using the files
-    # in config/environments, which are processed later.
-    #
-    # config.time_zone = "Central Time (US & Canada)"
+    # Example of adding additional paths for eager loading
     # config.eager_load_paths << Rails.root.join("extras")
   end
 end
