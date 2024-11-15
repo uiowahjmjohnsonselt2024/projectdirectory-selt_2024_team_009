@@ -41,8 +41,6 @@ Rails.application.configure do
     domain:               'localhost',  # Update this to your domain if deploying
     user_name:            ENV['GMAIL_USERNAME'],  # Use environment variable for Gmail username
     password:             ENV['GMAIL_PASSWORD'],  # Use environment variable for Gmail password
-    #user_name:            'shardsofthegrid9@gmail.com',  # Use environment variable for Gmail username
-    #password:             'SeltTeam@9',  # Use environment variable for Gmail password
     authentication:       'plain',
     enable_starttls_auto: true
   }

@@ -15,7 +15,7 @@
     %main.container
       = yield
 
-    %footer.footer-nav
+    %nav.footer-nav
       %ul.nav-links
         - if user_signed_in?
           %li.nav-item= link_to 'Profile', authenticated_root_path, class: 'nav-link'
@@ -25,4 +25,4 @@
           %li.nav-item= link_to 'Sign Up', new_user_registration_path, class: 'nav-link'
 
     %footer.app-footer
-      %p &copy; #{Time.now.year} Shards of the Grid
+      %p.footer-text &copy; #{Time.now.year} Shards of the Grid
