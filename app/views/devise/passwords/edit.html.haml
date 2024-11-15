@@ -1,19 +1,23 @@
-%h2 Change your password
-= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :put }) do |f|
+%h2.change-password-title Change Your Password
+
+= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :put, class: 'change-password-form' }) do |f|
   = render "devise/shared/error_messages", resource: resource
   = f.hidden_field :reset_password_token
+
   .field
-    = f.label :password, "New password"
+    = f.label :password, "New Password", class: 'label-password'
     %br/
     - if @minimum_password_length
-      %em
-        (#{@minimum_password_length} characters minimum)
+      %em.hint-text (#{@minimum_password_length} characters minimum)
       %br/
-    = f.password_field :password, autofocus: true, autocomplete: "new-password"
+    = f.password_field :password, autofocus: true, autocomplete: "new-password", class: 'input-password'
+
   .field
-    = f.label :password_confirmation, "Confirm new password"
+    = f.label :password_confirmation, "Confirm New Password", class: 'label-password-confirmation'
     %br/
-    = f.password_field :password_confirmation, autocomplete: "new-password"
+    = f.password_field :password_confirmation, autocomplete: "new-password", class: 'input-password-confirmation'
+
   .actions
-    = f.submit "Change my password"
+    = f.submit "Change My Password", class: 'submit-button'
+
 = render "devise/shared/links"
