@@ -22,3 +22,4 @@ production:
   password: <%= ENV["PGPASSWORD"] %>
   host: <%= ENV["PGHOST"] || "localhost" %>
   port: <%= ENV["PGPORT"] || 5432 %>
+
