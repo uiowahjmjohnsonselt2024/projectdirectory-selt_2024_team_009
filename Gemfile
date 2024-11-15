@@ -1,10 +1,8 @@
-# Specify the minimum bundler version
-gem "bundler", "~> 2.5"
-
 source "https://rubygems.org"
 
 ruby "3.3.0"
-
+# Specify the minimum bundler version
+gem "bundler", "~> 2.5"
 # Rails framework
 gem "rails", "~> 7.2.2"
 
