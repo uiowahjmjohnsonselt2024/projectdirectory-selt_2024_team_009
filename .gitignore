@@ -51,7 +51,7 @@ build-iPhoneSimulator/
 # unless supporting rvm < 1.11.0 or doing something fancy, ignore this:
 .rvmrc
 
-
+.env.*
 ### https://raw.githubusercontent.com/github/gitignore/master/Rails.gitignore
 
 *.rbc
