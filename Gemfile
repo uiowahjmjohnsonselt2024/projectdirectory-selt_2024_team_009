@@ -29,6 +29,11 @@ gem "coffee-rails", "~> 5.0" # Use CoffeeScript for .coffee assets
 gem "jquery-rails" # Use jQuery as the JavaScript library
 gem "haml" # Use Haml as the templating engine
 gem "cancancan" # Authorization library
+
+# UI libraries
+gem "bootstrap"
+gem "sassc-rails"
+
 # JSON APIs
 gem "jbuilder", "~> 2.13"
 gem 'haml-rails'
