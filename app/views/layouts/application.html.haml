@@ -7,17 +7,30 @@
 
     = stylesheet_link_tag 'application', media: 'all', 'data-turbo-track': 'reload'
     = javascript_importmap_tags
+
   %body
-    %header
-      %nav
-        %ul
-          - if user_signed_in?
-            %li= link_to 'Profile', authenticated_root_path
-            %li= link_to 'Logout', destroy_user_session_path, method: :delete
-          - else
-            %li= link_to 'Login', new_user_session_path
-            %li= link_to 'Sign Up', new_user_registration_path
-    %main
+    %header.header
+      -# %h1.app-title Shards of the Grid
+      %nav.navbar.navbar-expand-lg.bg-body-tertiary.fixed-top
+        %div.container-fluid
+          %a.navbar-brand{:href => "#"} Shards of the Grid
+          %button.navbar-toggler{:type => "button", :data-bs-toggle => "collapse", :data-bs-target => "#navbarNav", :aria-controls => "navbarNav", :aria-expanded => "false", :aria-label => "Toggle navigation"}
+            #span.navbar-toggler-icon
+          %div.collapse.navbar-collapse#navbarNav
+            %ul.navbar-nav.ms-auto
+              - if user_signed_in?
+                %li.nav-item
+                  %a.nav-link{:href => authenticated_root_path} Profile
+                %li.nav-item
+                  %a.nav-link{:href => destroy_user_session_path} Logout
+              -else
+                %li.nav-item
+                  %a.nav-link{:href => new_user_session_path} Login
+                %li.nav-item
+                  %a.nav-link{:href => new_user_registration_path} Sign Up
+
+    %main.container
       = yield
-    %footer
-      %p &copy; #{Time.now.year} Shards of the Grid
+
+    %footer.my-2.py-3.bg-body-tertiary
+      %p.text-center.my-auto &copy; #{Time.now.year} Shards of the Grid

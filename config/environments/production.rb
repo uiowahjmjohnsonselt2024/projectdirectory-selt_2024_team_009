@@ -43,6 +43,17 @@ Rails.application.configure do
 
   # Disable schema dump after migrations
   config.active_record.dump_schema_after_migration = false
+
+  # Action Mailer settings for Devise in production
+  config.action_mailer.default_url_options = { host: host, protocol: protocol }
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.smtp_settings = {
+    address:              'smtp.gmail.com',
+    port:                 587,
+    domain:               'yourdomain.com',           # Replace with your actual domain
+    user_name:            ENV['GMAIL_USERNAME'],      # Set this in your environment variables
+    password:             ENV['GMAIL_PASSWORD'],      # Set this in your environment variables
+    authentication:       'plain',
+    enable_starttls_auto: true
+  }
 end
-
-
