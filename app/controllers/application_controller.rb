@@ -5,6 +5,8 @@ class ApplicationController < ActionController::Base
 
   # Configure additional parameters for Devise
   before_action :configure_permitted_parameters, if: :devise_controller?
+  # Capture and log flash messages (optional, for debugging)
+  before_action :log_flash_messages
 
   protected
   def after_sign_in_path_for(resource)
@@ -18,5 +20,9 @@ class ApplicationController < ActionController::Base
   end
   def after_sign_out_path_for(resource_or_scope)
     unauthenticated_root_path
+  end
+
+  def log_flash_messages
+    Rails.logger.debug "Flash contents: #{flash.to_hash}" if flash.any?
   end
 end
