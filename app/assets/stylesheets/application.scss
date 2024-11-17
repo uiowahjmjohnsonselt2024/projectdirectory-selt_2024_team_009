@@ -16,55 +16,6 @@
 /* Custom styles for Forgot Password page */
 @import "bootstrap";
 
-.forgot-password-title {
-    font-size: 24px;
-    color: #333;
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.forgot-password-form {
-    max-width: 400px;
-    margin: 0 auto;
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background-color: #f9f9f9;
-}
-
-.label-email {
-    font-weight: bold;
-    color: #555;
-}
-
-.input-email {
-    width: 100%;
-    padding: 10px;
-    margin-top: 5px;
-    margin-bottom: 20px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-}
-
-.submit-button {
-    width: 100%;
-    padding: 10px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s ease;
-}
-
-.submit-button:hover {
-    background-color: #0056b3;
-}
-
-.help-text {
-    text-align: center;
-    color: #666;
-    font-size: 14px;
-    margin-top: 10px;
+body {
+    padding-top: 56px;
 }

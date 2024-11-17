@@ -8,13 +8,13 @@
     = stylesheet_link_tag 'application', media: 'all', 'data-turbo-track': 'reload'
     = javascript_importmap_tags
 
-  %body
+  %body.mt-10
     %header.header
       -# %h1.app-title Shards of the Grid
       %nav.navbar.navbar-expand-lg.bg-body-tertiary.fixed-top
         %div.container-fluid
           %a.navbar-brand{:href => "#"} Shards of the Grid
-          %button.navbar-toggler{:type => "button", :data-bs-toggle => "collapse", :data-bs-target => "#navbarNav", :aria-controls => "navbarNav", :aria-expanded => "false", :aria-label => "Toggle navigation"}
+          %button.navbar-toggler{ type: "button", data: { bs_toggle: "collapse", bs_target: "#navbarNav" }, aria: { controls: "navbarNav", expanded: "false", label: "Toggle navigation" } }
             #span.navbar-toggler-icon
           %div.collapse.navbar-collapse#navbarNav
             %ul.navbar-nav.ms-auto
@@ -31,6 +31,7 @@
 
     %main.container
       = yield
+      %script{:src => "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js", :integrity => "sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz", :crossorigin => "anonymous"}
 
     %footer.my-2.py-3.bg-body-tertiary
       %p.text-center.my-auto &copy; #{Time.now.year} Shards of the Grid
