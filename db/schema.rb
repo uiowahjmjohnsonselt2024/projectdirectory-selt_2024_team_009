@@ -100,6 +100,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_11_15_210949) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
+
   create_table "transactions", force: :cascade do |t|
     t.integer "user_id", null: false
     t.string "transaction_type"
