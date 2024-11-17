@@ -7,6 +7,14 @@ class ProfilesController < ApplicationController
     @user = current_user
     # Load additional resources as needed
   end
+
+  def changePass(username, email, passToken, newPassword)
+
+    user = User.find_by(username: username)
+    if(email == User.find_by(email: user.email) && passToken == User.find_by(reset_password_token: user.reset_password_token))
+      user.update(password: newPassword)
+    end
+  end
   def checkPass(username, password)
 
     user = User.find_by(username: username)
