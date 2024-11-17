@@ -15,7 +15,137 @@
  */
 /* Custom styles for Forgot Password page */
 @import "bootstrap";
+@import url('https://fonts.googleapis.com/css2?family=Eagle+Lake&display=swap');
+
+:root {
+    --primary-color: #730E15;
+    --secondary-color: gold;
+}
 
 body {
     padding-top: 56px;
+    font-family: "Eagle Lake", serif;
+    font-weight: 400;
+    font-style: normal;
+    color: var(--primary-text-color);
+}
+
+.text-shadow {
+    text-shadow: 3px 3px rgba(0, 0, 0, 0.5);
+}
+
+.logo {
+    height: 3rem;
+    width: 3rem;
+    background-blend-mode: darken;
+    box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.8);
+}
+
+.logo:hover {
+    border: 3px solid var(--secondary-color);
+    border-radius: 2px;
+    transition: 0.5s linear;
+}
+
+.navbar {
+    box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.8);
+}
+
+.navbar-toggler {
+    border-color: var(--secondary-color);
+    color: var(--secondary-color);
+}
+
+.navbar-toggler-icon {
+    -webkit-text-stroke-color: var(--secondary-color);
+}
+
+.nav-link {
+    color: var(--secondary-color);
+}
+
+.nav-link:hover {
+    border-bottom: 1px solid var(--secondary-color);
+    color: white;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+    transition: 0.8s linear;
+}
+
+.form-control:focus {
+    border: 2px solid var(--secondary-color);
+    color: var(--primary-color);
+    outline: none;
+    box-shadow: none;
+}
+
+.form-label, .form-check-label {
+    color: var(--secondary-color);
+}
+
+.form-check-input, .form-check-input:focus {
+    border: 1px solid var(--primary-color);
+    box-shadow: none;
+    outline: none;
+}
+
+.form-check-input:checked {
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+    border: 1px solid var(--secondary-color);
+    box-shadow: none;
+    outline: none;
+}
+
+.text-color-primary, a.text-color-primary {
+    color: var(--primary-color);
+}
+
+.text-color-secondary, a.text-color-secondary {
+    color: var(--secondary-color);
+}
+
+.bg-color-primary {
+    background-color: var(--primary-color);
+}
+
+.bg-color-secondary {
+    background-color: var(--secondary-color);
+}
+
+.home-background {
+    background-image: image-url('default_background.png');
+    background-color: rgba(0, 0, 0, 0.3);
+    background-blend-mode: darken;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    height: 100%;
+}
+
+.card {
+    background-color: rgba(0, 0, 0, 0.2);
+    background-blend-mode: darken;
+    box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.8);
+    border: 2px solid var(--secondary-color);
+    border-radius: 8px;
+}
+
+.errors {
+    background-color: var(--secondary-color);
+    box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.8);
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    border-radius: 4px;
+    padding: 5px;
+    margin: 2rem 0;
 }
