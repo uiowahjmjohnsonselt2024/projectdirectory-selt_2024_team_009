@@ -1,0 +1,14 @@
+%h1 Create a New Server
+
+= form_with(model: @server, local: true) do |f|
+  .form-group
+    = f.label :name
+    = f.text_field :name, class: 'form-control'
+
+  .form-group
+    = f.label :max_players
+    = f.number_field :max_players, class: 'form-control'
+
+  = f.submit 'Create Server', class: 'btn btn-primary'
+
+= link_to 'Back to My Servers', servers_path, class: 'btn btn-secondary'

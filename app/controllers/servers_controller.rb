@@ -4,7 +4,7 @@ class ServersController < ApplicationController
 
   # GET /servers
   def index
-    @servers = Server.all
+    @servers = current_user.created_servers
   end
 
   # GET /servers/:id
@@ -14,12 +14,12 @@ class ServersController < ApplicationController
 
   # GET /servers/new
   def new
-    @server = current_user.servers.build
+    @server = current_user.created_servers.build
   end
 
   # POST /servers
   def create
-    @server = current_user.servers.build(server_params)
+    @server = current_user.created_servers.build(server_params)
     if @server.save
       redirect_to @server, notice: 'Server was successfully created.'
     else
@@ -51,7 +51,7 @@ class ServersController < ApplicationController
 
   # Set the @server based on the ID in params
   def set_server
-    @server = Server.find(params[:id])
+    @server = current_user.created_servers.find(params[:id])
   end
 
   # Strong parameters to prevent mass assignment
