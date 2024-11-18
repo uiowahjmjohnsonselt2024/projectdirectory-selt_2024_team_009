@@ -113,6 +113,82 @@ body {
 .text-color-secondary, a.text-color-secondary {
     color: var(--secondary-color);
 }
+/* Flexbox container for the profile and actions */
+.profile-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 2rem;
+    gap: 2rem;
+
+    @media (max-width: 768px) {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+}
+
+/* Profile Section Styling */
+.profile-left {
+    width: 50%;
+}
+
+.profile-header {
+    margin-bottom: 2rem;
+}
+
+.profile-info p {
+    margin: 0.5rem 0;
+}
+
+.profile-actions .btn {
+    padding: 0.6rem 1.2rem;
+    font-size: 1rem;
+}
+
+/* Actions Section Styling */
+.actions-right {
+    width: 50%;
+}
+
+.actions-header {
+    margin-bottom: 2rem;
+}
+
+.actions-list-container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+ul.actions-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+ul.actions-list li {
+    margin: 0.5rem 0;
+}
+
+ul.actions-list li a {
+    display: block;
+    text-align: center;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    font-size: 1.1rem;
+    font-weight: bold;
+    background: linear-gradient(145deg, #e3e3e3, #ffffff);
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2), -2px -2px 5px rgba(255, 255, 255, 0.9);
+    color: #333;
+    transition: all 0.3s ease-in-out;
+}
+
+ul.actions-list li a:hover {
+    background: linear-gradient(145deg, #ffffff, #e3e3e3);
+    box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.1), inset -2px -2px 5px rgba(255, 255, 255, 0.8);
+    color: var(--primary-color);
+}
 
 .bg-color-primary {
     background-color: var(--primary-color);
@@ -131,7 +207,34 @@ body {
     background-position: center;
     height: 100%;
 }
+.authenticated-home-background {
+    background-image: image-url('default_background.png');
+    background-color: rgba(0, 0, 0, 0.3);
+    background-blend-mode: darken;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    height: 100%;
+}
 
+.unauthenticated-home-background {
+    background-image: image-url('start_background.png');
+    background-color: rgba(0, 0, 0, 0.3);
+    background-blend-mode: darken;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    height: 100%;
+}
+.game-background {
+    background-image: image-url('game_background.png');
+    background-color: rgba(0, 0, 0, 0.3);
+    background-blend-mode: darken;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    height: 100%;
+}
 .card {
     background-color: rgba(0, 0, 0, 0.2);
     background-blend-mode: darken;
