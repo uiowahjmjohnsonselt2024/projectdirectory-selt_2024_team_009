@@ -14,6 +14,7 @@ module ProjectdirectorySelt2024Team009
 
     # Ensure encrypted credentials are required
     config.require_master_key = true
+    config.assets.paths << Rails.root.join('app', 'assets', 'images')
 
     # Automatically load lib subdirectories
     config.autoload_lib(ignore: %w[assets tasks])
