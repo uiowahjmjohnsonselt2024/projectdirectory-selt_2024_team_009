@@ -1,26 +1,28 @@
-%h1 Profile
+%section.profile-container.d-flex.justify-content-between.align-items-start
+  %div.profile-left.w-50
+    %div.profile-header
+      %h1.display-4.text-color-secondary.text-shadow Profile
 
-%p
-  %strong Username:
-  = @user.username
+    %div.profile-info.mt-4
+      %p
+        %strong Username:
+        = @user.username
+      %p
+        %strong Email:
+        = @user.email
 
-%p
-  %strong Email:
-  = @user.email
+      %div.profile-actions.mt-3
+        = link_to 'Edit Profile', edit_profile_path, class: "btn btn-primary mx-2"
+        = link_to 'Logout', destroy_user_session_path, method: :delete, class: "btn btn-danger mx-2"
 
-%p
-  = link_to 'Edit Profile', edit_user_registration_path
+  %div.actions-right.w-50.text-center
+    %div.actions-header
+      %h2.display-5.text-color-secondary.text-shadow Actions
 
-%p
-  = link_to 'Logout', destroy_user_session_path, method: :delete
-
-%hr/
-
-%h2 Actions
-
-%ul
-  %li= link_to 'Create Server', new_server_path
-  %li= link_to 'Your Servers', servers_path
-  %li= link_to 'Items', items_path
-  %li= link_to 'View Inventory', inventories_path
-  %li= link_to 'View Transactions', transactions_path
+    %div.actions-list-container.mt-4
+      %ul.actions-list
+        %li= link_to 'Create Server', new_server_path
+        %li= link_to 'Your Servers', servers_path
+        %li= link_to 'Items', items_path
+        %li= link_to 'View Inventory', inventories_path
+        %li= link_to 'View Transactions', transactions_path

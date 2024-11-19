@@ -17,7 +17,19 @@ Rails.application.routes.draw do
   devise_scope :user do
     get 'profile', to: 'profiles#show', as: :user_root
   end
-
+  devise_scope :user do
+    get 'users/confirmation/new', to: 'devise/confirmations#new'
+    get 'users/password/edit', to: 'devise/passwords#edit'
+    get 'users/password/new', to: 'devise/passwords#new'
+    get 'users/registration/edit', to: 'devise/registrations#edit'
+    get 'users/registration/new', to: 'devise/registrations#new'
+    get 'users/session/new', to: 'devise/sessions#new'
+    get 'users/unlock/new', to: 'devise/unlocks#new'
+    # Custom routes for profiles
+    get 'profile', to: 'profiles#show', as: :profile
+    get 'profile/edit', to: 'profiles#edit', as: :edit_profile
+    patch 'profile', to: 'profiles#update'
+  end
   # Resource routes for your models
   resources :wallets
   resources :transactions

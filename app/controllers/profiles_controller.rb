@@ -1,28 +1,30 @@
 # app/controllers/profiles_controller.rb
-
 class ProfilesController < ApplicationController
   before_action :authenticate_user!
 
+  # GET /profile/edit
+  def edit
+    @user = current_user
+  end
+
+  # GET /profile
   def show
     @user = current_user
-    # Load additional resources as needed
   end
 
-  def changePass(username, email, passToken, newPassword)
-
-    user = User.find_by(username: username)
-    if(email == User.find_by(email: user.email) && passToken == User.find_by(reset_password_token: user.reset_password_token))
-      user.update(password: newPassword)
-    end
-  end
-  def checkPass(username, password)
-
-    user = User.find_by(username: username)
-
-    if user && BCrypt::Password.new(user.encrypted_password) == password
-      true
+  # PUT /profile
+  def update
+    @user = current_user
+    if @user.update(user_params)
+      redirect_to authenticated_root_path, notice: 'Profile updated successfully.'
     else
-      false
+      render :edit
     end
+  end
+
+  private
+
+  def user_params
+    params.require(:user).permit(:username, :email, :password, :password_confirmation)
   end
 end
