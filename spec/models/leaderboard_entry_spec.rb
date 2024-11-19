@@ -5,20 +5,20 @@ RSpec.describe LeaderboardEntry, type: :model do
     let(:user) { User.create!(username: 'Player1', email: 'player1@example.com', password: 'password123') }
 
     it 'is valid with valid attributes' do
-      #entry = LeaderboardEntry.new(user_id: user.id, score: 100)
-      #expect(entry).to be_valid
+      entry = LeaderboardEntry.new(user_id: user.id, score: 100)
+      expect(entry).to be_valid
     end
 
     it 'is invalid without a user_id' do
-      #entry = LeaderboardEntry.new(score: 100)
-      #expect(entry).not_to be_valid
-      #expect(entry.errors[:user_id]).to include("can't be blank")
+      entry = LeaderboardEntry.new(score: 100)
+      expect(entry).not_to be_valid
+      expect(entry.errors[:user_id]).to include("can't be blank")
     end
 
     it 'is invalid without a score' do
-      #entry = LeaderboardEntry.new(user_id: user.id)
-      #expect(entry).not_to be_valid
-      #expect(entry.errors[:score]).to include("can't be blank")
+      entry = LeaderboardEntry.new(user_id: user.id)
+      expect(entry).not_to be_valid
+      expect(entry.errors[:score]).to include("can't be blank")
     end
   end
 

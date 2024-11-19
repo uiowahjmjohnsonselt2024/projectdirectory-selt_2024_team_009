@@ -10,9 +10,9 @@ RSpec.describe Treasure, type: :model do
 
   describe 'Validations' do
     it 'is valid with an item_id' do
-      #item = Item.create!(name: 'Golden Crown', description: 'A treasure fit for royalty', score: 100)
-      #treasure = Treasure.new(item: item)
-      #expect(treasure).to be_valid
+      item = Item.create!(name: 'Golden Crown', description: 'A treasure fit for royalty', score: 100)
+      treasure = Treasure.new(item: item)
+      expect(treasure).to be_valid
     end
 
     it 'is invalid without an item_id' do
