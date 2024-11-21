@@ -11,6 +11,7 @@ gem "pg", "~> 1.5", group: :production # PostgreSQL for production
 gem "sqlite3", "~> 2.2", groups: [ :development, :test ] # SQLite for development and test
 group :development, :test do
   gem 'dotenv-rails', groups: [:development, :test]
+  gem 'simplecov', require: false
 end
 # Web server interface for Ruby/Rack applications
 gem "puma", "~> 6"
