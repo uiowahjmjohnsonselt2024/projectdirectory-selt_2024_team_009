@@ -13,16 +13,24 @@ class WalletsController < ApplicationController
 
   # GET /wallets/new
   def new
-    @wallet = current_user.build_wallet
+    if current_user.wallet.present?
+      redirect_to current_user.wallet, alert: 'Wallet already created'
+    else
+      @wallet = current_user.build_wallet
+    end
   end
 
   # POST /wallets
   def create
-    @wallet = current_user.build_wallet(wallet_params)
-    if @wallet.save
-      redirect_to @wallet, notice: 'Wallet was successfully created.'
+    if current_user.wallet.present?
+      redirect_to current_user.wallet, alert: 'You already have a wallet!'
     else
-      render :new, status: :unprocessable_entity
+      @wallet = current_user.build_wallet(wallet_params)
+      if @wallet.save
+        redirect_to @wallet, notice: 'Wallet was successfully created.'
+      else
+        render :new, status: :unprocessable_entity
+      end
     end
   end
 
@@ -53,5 +61,32 @@ class WalletsController < ApplicationController
 
   def wallet_params
     params.require(:wallet).permit(:balance)
+  end
+
+  def add_shards
+    shardAmount = params[:amount].to_i
+    if(amount.positive?)
+      @wallet.balance += shardAmount
+      if @wallet.save
+        redirect to @wallet, notice: "#{amount} Shards successfully added"
+      else
+        redirect_to @wallet, alert: "Operation Failed"
+      end
+    end
+
+  end
+
+  def subtract_shards
+    amount = params[:amount].to_i
+    if(amount.positive? && @wallet.balance >= amount)
+      @wallet.balance -= amount
+      if @wallet.save
+        redirect_to @wallet, notice: "#{amount} Shards removed from account"
+      else
+        redirect_to @wallet, alert: "Operation Failed"
+      end
+    else
+      redirect_to @wallet, alert: "Insufficient Funds"
+    end
   end
 end
