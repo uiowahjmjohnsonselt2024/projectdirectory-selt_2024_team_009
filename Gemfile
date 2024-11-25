@@ -4,7 +4,7 @@ ruby "3.3.0"
 # Specify the minimum bundler version
 gem "bundler", "~> 2.5"
 # Rails framework
-gem "rails", "~> 7.2.2"
+gem "rails", "~> 8.0.0"
 
 # Database adapters
 gem "pg", "~> 1.5", group: :production # PostgreSQL for production
