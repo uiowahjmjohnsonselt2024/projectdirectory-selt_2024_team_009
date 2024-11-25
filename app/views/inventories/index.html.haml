@@ -1,0 +1,12 @@
+%h1 Inventory
+
+%div.inventory-container
+  - @items.each do |item|
+    %div.item-box
+      %div.item-image
+        = image_tag item.image_url, alt: item.name, class: "item-image-png"
+      %div.item-details
+        %h3.item-name= item.name
+        %p.item-score= "Score: #{item.score}"
+      %div.item-actions
+        = button_to "Discard Item", inventory_path(item), method: :delete, class: "discard-button"
