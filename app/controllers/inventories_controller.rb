@@ -28,6 +28,7 @@ class InventoriesController < ApplicationController
 
   # GET /inventories/:id/edit
   def edit
+    @item = Item.find(params[:item_id])
   end
 
   # PATCH/PUT /inventories/:id
