@@ -9,6 +9,7 @@ class InventoriesController < ApplicationController
 
   # GET /inventories/:id
   def show
+    @inventory = current_user.inventory
   end
 
   # GET /inventories/new
