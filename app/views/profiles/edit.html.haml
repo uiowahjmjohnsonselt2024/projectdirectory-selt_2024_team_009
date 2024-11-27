@@ -31,4 +31,4 @@
     = f.submit "Save Changes", class: "btn btn-primary my-2"
 
 %p
-  = link_to 'Back to Profile', profile_path, class: "btn btn-secondary"
+  = link_to 'Back to Profile', user_root_path(current_user.id), class: "btn btn-secondary"
