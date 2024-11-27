@@ -30,6 +30,11 @@
     = f.password_field :current_password, autocomplete: "current-password"
     %em We need your current password to confirm your changes
 
+  .field
+  = f.label :role
+  = f.select :role, options_for_select([['Player', 'player'], ['Admin', 'admin']], selected: resource.role), class: 'form-control'
+
+
   .actions
     = f.submit "Update"
 

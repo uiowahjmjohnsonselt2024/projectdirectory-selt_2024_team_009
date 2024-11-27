@@ -27,6 +27,10 @@
     = f.password_field :password_confirmation, class: "form-control", autocomplete: "off"
 
   .form-group
+    = f.label :role
+    = f.select :role, options_for_select([['Player', 'player'], ['Admin', 'admin']], selected: @user.role), class: "form-control"
+
+  .form-group
     = f.submit "Save Changes", class: "btn btn-primary"
 
 %p
