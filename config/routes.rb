@@ -40,7 +40,7 @@ Rails.application.routes.draw do
 
   resources :transactions
   resources :items
-  resources :inventories
+  resources :inventories, only: [:index, :show, :edit, :update]
   resources :servers
   resources :server_users
   resources :grid_cells
