@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_11_22_020758) do
+ActiveRecord::Schema[7.2].define(version: 2024_11_27_065711) do
   create_table "contents", force: :cascade do |t|
     t.text "story_text"
     t.string "image_url"
@@ -44,6 +44,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_11_22_020758) do
     t.integer "required_level"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "image_url"
   end
 
   create_table "leaderboard_entries", force: :cascade do |t|

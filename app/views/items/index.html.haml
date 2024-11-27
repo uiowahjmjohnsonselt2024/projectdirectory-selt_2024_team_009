@@ -1,0 +1,23 @@
+%h1.text-center.my-4.text-uppercase.text-primary Shop Page
+
+.container
+  .row.row-cols-1.row-cols-md-3.g-4
+    - @items.each do |item|
+      .col
+        .card.h-100.shadow-lg
+          .card-img-top
+            - if item.image_url.present?
+              = image_tag item.image_url, alt: item.name, class: 'img-fluid'
+            - else
+              = image_tag 'default-item-image.jpg', alt: item.name, class: 'img-fluid'
+          .card-body
+            %h5.card-title.text-center
+              = item.name.presence || 'No Name'  # Show 'No Name' if name is blank
+            %p.card-text
+              = item.description.presence || 'No description available'  # Show alternative text if description is blank
+          .card-footer.bg-transparent
+            .d-flex.justify-content-between.align-items-center
+              %span.badge.bg-success Price: #{item.price} Shards
+              %span.badge.bg-info.text-dark Level: #{item.required_level}
+          .card-footer.text-center
+            = button_to 'Buy Now', '#', method: :post, class: 'btn btn-primary w-100 mt-2'
