@@ -31,16 +31,16 @@ Rails.application.routes.draw do
     patch 'profile', to: 'profiles#update'
   end
   # Resource routes for your models
-  resources :wallets do
-    member do
-      post :add_shards
-      post :subtract_shards
-    end
-  end
+  resources :wallets #do
+    # member do
+    #  post :add_shards
+    #  post :subtract_shards
+    #end
+    #end
 
   resources :transactions
   resources :items
-  resources :inventories, only: [:index, :show, :edit, :update]
+  resources :inventories
   resources :servers
   resources :server_users
   resources :grid_cells
