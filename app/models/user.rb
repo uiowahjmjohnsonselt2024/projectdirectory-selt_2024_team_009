@@ -26,4 +26,14 @@ class User < ApplicationRecord
   # Validations
   validates :username, presence: true, uniqueness: true
   validates :email, presence: true, uniqueness: true
+  validates :role, presence: true, inclusion: { in: %w[admin player], message: "%{value} is not a valid role" }
+
+  # Role Methods
+  def admin?
+    role == 'admin'
+  end
+
+  def player?
+    role == 'player'
+  end
 end

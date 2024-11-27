@@ -51,6 +51,13 @@ Rails.application.routes.draw do
   resources :leaderboards
   resources :leaderboard_entries
 
+  resources :items do
+    member do
+      post :purchase
+    end
+  end
+
+
   get "up" => "rails/health#show", as: :rails_health_check
 
   # Render dynamic PWA files from app/views/pwa/*
