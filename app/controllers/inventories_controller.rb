@@ -10,7 +10,7 @@ class InventoriesController < ApplicationController
 
   # GET /inventories/:id
   def show
-    @inventory = current_user.inventory
+    @item = Item.find(params[:id])
   end
 
   # GET /inventories/new
@@ -44,8 +44,9 @@ class InventoriesController < ApplicationController
 
   # DELETE /inventories/:id
   def destroy
+    @inventory = current_user.inventories.find(params[:id])
     @inventory.destroy
-    redirect_to inventories_url, notice: 'Inventory item was successfully removed.'
+    redirect_to inventories_path, notice: 'Item successfully discarded.'
   end
 
   private

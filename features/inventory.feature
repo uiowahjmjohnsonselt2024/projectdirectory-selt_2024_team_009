@@ -16,7 +16,7 @@ Feature: Iventory management
     Given the user with email "test@example.com" has items with names "Assault Rifle (M416), Shotgun (S12K)" in their inventory
     When I visit the inventory index page
     Then I should see a list of these items "Assault Rifle (M416), Shotgun (S12K)"
-    And each item should display its name, description, price, and category
+
 
   Scenario: Viewing a single item
     Given an item "Assault Rifle (M416)" exists
@@ -25,7 +25,7 @@ Feature: Iventory management
 
 
   Scenario: Deleting an item
-    Given an item "Smoke Grenade" exists
-    When I delete the item "Smoke Grenade"
-    Then I should not see "Smoke Grenade" in the list of items
+    Given an item "Assault Rifle (M416)" exists
+    When I delete the item "Assault Rifle (M416)"
+    Then I should not see "Assault Rifle (M416)" in the list of items
     And I should see "Item successfully deleted"

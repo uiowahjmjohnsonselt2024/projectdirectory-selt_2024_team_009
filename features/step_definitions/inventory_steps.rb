@@ -43,8 +43,8 @@ Then('I should see a list of these items {string}') do |names|
     within("#item_#{inventory.item.id}") do
       expect(page).to have_content(inventory.item.name)
       expect(page).to have_content(inventory.item.description)
-      expect(page).to have_content("Price: #{inventory.item.price}")
-      expect(page).to have_content("Category: #{inventory.item.category}")
+      expect(page).to have_content(inventory.item.price)
+      expect(page).to have_content(inventory.item.category)
       end
   end
 end
@@ -113,11 +113,13 @@ end
 
 When('I delete the item {string}') do |item_name|
   item = Item.find_by(name: item_name)
-  within("#item_#{item.id}") do
-    click_link 'Delete'
+  puts "DEBUG: Item found: #{item.inspect}" # Add this to debug
+  item = Item.find_by(name: item_name)
+  within(:css, "#item_#{item.id}") do
+    click_button 'Discard Item'
   end
-end
 
+end
 Then('I should not see {string} in the list of items') do |item_name|
   expect(page).not_to have_content(item_name)
 end

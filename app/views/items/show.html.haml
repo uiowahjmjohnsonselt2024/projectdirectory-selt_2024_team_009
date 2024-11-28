@@ -1,0 +1,6 @@
+%h1= @item.name
+%p= @item.description
+%p Price: #{@item.price}
+%p Category: #{@item.category}
+%p Required Level: #{@item.required_level}
+= image_tag @item.image_url, alt: @item.name, class: 'item-image'
