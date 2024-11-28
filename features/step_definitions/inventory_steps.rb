@@ -1,5 +1,8 @@
 
 Given('I am logged in as a user with email {string} and password {string}') do |email, password|
+  User.create!(email: email, password: password, password_confirmation: password)
+
+
   fill_in 'user_email', with: email
   fill_in 'user_password', with: password
   click_button 'Log in'
@@ -10,20 +13,39 @@ Given('I navigate to the inventory page') do
 
 end
 
+Given('the user with email {string} has items with names {string} in their inventory') do |email, item_names|
+  user = User.find_by(email: email)
+  item_names.split(', ').each do |item_name|
+    item = Item.find_by(name: item_name)
+    if item.present?
+      user.inventories.create!(item: item, item_name: item.name) # Include item_name explicitly
+    else
+      raise "Item with name '#{item_name}' not found in the database."
+    end
+  end
+end
+
 Given('the database is seeded with default items') do
   Rails.application.load_seed
 end
 
-When('I visit the items index page') do
-  visit items_path
+When('I visit the inventory index page') do
+  visit inventories_path
 end
 
-Then('I should see a list of all items') do
-  Item.all.each do |item|
-    expect(page).to have_content(item.name)
-    expect(page).to have_content(item.description)
-    expect(page).to have_content(item.price)
-    expect(page).to have_content(item.category)
+Then('I should see a list of these items {string}') do |names|
+
+  item_ids_array = names.split(',').map(&:strip)
+  # items = Item.where(id: item_ids_array)
+  inventories = Inventory.where(item_name: item_ids_array).includes(:item)
+
+  inventories.each do |inventory|
+    within("#item_#{inventory.item.id}") do
+      expect(page).to have_content(inventory.item.name)
+      expect(page).to have_content(inventory.item.description)
+      expect(page).to have_content("Price: #{inventory.item.price}")
+      expect(page).to have_content("Category: #{inventory.item.category}")
+      end
   end
 end
 

@@ -21,6 +21,8 @@ Rails.application.routes.draw do
     # Custom routes for profiles
     get 'profile/edit/:id', to: 'profiles#edit', as: :edit_profile
     patch 'profile', to: 'profiles#update'
+    #get '/inventory', to: 'inventory#index'
+
   end
   # Resource routes for your models
   resources :wallets #do

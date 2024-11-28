@@ -5,6 +5,7 @@ class InventoriesController < ApplicationController
   # GET /inventories
   def index
     @inventories = current_user.inventories.includes(:item)
+    render :index
   end
 
   # GET /inventories/:id
@@ -49,11 +50,15 @@ class InventoriesController < ApplicationController
 
   private
 
+  def add_item
+
+  end
   def set_inventory
     @inventory = current_user.inventories.find(params[:id])
   end
 
   def inventory_params
-    params.require(:inventory).permit(:item_id, :quantity)
+    #params.require(:inventory).permit(:item_id, :quantity)
+    params.require(:inventory).permit(:item_name, :quantity)
   end
 end

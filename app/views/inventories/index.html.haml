@@ -1,12 +1,22 @@
-%h1 Inventory
+%h1.text-center.my-4.text-uppercase.text-primary Inventory Page
 
-%div.inventory-container
-  - @items.each do |item|
-    %div.item-box
-      %div.item-image
-        = image_tag item.image_url, alt: item.name, class: "item-image-png"
-      %div.item-details
-        %h3.item-name= item.name
-        %p.item-score= "Score: #{item.score}"
-      %div.item-actions
-        = button_to "Discard Item", inventory_path(item), method: :delete, class: "discard-button"
+
+.container
+  .row.row-cols-1.row-cols-md-3.g-4
+    - @inventories.each do |inventory|
+      .col
+        .card.h-100.shadow-lg{id: "item_#{inventory.item.id}"}
+          .card-body
+            %h5.card-title.text-center
+              = inventory.item.name # Name
+            %p.card-text
+              = inventory.item.description # Description
+            .card-footer
+              %span.badge.bg-success
+                = "Price: #{inventory.item.price}" # Price
+              %span.badge.bg-info.text-dark
+                = "Category: #{inventory.item.category}" # Category
+
+                %span.badge.bg-info.text-dark Level: #{inventory.item.required_level}
+            .card-footer.text-center
+              = button_to 'Discard Item', inventory_path(inventory), method: :delete, class: 'btn btn-danger w-100 mt-2'

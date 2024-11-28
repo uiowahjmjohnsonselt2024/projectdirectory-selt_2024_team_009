@@ -1,16 +1,21 @@
-Feature: Item management
+Feature: Iventory management
   As a user
-  I want to manage items
+  I want to manage my inventory
   So that I can view, create, edit, and delete items effectively
 
   Background:
-    Given I am logged in as a user with email "test@example.com" and password "asdf1234"
-    And I navigate to the inventory page
+    Given a user with email "test@example.com" and password "asdf1234"
+    When I go "/users/sign_in"
+    And I fill "user_email" with "test@example.com"
+    And I fill "user_password" with "asdf1234"
+    And I press "Log in"
+    When I go "/inventories"
     And the database is seeded with default items
 
   Scenario: Viewing all items
-    When I visit the items index page
-    Then I should see a list of all items
+    Given the user with email "test@example.com" has items with names "Assault Rifle (M416), Shotgun (S12K)" in their inventory
+    When I visit the inventory index page
+    Then I should see a list of these items "Assault Rifle (M416), Shotgun (S12K)"
     And each item should display its name, description, price, and category
 
   Scenario: Viewing a single item
