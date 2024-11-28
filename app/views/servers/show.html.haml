@@ -1,8 +1,12 @@
-%h1= @server.name
+- provide(:title, "Server Info")
+%div.d-flex.justify-content-center
+  %div.row
+    %div.col-md-12
+      %h1.text-color-secondary= @server.name
 
-%p
-  %strong Max Players:
-  = @server.max_players
+      %p.text-color-secondary
+        %strong Max Players:
+        = @server.max_players
 
-= link_to 'Edit Server', edit_server_path(@server), class: 'btn btn-secondary'
-= link_to 'Back to My Servers', servers_path, class: 'btn btn-primary'
+      = link_to 'Edit Server', edit_server_path(@server), class: 'btn btn-secondary'
+      = link_to 'Back to My Servers', servers_path, class: 'btn btn-primary'

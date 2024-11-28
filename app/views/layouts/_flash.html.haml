@@ -1,0 +1,7 @@
+- flash.each do |key, message|
+  %div.d-flex.justify-content-center.align-items-center
+    %div.row
+      %div.col-md-12
+        %div.errors.alert.alert-dismissible.fade.show
+          %h6= message
+          %button.btn-close{type: 'button', data:{bs_dismiss: 'alert'}, aria:{label: 'Close'}}

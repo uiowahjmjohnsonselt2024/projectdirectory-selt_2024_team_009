@@ -10,7 +10,8 @@ class ApplicationController < ActionController::Base
 
   protected
   def after_sign_in_path_for(resource)
-    authenticated_root_path
+    # 'user_root_path' is the path of the user's profile directory
+    user_root_path(resource)
   end
 
   def configure_permitted_parameters
@@ -18,8 +19,10 @@ class ApplicationController < ActionController::Base
     devise_parameter_sanitizer.permit(:sign_up, keys: %i[username role])
     devise_parameter_sanitizer.permit(:account_update, keys: %i[username role])
   end
+  
   def after_sign_out_path_for(resource_or_scope)
-    unauthenticated_root_path
+    # 'root_path' is the path of the app's home directory
+    root_path
   end
 
   def log_flash_messages
