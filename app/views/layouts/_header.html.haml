@@ -1,0 +1,21 @@
+%header.header
+    %nav.navbar.navbar-expand-lg.bg-color-primary.fixed-top
+        %div.container-fluid
+            %a.navbar-brand{:href => "/"}
+                = image_tag "logo.webp", alt: "Logo", class: "logo"
+            %button.navbar-toggler{ type: "button", data: { bs_toggle: "collapse", bs_target: "#navbarNav" }, aria: { controls: "navbarNav", expanded: "false", label: "Toggle navigation" } }
+                #span.navbar-toggler-icon
+            %div.collapse.navbar-collapse#navbarNav
+                %ul.navbar-nav.ms-auto
+                    - if user_signed_in?
+                        %li.nav-item
+                            %a.nav-link.text-color-secondary{:href => user_root_path(current_user.id)} Profile
+                        %li.nav-item
+                            %a.nav-link.text-color-secondary{:href => destroy_user_session_path} Logout
+                    -else
+                        %li.nav-item
+                            %a.nav-link.text-color-secondary{:href => new_user_session_path} Login
+                        %li.nav-item
+                            %a.nav-link.text-color-secondary{:href => new_user_registration_path} Sign Up
+                        %li.nav-item
+                            %a.nav-link.text-color-secondary{:href => about_path} About

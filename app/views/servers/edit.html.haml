@@ -1,14 +1,18 @@
-%h1 Edit Server
+- provide(:title, "Edit Server Info")
+%div.d-flex.justify-content-center
+  %div.row
+    %div.col-md-12
+      %h1.text-color-secondary Edit Server
 
-= form_with(model: @server, local: true) do |f|
-  .form-group
-    = f.label :name
-    = f.text_field :name, class: 'form-control'
+      = form_with(model: @server, local: true) do |f|
+        .form-group.text-color-secondary
+          = f.label :name
+          = f.text_field :name, class: 'form-control'
 
-  .form-group
-    = f.label :max_players
-    = f.number_field :max_players, class: 'form-control'
+        .form-group.text-color-secondary
+          = f.label :max_players
+          = f.number_field :max_players, class: 'form-control'
 
-  = f.submit 'Save Changes', class: 'btn btn-primary'
+        = f.submit 'Save Changes', class: 'btn btn-primary my-2'
 
-= link_to 'Back to My Servers', servers_path, class: 'btn btn-secondary'
+      = link_to 'Back to My Servers', servers_path, class: 'btn btn-secondary'
