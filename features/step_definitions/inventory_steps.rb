@@ -1,3 +1,15 @@
+
+Given('I am logged in as a user with email {string} and password {string}') do |email, password|
+  fill_in 'user_email', with: email
+  fill_in 'user_password', with: password
+  click_button 'Log in'
+end
+
+Given('I navigate to the inventory page') do
+  click_link 'Inventory'
+
+end
+
 Given('the database is seeded with default items') do
   Rails.application.load_seed
 end

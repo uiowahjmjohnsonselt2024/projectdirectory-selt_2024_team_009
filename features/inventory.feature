@@ -4,7 +4,9 @@ Feature: Item management
   So that I can view, create, edit, and delete items effectively
 
   Background:
-    Given the database is seeded with default items
+    Given I am logged in as a user with email "test@example.com" and password "asdf1234"
+    And I navigate to the inventory page
+    And the database is seeded with default items
 
   Scenario: Viewing all items
     When I visit the items index page
