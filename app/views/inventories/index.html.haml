@@ -1,0 +1,12 @@
+%h1 Your Inventory
+
+%table
+  %thead
+    %tr
+      %th Item
+      %th Quantity
+  %tbody
+    - @inventories.each do |inventory|
+      %tr
+        %td= inventory.item.name
+        %td= inventory.quantity

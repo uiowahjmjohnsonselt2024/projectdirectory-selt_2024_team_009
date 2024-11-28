@@ -22,12 +22,55 @@
     --secondary-color: gold;
 }
 
-body {
-    padding-top: 56px;
+html, body { 
+    background-image: image-url('start_background.png');
+    background-color: white;
+    background-size: cover;
     font-family: "Eagle Lake", serif;
     font-weight: 400;
     font-style: normal;
     color: var(--primary-text-color);
+}
+
+body.static_pages {
+    background-image: image-url('start_background.png');
+}
+
+body.profiles {
+    background-image: image-url('default_background.png');
+}
+body.games {
+    background-image: url('game_background.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-attachment: fixed;
+    position: relative;
+}
+
+body.games::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.2); /* Adjust opacity as needed */
+    pointer-events: none; /* Allows interaction with underlying elements */
+}
+
+
+main {
+    min-height: 100vh;
+    padding-top: 80px;
+}
+
+h6 {
+    margin-bottom: 0.2rem;
+}
+
+.alert-dismissible .btn-close {
+    padding: 1rem;
 }
 
 .text-shadow {
@@ -78,7 +121,33 @@ body {
 .btn-primary:hover {
     background-color: var(--secondary-color);
     color: var(--primary-color);
-    transition: 0.8s linear;
+    transition: 0.5s linear;
+}
+
+.btn-secondary {
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+    border: none;
+}
+
+.btn-secondary:hover {
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+    transition: 0.5s linear;
+}
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 1rem;
+}
+
+#action-form {
+    max-width: 600px;
+    margin: 0 auto;
 }
 
 .form-control:focus {
@@ -198,43 +267,12 @@ ul.actions-list li a:hover {
     background-color: var(--secondary-color);
 }
 
-.home-background {
-    background-image: image-url('default_background.png');
-    background-color: rgba(0, 0, 0, 0.3);
-    background-blend-mode: darken;
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
-    height: 100%;
-}
-.authenticated-home-background {
-    background-image: image-url('default_background.png');
-    background-color: rgba(0, 0, 0, 0.3);
-    background-blend-mode: darken;
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
-    height: 100%;
+.text-box {
+    background-color: var(--primary-color);
+    padding: 2rem;
+    color: var(--secondary-color);
 }
 
-.unauthenticated-home-background {
-    background-image: image-url('start_background.png');
-    background-color: rgba(0, 0, 0, 0.3);
-    background-blend-mode: darken;
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
-    height: 100%;
-}
-.game-background {
-    background-image: image-url('game_background.png');
-    background-color: rgba(0, 0, 0, 0.3);
-    background-blend-mode: darken;
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
-    height: 100%;
-}
 .card {
     background-color: rgba(0, 0, 0, 0.2);
     background-blend-mode: darken;
@@ -249,6 +287,137 @@ ul.actions-list li a:hover {
     border: 2px solid var(--primary-color);
     color: var(--primary-color);
     border-radius: 4px;
-    padding: 5px;
-    margin: 2rem 0;
+    padding: 0.8rem 3rem;
+    margin: 2rem;
+    text-align: center;
+}
+.game-board {
+    border-collapse: collapse;
+    margin: 0 auto; /* Center the table */
+}
+
+.game-board .cell {
+    width: 80px; /* Increase cell size */
+    height: 80px;
+    position: relative;
+    border: 3px solid #333; /* Dark and thick border */
+    text-align: center;
+    vertical-align: middle;
+    font-size: 2em; /* Increase symbol size */
+    background-color: rgba(255, 255, 255, 0.1); /* Add a base background color */
+    transition: background-color 0.3s ease; /* Smooth color transitions */
+
+}
+.game-board .cell:hover {
+    background-color: rgba(255, 255, 255, 0.8); /* Highlight cell on hover */
+}
+.game-board .cell.player {
+    background-color: rgba(135, 206, 235, 0.7); /* Light blue */
+}
+
+.game-board .cell.obstacle {
+    background-color: rgba(128, 128, 128, 0.7); /* Gray */
+}
+
+.game-board .cell.treasure {
+    background-color: rgba(255, 215, 0, 0.7); /* Gold */
+}
+
+.game-board .cell.owned {
+    background-color: rgba(173, 216, 230, 0.7); /* Light Steel Blue */
+}
+
+.game-board .cell::before {
+    content: "";
+    display: block;
+    padding-top: 100%; /* Makes the cell a square */
+}
+
+.game-board .cell > * {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+.player-cell {
+    border: 2px solid black;
+    position: relative;
+}
+
+.player-cell.current-player {
+    box-shadow: 0 0 10px 3px gold;
+}
+
+.player-symbol {
+    font-size: 2em;
+}
+
+.symbol-🟢 {
+    color: green;
+}
+
+.symbol-🔴 {
+    color: red;
+}
+
+.symbol-🔵 {
+    color: blue;
+}
+
+.symbol-🟡 {
+    color: yellow;
+}
+
+
+/* Legend Styles */
+.legend {
+    margin-top: 20px;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 15px;
+    border-radius: 5px;
+}
+
+.legend ul {
+    list-style: none;
+    padding: 0;
+}
+
+.legend li {
+    margin-bottom: 5px;
+}
+
+.cell.obstacle {
+    background-color: gray;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    text-align: center;
+}
+
+.cell.treasure {
+    background-color: gold;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    text-align: center;
+}
+
+.cell.owned {
+    background-color: lightblue;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    text-align: center;
+}
+
+/* Stats and Actions */
+.player-stats {
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 15px;
+    margin-top: 20px;
+    border-radius: 5px;
+}
+
+.action-buttons {
+    margin-top: 20px;
 }
