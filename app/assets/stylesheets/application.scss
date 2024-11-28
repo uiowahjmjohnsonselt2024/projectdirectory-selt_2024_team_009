@@ -45,6 +45,14 @@ main {
     padding-top: 80px;
 }
 
+h6 {
+    margin-bottom: 0.2rem;
+}
+
+.alert-dismissible .btn-close {
+    padding: 1rem;
+}
+
 .text-shadow {
     text-shadow: 3px 3px rgba(0, 0, 0, 0.5);
 }
