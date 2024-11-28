@@ -22,12 +22,18 @@
     --secondary-color: gold;
 }
 
-body {
-    padding-top: 56px;
+html, body { 
+    background-image: image-url('start_background.png');
+    background-size: cover;
     font-family: "Eagle Lake", serif;
     font-weight: 400;
     font-style: normal;
     color: var(--primary-text-color);
+}
+
+main {
+    min-height: 100vh;
+    padding-top: 80px;
 }
 
 .text-shadow {
@@ -219,6 +225,13 @@ ul.actions-list li a:hover {
     background-position: center;
     height: 100%;
 }
+
+.text-box {
+    background-color: var(--primary-color);
+    padding: 2rem;
+    color: var(--secondary-color);
+}
+
 .authenticated-home-background {
     background-image: image-url('default_background.png');
     background-color: rgba(0, 0, 0, 0.3);
@@ -261,6 +274,12 @@ ul.actions-list li a:hover {
     border: 2px solid var(--primary-color);
     color: var(--primary-color);
     border-radius: 4px;
-    padding: 5px;
-    margin: 2rem 0;
+    padding: 0.8rem 3rem;
+    margin: 2rem;
+    text-align: center;
 }
+
+// footer {
+//     position: fixed;
+//     bottom: 0;
+// }

@@ -4,13 +4,6 @@
     %div.card.my-5
       %div.card-body
         %h3.card-title.text-center.text-color-secondary Log in
-        
-        - if flash[:alert] || flash[:notice]
-          %div.errors
-            #error_explanation
-              %h6.text-center
-                = flash[:alert] if flash[:alert]
-                = flash[:notice] if flash[:notice]
 
         = form_for(resource, as: resource_name, url: session_path(resource_name), html: { class: 'form-container' }) do |f|
 
