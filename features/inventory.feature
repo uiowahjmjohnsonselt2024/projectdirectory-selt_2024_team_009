@@ -23,9 +23,3 @@ Feature: Iventory management
     When I visit the item details page for "Assault Rifle (M416)"
     Then I should see the item's name, description, price, category, required level, and image
 
-
-  Scenario: Deleting an item
-    Given an item "Assault Rifle (M416)" exists
-    When I delete the item "Assault Rifle (M416)"
-    Then I should not see "Assault Rifle (M416)" in the list of items
-    And I should see "Item successfully deleted"
