@@ -24,11 +24,20 @@
 
 html, body { 
     background-image: image-url('start_background.png');
+    background-color: white;
     background-size: cover;
     font-family: "Eagle Lake", serif;
     font-weight: 400;
     font-style: normal;
     color: var(--primary-text-color);
+}
+
+body.static_pages {
+    background-image: image-url('start_background.png');
+}
+
+body.profiles {
+    background-image: image-url('default_background.png');
 }
 
 main {
@@ -216,50 +225,12 @@ ul.actions-list li a:hover {
     background-color: var(--secondary-color);
 }
 
-.home-background {
-    background-image: image-url('default_background.png');
-    background-color: rgba(0, 0, 0, 0.3);
-    background-blend-mode: darken;
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
-    height: 100%;
-}
-
 .text-box {
     background-color: var(--primary-color);
     padding: 2rem;
     color: var(--secondary-color);
 }
 
-.authenticated-home-background {
-    background-image: image-url('default_background.png');
-    background-color: rgba(0, 0, 0, 0.3);
-    background-blend-mode: darken;
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
-    height: 100%;
-}
-
-.unauthenticated-home-background {
-    background-image: image-url('start_background.png');
-    background-color: rgba(0, 0, 0, 0.3);
-    background-blend-mode: darken;
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
-    height: 100%;
-}
-.game-background {
-    background-image: image-url('game_background.png');
-    background-color: rgba(0, 0, 0, 0.3);
-    background-blend-mode: darken;
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
-    height: 100%;
-}
 .card {
     background-color: rgba(0, 0, 0, 0.2);
     background-blend-mode: darken;
@@ -278,8 +249,3 @@ ul.actions-list li a:hover {
     margin: 2rem;
     text-align: center;
 }
-
-// footer {
-//     position: fixed;
-//     bottom: 0;
-// }
