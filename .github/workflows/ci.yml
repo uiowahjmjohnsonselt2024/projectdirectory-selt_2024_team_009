@@ -1,4 +1,4 @@
-name: Integration & Deployment
+name: Integration Tests & Deployment
 
 on:
   pull_request:
@@ -9,7 +9,7 @@ env:
   RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
 
 jobs:  
-  cucumber_test:
+  cucumber:
     runs-on: ubuntu-latest  # The host runner
     container: 
       image: ruby:3.3.0
@@ -37,7 +37,7 @@ jobs:
           name: cucumber-report
           path: cucumber_report.html
 
-  rspec_test:
+  rspec:
     runs-on: ubuntu-latest  # The host runner
     container: 
       image: ruby:3.3.0
@@ -56,8 +56,8 @@ jobs:
       - name: Run RSpec Tests
         id: rspec
         run: |
-          bundle exec rpsec
-
+          bundle exec rspec spec
+          
       # Step 3: Artifact
       - name: Upload code coverage report as Artifact
         uses: actions/upload-artifact@v3
