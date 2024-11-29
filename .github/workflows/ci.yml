@@ -29,7 +29,7 @@ jobs:
         id: cucumber
         run: |
           output=$(bundle exec cucumber --publish >> data.out 2>&1)
-          report_url=$(grep -oP 'https://[^\s]+' data.out | head -n 1)
+          report_url=$(grep -oP 'https://[^\s]+' data.out | head -n 1 | sed 's/[^[:print:]\t]//g' |  sed 's/\[.*//')
           echo "report_url=$report_url" >> $GITHUB_ENV
 
       # Step 3: Artifact
