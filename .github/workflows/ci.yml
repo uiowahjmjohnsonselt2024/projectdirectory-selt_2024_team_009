@@ -36,3 +36,31 @@ jobs:
         with:
           name: cucumber-report
           path: cucumber_report.html
+
+  rspec_test:
+    runs-on: ubuntu-latest  # The host runner
+    container: 
+      image: ruby:3.3.0
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 1: Set up deps
+      - name: Install Dependencies
+        run: |
+          bundle install
+          bundle exec rails db:migrate
+
+      # Step 2: Test
+      - name: Run RSpec Tests
+        id: rspec
+        run: |
+          bundle exec rpsec
+
+      # Step 3: Artifact
+      - name: Upload code coverage report as Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage_data
+          path: coverage
