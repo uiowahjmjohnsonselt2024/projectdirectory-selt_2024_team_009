@@ -28,8 +28,8 @@ jobs:
       - name: Run Cucumber Tests
         id: cucumber
         run: |
-          output=$(bundle exec cucumber | tee /dev/tty)
-          report_url=$(echo "$output" | grep -oP 'View your Cucumber Report at: \K.*')
+          output=$(bundle exec cucumber --publish >> data.out 2>&1)
+          report_url=$(grep -oP 'https://[^\s]+' data.out | head -n 1)
           echo "report_url=$report_url" >> $GITHUB_ENV
 
       # Step 3: Artifact
