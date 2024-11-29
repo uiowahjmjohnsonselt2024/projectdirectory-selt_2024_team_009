@@ -1,4 +1,4 @@
-name: Style Tests.
+name: Style Tests
 
 on:
   pull_request:

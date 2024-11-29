@@ -10,7 +10,9 @@ env:
 
 jobs:  
   cucumber_test:
-    runs-on: ruby:3.3.0
+    runs-on: ubuntu-latest  # The host runner
+    container: 
+      image: ruby:3.3.0
 
     steps:
       - name: Checkout code
