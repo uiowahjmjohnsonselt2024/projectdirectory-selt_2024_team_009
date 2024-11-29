@@ -1,13 +1,15 @@
 Given('a user with a wallet balance of {int} shards') do |balance|
+  @user = User.create!(
+    email: "test_user@example.com",
+    username: "TestUser",
+    password: "password123",
+    role: "player"
+  )
 
-  @user = User.find_or_create_by(email: 'test@example.com') do |user|
-    user.password = 'password123'
-    user.password_confirmation = 'password123'
-  end
-
-  @wallet = @user.wallet || Wallet.create(user: @user, balance: balance)
-
-  @wallet.update(balance: balance)
+  @wallet = Wallet.create!(
+    user: @user,
+    balance: balance
+  )
 end
 
 
@@ -45,18 +47,20 @@ Then('they should be redirected to the wallet creation page') do
 end
 
 When('the user attempts to purchase the item {string}') do |item_name|
-  @item = Item.find_by(name: item_name)
+  @item = Item.find_by!(name: item_name)
   visit items_path
   within("#item_#{@item.id}") do
     click_button 'Buy Now'
   end
 end
 
-Then('their wallet balance should remain {int} shards') do |balance|
-  expect(current_user.wallet.reload.balance).to eq(balance)
+Then('their wallet balance should remain {int} shards') do |expected_balance|
+  @wallet.reload
+  expect(@wallet.balance.to_i).to eq(expected_balance)
 end
 
-Then('the item {string} should not be in their inventory') do |item_name|
-  item = Item.find_by(name: item_name)
-  expect(current_user.inventories.exists?(item: item)).to be false
+
+And('the item {string} should not be in their inventory') do |item_name|
+  inventory_item = Inventory.find_by(user: @user, item: Item.find_by(name: item_name))
+  expect(inventory_item).to be_nil
 end
