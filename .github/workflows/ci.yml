@@ -5,6 +5,9 @@ on:
   push:
     branches: [ main ]
 
+env:
+  RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
+
 jobs:
   scan_ruby:
     runs-on: ubuntu-latest
@@ -53,31 +56,36 @@ jobs:
       - name: Lint code for consistent style
         run: bin/rubocop -f github
 
-  test:
+  cucumber_test:
     runs-on: ruby:3.3.0
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: .ruby-version
-          bundler-cache: true
+      # Step 1: Set up deps
+      - name: Install Dependencies
+        run: |
+          bundle install
+          bundle exec rails db:migrate
 
-      - name: Run tests
-        if:
-          github.event.pull_request.title != 'Feature: Create Barebones App Folder Structure'
+      # Step 2: Test
+      - name: Run Cucumber Tests
+        id: cucumber
+        run: |
+          output=$(bundle exec cucumber | tee /dev/tty)
+          report_url=$(echo "$output" | grep -oP 'View your Cucumber Report at: \K.*')
+          echo "report_url=$report_url" >> $GITHUB_ENV
+
+      # Step 3: Artifact
+      - name: Download Cucumber Report
+        run: |
+          curl -o cucumber_report.html "$report_url"
         env:
-          RAILS_ENV: test
-          # REDIS_URL: redis://localhost:6379/0
-        run: bin/rails db:test:prepare test test:system
+          report_url: ${{ env.report_url }}
 
-      - name: Keep screenshots from failed system tests
-        uses: actions/upload-artifact@v4
-        if: failure()
+      - name: Upload Cucumber Report as Artifact
+        uses: actions/upload-artifact@v3
         with:
-          name: screenshots
-          path: ${{ github.workspace }}/tmp/screenshots
-          if-no-files-found: ignore
+          name: cucumber-report
+          path: cucumber_report.html
