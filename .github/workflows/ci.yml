@@ -28,17 +28,9 @@ jobs:
       - name: Run Cucumber Tests
         id: cucumber
         run: |
-          output=$(bundle exec cucumber --publish >> data.out 2>&1)
-          report_url=$(grep -oP 'https://[^\s]+' data.out | head -n 1 | sed 's/[^[:print:]\t]//g' |  sed 's/\[.*//')
-          echo "report_url=$report_url" >> $GITHUB_ENV
+          bundle exec cucumber -f html >> cucumber_report.html
 
       # Step 3: Artifact
-      - name: Download Cucumber Report
-        run: |
-          curl -o cucumber_report.html "$report_url"
-        env:
-          report_url: ${{ env.report_url }}
-
       - name: Upload Cucumber Report as Artifact
         uses: actions/upload-artifact@v3
         with:
