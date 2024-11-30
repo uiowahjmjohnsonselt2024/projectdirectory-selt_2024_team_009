@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_11_27_080557) do
+ActiveRecord::Schema[7.2].define(version: 2024_11_30_101041) do
   create_table "contents", force: :cascade do |t|
     t.text "story_text"
     t.string "image_url"
@@ -22,10 +22,13 @@ ActiveRecord::Schema[7.2].define(version: 2024_11_27_080557) do
     t.integer "server_id", null: false
     t.integer "x"
     t.integer "y"
-    t.integer "content_id", null: false
-    t.integer "treasure_id", null: false
+    t.integer "content_id"
+    t.integer "treasure_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "owner_id"
+    t.boolean "obstacle", default: false
+    t.integer "fortified"
   end
 
   create_table "inventories", force: :cascade do |t|
@@ -80,6 +83,15 @@ ActiveRecord::Schema[7.2].define(version: 2024_11_27_080557) do
     t.integer "current_position_y"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "total_ap", default: 200
+    t.integer "turn_ap", default: 2
+    t.integer "shard_balance", default: 0
+    t.string "symbol"
+    t.integer "turn_order"
+    t.boolean "can_move_diagonally"
+    t.integer "diagonal_moves_left"
+    t.boolean "mirror_shield"
+    t.integer "turns_skipped"
   end
 
   create_table "servers", force: :cascade do |t|
@@ -88,6 +100,8 @@ ActiveRecord::Schema[7.2].define(version: 2024_11_27_080557) do
     t.integer "created_by"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "status", default: "pending"
+    t.integer "current_turn_server_user_id"
   end
 
   create_table "transactions", force: :cascade do |t|
