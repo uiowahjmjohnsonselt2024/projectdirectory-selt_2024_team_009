@@ -1,0 +1,46 @@
+- provide(:title, "Your Turn")
+%h1 Your Turn
+
+%p Total AP Remaining: #{@server_user.total_ap}
+%p Turn AP Remaining: #{@server_user.turn_ap}
+%p Shard Balance: #{@server_user.shard_balance}
+
+%h2 Actions
+
+= form_with url: perform_action_game_path(@server), method: :post, local: true, id: 'action-form', data: { controller: 'action-form' } do |f|
+  .form-group
+    %label{ for: 'action_type' } Choose Action:
+    = select_tag 'action_type', options_for_select([['Move', 'move'], ['Occupy', 'occupy'], ['Capture', 'capture'], ['Use Item', 'use_item'], ['Purchase Item', 'purchase_item']]), data: { action: 'change->action-form#updateActionDetails' }, id: 'action_type', name: 'action_type', data_action_form_target: 'actionType', class: 'form-control'
+
+  %div#action-details{ data: { action_form_target: 'actionDetails' } }
+    %div{ data: { action_form_target: 'moveCaptureFields' }, style: 'display: none;' }
+      .form-group
+        %label{ for: 'direction' } Direction:
+        - move_options = ['Up', 'Down', 'Left', 'Right']
+        - if @server_user.can_move_diagonally
+          - move_options += ['Up_Left', 'Up_Right', 'Down_Left', 'Down_Right']
+        = select_tag 'direction', options_for_select(move_options), id: 'direction', name: 'direction', class: 'form-control'
+
+    %div{ data: { action_form_target: 'useItemFields' }, style: 'display: none;' }
+      .form-group
+        %label{ for: 'selected_item' } Item:
+        = select_tag 'item_id', options_from_collection_for_select(current_user.inventories.includes(:item).map(&:item), 'id', 'name'), id: 'item_id', name: 'item_id', data: { action: 'change->action-form#updateUseItemFields' }, data_action_form_target: 'selectedItem', class: 'form-control'
+      %div#target-user-field{ data: { action_form_target: 'targetUserId' }, style: 'display: none;' }
+        .form-group
+          %label{ for: 'target_user_id' } Target Player:
+          = select_tag 'target_user_id', options_from_collection_for_select(@server.server_users.where.not(user: current_user).map(&:user), 'id', 'username'), prompt: 'Select Player', id: 'target_user_id', name: 'target_user_id', class: 'form-control'
+      %div#coordinate-fields{ data: { action_form_target: 'targetX' }, style: 'display: none;' }
+        .form-group
+          %label{ for: 'target_x' } Target X:
+          = number_field_tag 'target_x', nil, id: 'target_x', name: 'target_x', placeholder: 'Enter X coordinate', class: 'form-control'
+          %label{ for: 'target_y' } Target Y:
+          = number_field_tag 'target_y', nil, id: 'target_y', name: 'target_y', placeholder: 'Enter Y coordinate', class: 'form-control'
+
+    %div{ data: { action_form_target: 'purchaseItemFields' }, style: 'display: none;' }
+      .form-group
+        %label{ for: 'item_id' } Item:
+        = select_tag 'item_id', options_from_collection_for_select(Item.all, 'id', 'name'), id: 'item_id', name: 'item_id', class: 'form-control'
+
+  = f.submit 'Perform Action', class: 'btn btn-primary'
+
+= link_to 'Back to Game Board', game_path(@server), class: 'btn btn-secondary mt-3'

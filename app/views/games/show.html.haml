@@ -1,0 +1,66 @@
+- provide(:title, "Game Board")
+%h2 Game Board
+%h3 Current Player: #{@server.current_turn_server_user.user.username}
+
+%div.game-container
+  %table.game-board
+    - (0..5).to_a.reverse.each do |y|
+      %tr
+        - (0..5).each do |x|
+          - cell = @grid_cells.find { |c| c.x == x && c.y == y }
+          - classes = ['cell']
+          - player = @server_users.find { |su| su.current_position_x == x && su.current_position_y == y }
+          - if player
+            - classes << 'player-cell'
+            - classes << "symbol-#{player.symbol}"
+            - classes << 'current-player' if player == @server.current_turn_server_user
+          - elsif cell.owner
+            - classes << 'owned'
+          - elsif cell.obstacle?
+            - classes << 'obstacle'
+          - elsif cell.treasure
+            - classes << 'treasure'
+          %td{ class: classes.join(' '), data: { x: x, y: y } }
+            - if player
+              %span.player-symbol= player.symbol
+            - elsif cell.owner
+              %span.cell-owner= cell.owner.username[0].upcase
+            - elsif cell.obstacle?
+              %span.obstacle-symbol O
+            - elsif cell.treasure
+              %span.treasure-symbol T
+            - else
+              -
+%div.player-stats
+  %h3 Your Stats
+  %p Total AP Remaining: #{@server_user.total_ap}
+  %p Turn AP Remaining: #{@server_user.turn_ap}
+  %p Shard Balance: #{@server_user.shard_balance}
+  %h4 Inventory
+  %ul
+    - @items = current_user.inventories.includes(:item)
+    - @items.each do |inventory|
+      %li= inventory.item.name
+
+- if @server.current_turn_server_user == @server_user
+  %div.action-buttons
+    = link_to 'Play Your Turn', play_turn_game_path(@server), class: 'btn btn-primary'
+- else
+  %p It's not your turn.
+
+%div.legend
+  %h3 Legend
+  %ul
+    - @server.server_users.each do |su|
+      %li
+        %span{ class: "player-symbol symbol-#{su.symbol}" }= su.symbol
+        = " - #{su.user.username}"
+    %li
+      %span{ class: 'cell obstacle' } O
+      - ' - Obstacle'
+    %li
+      %span{ class: 'cell treasure' } T
+      - ' - Treasure'
+    %li
+      %span{ class: 'cell owned' }
+      - ' - Owned Cell'
