@@ -1,26 +1,31 @@
 Given('a user with a wallet balance of {int} shards') do |balance|
-  @user = User.create!(
+  user = User.create!(
+    username: "test_user",
     email: "test_user@example.com",
-    username: "TestUser",
     password: "password123",
-    role: "player"
+    password_confirmation: "password123"
   )
 
-  @wallet = Wallet.create!(
-    user: @user,
-    balance: balance
-  )
+  user.create_wallet!(balance: balance)
 end
 
 
-Given('an item {string} exists costing {int} shards') do |name, price|
-  @item = Item.create!(name: name, price: price)
-end
 
-When('the user purchases the item {string}') do |name|
-  @item = Item.find_by(name: name)
-  visit items_path
-  click_button "Buy #{name}"
+Given('an item {string} exists costing {int} shards') do |item_name, price|
+  Item.create!(
+    name: item_name,
+    price: price,
+    description: "A powerful item for testing purposes",
+    category: "Weapons",
+    required_level: 1,
+    image_url: "default-item.jpg"
+  )
+  end
+
+When('the user purchases the item {string}') do |item_name|
+  item = Item.find_by(name: item_name)
+  expect(item).not_to be_nil, "Item with name '#{item_name}' not found in the database"
+  click_button("Buy #{item_name}")
 end
 
 Then('their wallet balance should be {int} shards') do |balance|

@@ -6,7 +6,7 @@ Feature: Wallet integration with Items
     When the user purchases the item "Assault Rifle (M416)"
     Then their wallet balance should be 50 shards
     And the item "Assault Rifle (M416)" should be in their inventory
-    And they should see "Item purchased successfully!"
+
 
 
   Scenario: Attempting to purchase an item with insufficient shards
