@@ -59,11 +59,9 @@ Rails.application.routes.draw do
 
   resources :games, only: [:show] do
     member do
-      get 'play_turn'
-      post 'perform_action'
+      post :perform_action
     end
   end
-
 
   get "up" => "rails/health#show", as: :rails_health_check
 

@@ -40,7 +40,7 @@ body.profiles {
     background-image: image-url('default_background.png');
 }
 body.games {
-    background-image: url('game_background.png');
+    background-image: image-url('game_background.png');
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
@@ -56,8 +56,190 @@ body.games::after {
     width: 100%;
     height: 100%;
     background-color: rgba(255, 255, 255, 0.2); /* Adjust opacity as needed */
-    pointer-events: none; /* Allows interaction with underlying elements */
+    pointer-events: none; /* Allows clicks to pass through the overlay */
 }
+.game-container {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+}
+
+.game-left-panel, .game-right-panel {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    padding: 20px;
+    width: 25%;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.game-center-panel {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    width: 45%;
+}
+
+.game-board {
+    border-collapse: collapse;
+    margin: 0 auto;
+}
+
+.game-board .game-cell {
+    width: 80px;
+    height: 80px;
+    border: 1px solid #ccc;
+    text-align: center;
+    vertical-align: middle;
+    position: relative;
+    background: rgba(240, 240, 240, 0.8);
+}
+
+.game-board .game-player-cell {
+    background: #add8e6;
+}
+
+.game-movement-controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.btn-game-movement {
+    width: 50px;
+    height: 50px;
+    font-size: 1.2em;
+    background-color: #ffd700;
+    border: none;
+    border-radius: 5px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s;
+}
+
+.btn-game-movement:hover {
+    background-color: #ffa500;
+    transform: translateY(-3px);
+}
+
+.game-other-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+    justify-content: center; /* Center align the actions */
+    color: #997404;
+
+    .btn-game-action {
+        width: 150px; /* Adjust width to make them consistent */
+        padding: 10px;
+        font-size: 1em;
+        text-align: center;
+        border-radius: 5px;
+        border: none;
+        background-color: coral; /* Base color */
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+        transition: all 0.2s ease;
+
+        &:hover {
+            background-color: #ffa500; /* Hover color */
+            transform: translateY(-3px); /* Lift the button */
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3); /* Stronger shadow on hover */
+            color: white; /* Change text color */
+        }
+
+        &:active {
+            transform: translateY(0); /* Reset position on click */
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2); /* Reset shadow */
+        }
+    }
+}
+
+
+
+.dropdown {
+    position: relative;
+}
+
+.dropdown-toggle {
+    width: 100%;
+    text-align: left;
+    background: var(--primary-color);
+    color: var(--secondary-color);
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: white;
+    border: 1px solid var(--primary-color);
+    border-radius: 5px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    z-index: 10;
+    min-width: 200px;
+}
+
+.dropdown-menu li {
+    padding: 10px;
+    text-align: left;
+}
+
+.dropdown-menu li:hover {
+    background: var(--secondary-color);
+    color: var(--primary-color);
+}
+
+.btn-game-action {
+    display: block;
+    margin: 5px 0;
+    width: 100%;
+    text-align: center;
+    background-color: coral;
+    border: none;
+    padding: 8px;
+    font-size: 1em;
+    border-radius: 5px;
+    color: white;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+.btn-game-action:hover {
+    background-color: #ffa500;
+    transform: translateY(-3px);
+}
+
+
+.game-legend {
+    margin-top: 20px;
+    list-style: none;
+    padding: 0;
+    line-height: 1.8;
+}
+
+
+.symbol-🟢 {
+    color: green;
+}
+
+.symbol-🔴 {
+    color: red;
+}
+
+.symbol-🔵 {
+    color: blue;
+}
+
+.symbol-🟡 {
+    color: yellow;
+}
+
 
 
 main {
@@ -290,134 +472,4 @@ ul.actions-list li a:hover {
     padding: 0.8rem 3rem;
     margin: 2rem;
     text-align: center;
-}
-.game-board {
-    border-collapse: collapse;
-    margin: 0 auto; /* Center the table */
-}
-
-.game-board .cell {
-    width: 80px; /* Increase cell size */
-    height: 80px;
-    position: relative;
-    border: 3px solid #333; /* Dark and thick border */
-    text-align: center;
-    vertical-align: middle;
-    font-size: 2em; /* Increase symbol size */
-    background-color: rgba(255, 255, 255, 0.1); /* Add a base background color */
-    transition: background-color 0.3s ease; /* Smooth color transitions */
-
-}
-.game-board .cell:hover {
-    background-color: rgba(255, 255, 255, 0.8); /* Highlight cell on hover */
-}
-.game-board .cell.player {
-    background-color: rgba(135, 206, 235, 0.7); /* Light blue */
-}
-
-.game-board .cell.obstacle {
-    background-color: rgba(128, 128, 128, 0.7); /* Gray */
-}
-
-.game-board .cell.treasure {
-    background-color: rgba(255, 215, 0, 0.7); /* Gold */
-}
-
-.game-board .cell.owned {
-    background-color: rgba(173, 216, 230, 0.7); /* Light Steel Blue */
-}
-
-.game-board .cell::before {
-    content: "";
-    display: block;
-    padding-top: 100%; /* Makes the cell a square */
-}
-
-.game-board .cell > * {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-.player-cell {
-    border: 2px solid black;
-    position: relative;
-}
-
-.player-cell.current-player {
-    box-shadow: 0 0 10px 3px gold;
-}
-
-.player-symbol {
-    font-size: 2em;
-}
-
-.symbol-🟢 {
-    color: green;
-}
-
-.symbol-🔴 {
-    color: red;
-}
-
-.symbol-🔵 {
-    color: blue;
-}
-
-.symbol-🟡 {
-    color: yellow;
-}
-
-
-/* Legend Styles */
-.legend {
-    margin-top: 20px;
-    background-color: rgba(255, 255, 255, 0.8);
-    padding: 15px;
-    border-radius: 5px;
-}
-
-.legend ul {
-    list-style: none;
-    padding: 0;
-}
-
-.legend li {
-    margin-bottom: 5px;
-}
-
-.cell.obstacle {
-    background-color: gray;
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    text-align: center;
-}
-
-.cell.treasure {
-    background-color: gold;
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    text-align: center;
-}
-
-.cell.owned {
-    background-color: lightblue;
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    text-align: center;
-}
-
-/* Stats and Actions */
-.player-stats {
-    background-color: rgba(255, 255, 255, 0.8);
-    padding: 15px;
-    margin-top: 20px;
-    border-radius: 5px;
-}
-
-.action-buttons {
-    margin-top: 20px;
 }

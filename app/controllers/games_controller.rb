@@ -3,50 +3,65 @@ class GamesController < ApplicationController
   before_action :set_server
   before_action :set_server_user
   before_action :ensure_game_in_progress
-  before_action :ensure_current_player_turn, only: %i[play_turn perform_action]
+  before_action :ensure_current_player_turn, only: %i[perform_action]
 
   # GET /games/:id
   def show
     @grid_cells = @server.grid_cells.includes(:owner, :treasure)
     @server_users = @server.server_users.includes(:user)
     @server_user ||= @server.server_users.find_by(user: current_user)
+
   end
 
   # GET /games/:id/play_turn
-  def play_turn
-    @server_user.reset_turn_ap if @server_user.turn_ap <= 0
-    @items = current_user.inventories.includes(:item)
-  end
+  # def play_turn
+  #   @server_user.reset_turn_ap if @server_user.turn_ap <= 0
+  #   @items = current_user.inventories.includes(:item)
+  # end
 
+  # POST /games/:id/perform_action
   # POST /games/:id/perform_action
   def perform_action
     @server_users = @server.server_users.includes(:user)
-    action_type = params[:action_type]
 
+    action_type = params[:action_type]
     case action_type
     when 'move'
-      handle_move_action
+      unless handle_move_action(params[:direction])
+        return handle_error('Invalid move. Please try again.')
+      end
     when 'occupy'
-      handle_occupy_action
+      unless handle_occupy_action
+        return handle_error('Unable to occupy the cell.')
+      end
     when 'capture'
-      handle_capture_action
-    when 'use_item'
-      handle_use_item_action
-    when 'purchase_item'
-      handle_purchase_item_action
+      unless handle_capture_action(params[:direction])
+        return handle_error('Capture action failed.')
+      end
+    when 'use_treasure'
+      unless handle_use_treasure_action(params[:treasure_id])
+        return handle_error('Treasure usage failed. Ensure you have the treasure.')
+      end
     else
-      flash[:alert] = 'Invalid action.'
+      return handle_error('Invalid action type.')
     end
 
     check_game_end_conditions
 
-    if @server_user.turn_ap <= 0
+    if @server_user.turn_ap <= 0 || @end_turn
       advance_turn
-      redirect_to game_path(@server), notice: 'Turn ended.'
+      message = 'Turn ended.'
     else
-      redirect_to play_turn_game_path(@server)
+      message = 'Action performed successfully.'
+    end
+
+    respond_to do |format|
+      format.html { redirect_to game_path(@server), notice: message }
+      format.json { render json: { success: true, message: message }, status: :ok }
     end
   end
+
+
 
   private
 
@@ -64,7 +79,10 @@ class GamesController < ApplicationController
 
   def ensure_current_player_turn
     unless @server.current_turn_server_user == @server_user
-      redirect_to game_path(@server), alert: 'It is not your turn.'
+      respond_to do |format|
+        format.html { redirect_to game_path(@server), alert: 'It is not your turn.' }
+        format.json { render json: { success: false, message: 'It is not your turn.' }, status: :forbidden }
+      end
     end
   end
 
@@ -102,10 +120,8 @@ class GamesController < ApplicationController
   end
 
   # Action Handlers
-  def handle_move_action
-    @server_users = @server.server_users.includes(:user)
+  def handle_move_action(direction)
     if @server_user.spend_turn_ap(1)
-      direction = params[:direction]
       dx, dy = movement_delta(direction)
       target_x = @server_user.current_position_x + dx
       target_y = @server_user.current_position_y + dy
@@ -120,7 +136,7 @@ class GamesController < ApplicationController
         target_cell = @server.grid_cells.find_by(x: target_x, y: target_y)
         if target_cell.obstacle?
           flash[:alert] = 'Cannot move to an obstacle.'
-        elsif @server_users.any? { |su| su.current_position_x == target_x && su.current_position_y == target_y }
+        elsif @server.server_users.any? { |su| su.current_position_x == target_x && su.current_position_y == target_y }
           flash[:alert] = 'Cell is occupied by another player.'
         else
           @server_user.update(current_position_x: target_x, current_position_y: target_y)
@@ -148,10 +164,18 @@ class GamesController < ApplicationController
       flash[:alert] = 'Not enough AP to occupy.'
     end
   end
+  # New method to handle treasure usage
+  def handle_use_treasure_action(treasure_id)
+    treasure = @server_user.treasures.find_by(id: treasure_id)
+    return false unless treasure
 
-  def handle_capture_action
+    apply_treasure_effect(treasure)
+    @server_user.treasures.delete(treasure) # Remove treasure after usage
+    flash[:notice] = "Used treasure: #{treasure.name}"
+    true
+  end
+  def handle_capture_action(direction)
     if @server_user.spend_turn_ap(3)
-      direction = params[:direction]
       dx, dy = movement_delta(direction)
       target_x = @server_user.current_position_x + dx
       target_y = @server_user.current_position_y + dy
@@ -176,8 +200,7 @@ class GamesController < ApplicationController
     end
   end
 
-  def handle_use_item_action
-    item_id = params[:item_id]
+  def handle_use_item_action(item_id)
     inventory = current_user.inventories.find_by(item_id: item_id)
     if inventory
       item = inventory.item
@@ -194,8 +217,8 @@ class GamesController < ApplicationController
     end
   end
 
-  def handle_purchase_item_action
-    item = Item.find(params[:item_id])
+  def handle_purchase_item_action(item_id)
+    item = Item.find(item_id)
     if @server_user.shard_balance >= item.price
       @server_user.adjust_shard_balance(-item.price)
       current_user.inventories.create(item: item)
@@ -207,16 +230,16 @@ class GamesController < ApplicationController
 
   # Helper Methods
   def movement_delta(direction)
-    case direction
-    when 'up' then [0, -1]
-    when 'down' then [0, 1]
-    when 'left' then [-1, 0]
-    when 'right' then [1, 0]
-    when 'up_left' then [-1, -1]
-    when 'up_right' then [1, -1]
-    when 'down_left' then [-1, 1]
-    when 'down_right' then [1, 1]
-    else [0, 0]
+    case direction.downcase
+    when 'up' then [0, 1] # Increase y for up
+    when 'down' then [0, -1] # Decrease y for down
+    when 'left' then [-1, 0] # Decrease x for left
+    when 'right' then [1, 0] # Increase x for right
+    when 'up_left' then [-1, 1] # Diagonal: up and left
+    when 'up_right' then [1, 1] # Diagonal: up and right
+    when 'down_left' then [-1, -1] # Diagonal: down and left
+    when 'down_right' then [1, -1] # Diagonal: down and right
+    else [0, 0] # No movement
     end
   end
 

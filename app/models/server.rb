@@ -38,12 +38,14 @@ class Server < ApplicationRecord
     end
 
     # Place treasures
-    grid_cells.sample(10).each do |cell|
+    treasure_cells = grid_cells.sample(5)
+    treasure_cells.each do |cell|
       cell.update(treasure: Treasure.all.sample)
     end
 
-    # Place obstacles
-    grid_cells.where(treasure: nil).sample(10).each do |cell|
+    # Randomly place obstacles (limit to 5)
+    obstacle_cells = grid_cells.where(treasure: nil).sample(5)
+    obstacle_cells.each do |cell|
       cell.update(obstacle: true)
     end
   end

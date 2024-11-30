@@ -62,6 +62,7 @@ ServerUser.create!(user: user2, server: server)
 ServerUser.create!(user: user3, server: server)
 ServerUser.create!(user: user4, server: server)
 
+
 # db/seeds.rb
 # db/seeds.rb
 Item.create!([
