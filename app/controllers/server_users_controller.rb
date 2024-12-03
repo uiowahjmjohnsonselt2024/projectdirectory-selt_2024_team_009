@@ -1,57 +1,34 @@
 class ServerUsersController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_server_user, only: %i[show edit update destroy]
-
-  # GET /server_users
-  def index
-    @server_users = current_user.server_users.includes(:server)
-  end
-
-  # GET /server_users/:id
-  def show
-  end
-
-  # GET /server_users/new
-  def new
-    @server_user = current_user.server_users.build
-  end
+  before_action :set_server_user, only: %i[destroy]
 
   # POST /server_users
   def create
-    @server_user = current_user.server_users.build(server_user_params)
-    if @server_user.save
-      redirect_to @server_user, notice: 'Joined server successfully.'
-    else
-      render :new, status: :unprocessable_entity
-    end
-  end
+    @server = Server.find(params[:server_id])
 
-  # GET /server_users/:id/edit
-  def edit
-  end
-
-  # PATCH/PUT /server_users/:id
-  def update
-    if @server_user.update(server_user_params)
-      redirect_to @server_user, notice: 'Server user was successfully updated.'
-    else
-      render :edit, status: :unprocessable_entity
+    if @server.users.include?(current_user)
+      redirect_to @server, alert: 'You have already joined this game.'
+      return
     end
+
+    if @server.server_users.count >= @server.max_players
+      redirect_to @server, alert: 'Server is full.'
+      return
+    end
+
+    @server_user = @server.server_users.create(user: current_user)
+    redirect_to @server, notice: 'You have joined the game.'
   end
 
   # DELETE /server_users/:id
   def destroy
     @server_user.destroy
-    redirect_to server_users_url, notice: 'Left server successfully.'
+    redirect_to servers_path, notice: 'You have left the game.'
   end
 
   private
 
   def set_server_user
     @server_user = current_user.server_users.find(params[:id])
-  end
-
-  def server_user_params
-    params.require(:server_user).permit(:server_id, :current_position_x, :current_position_y)
   end
 end

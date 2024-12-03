@@ -5,10 +5,12 @@ class InventoriesController < ApplicationController
   # GET /inventories
   def index
     @inventories = current_user.inventories.includes(:item)
+    render :index
   end
 
   # GET /inventories/:id
   def show
+    @item = Item.find(params[:id])
   end
 
   # GET /inventories/new
@@ -28,6 +30,7 @@ class InventoriesController < ApplicationController
 
   # GET /inventories/:id/edit
   def edit
+    @item = Item.find(params[:item_id])
   end
 
   # PATCH/PUT /inventories/:id
@@ -41,17 +44,22 @@ class InventoriesController < ApplicationController
 
   # DELETE /inventories/:id
   def destroy
+    @inventory = current_user.inventories.find(params[:id])
     @inventory.destroy
-    redirect_to inventories_url, notice: 'Inventory item was successfully removed.'
+    redirect_to inventories_path, notice: 'Item successfully discarded.'
   end
 
   private
 
+  def add_item
+
+  end
   def set_inventory
     @inventory = current_user.inventories.find(params[:id])
   end
 
   def inventory_params
-    params.require(:inventory).permit(:item_id, :quantity)
+    #params.require(:inventory).permit(:item_id, :quantity)
+    params.require(:inventory).permit(:item_name, :quantity)
   end
 end

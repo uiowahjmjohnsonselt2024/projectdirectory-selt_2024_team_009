@@ -1,11 +1,14 @@
 class ServersController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_server, only: %i[show edit update destroy]
+  before_action :set_server, only: %i[show edit update destroy start_game]
+  before_action :check_creator, only: %i[start_game]
 
   # GET /servers
   def index
     @servers = current_user.created_servers
+    @joined_servers = current_user.servers.where.not(created_by: current_user.id)
   end
+
 
   # GET /servers/:id
   def show
@@ -46,12 +49,48 @@ class ServersController < ApplicationController
     @server.destroy
     redirect_to servers_url, notice: 'Server was successfully destroyed.'
   end
+  # POST /servers/:id/start_game
+  # POST /servers/:id/start_game
+  def start_game
+    if @server.status != 'pending'
+      redirect_to @server, alert: 'Game has already started or finished.'
+      return
+    end
+
+    if @server.server_users.count < 2
+      redirect_to @server, alert: 'At least 2 players are required to start the game.'
+      return
+    end
+
+    @server.start_game
+    redirect_to game_path(@server), notice: 'Game started successfully.'
+  end
+  # POST /servers/:id/join_game
+  def join_game
+    if @server.users.include?(current_user)
+      redirect_to @server, alert: 'You have already joined this game.'
+      return
+    end
+
+    if @server.server_users.count >= @server.max_players
+      redirect_to @server, alert: 'Server is full.'
+      return
+    end
+
+    @server.server_users.create(user: current_user)
+    redirect_to @server, notice: 'You have joined the game.'
+  end
 
   private
 
   # Set the @server based on the ID in params
   def set_server
-    @server = current_user.created_servers.find(params[:id])
+    @server = Server.find(params[:id])
+  end
+  def check_creator
+    unless @server.creator == current_user
+      redirect_to @server, alert: 'Only the creator can start the game.'
+    end
   end
 
   # Strong parameters to prevent mass assignment

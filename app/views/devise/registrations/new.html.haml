@@ -1,3 +1,4 @@
+- provide(:title, "Registration")
 %div.row.justify-content-center
   %div.col-md-5
     %div.card.my-5
@@ -28,6 +29,11 @@
           .field
             = f.label :password_confirmation, class: "form-label"
             = f.password_field :password_confirmation, autocomplete: "new-password", class: "form-control"
+
+          .field
+            = f.label :role, class: "form-label"
+            = f.select :role, options_for_select([['Player', 'player'], ['Admin', 'admin']], selected: 'player'), class: "form-control"
+
 
           .actions.d-grid.my-2
             = f.submit "Sign up", class: "btn btn-primary"

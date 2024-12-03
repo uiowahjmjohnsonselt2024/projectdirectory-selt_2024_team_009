@@ -16,7 +16,7 @@ class ProfilesController < ApplicationController
   def update
     @user = current_user
     if @user.update(user_params)
-      redirect_to authenticated_root_path, notice: 'Profile updated successfully.'
+      redirect_to user_root_path, notice: 'Profile updated successfully.'
     else
       render :edit
     end
@@ -25,6 +25,6 @@ class ProfilesController < ApplicationController
   private
 
   def user_params
-    params.require(:user).permit(:username, :email, :password, :password_confirmation)
+    params.require(:user).permit(:username, :email, :password, :password_confirmation, :role)
   end
 end

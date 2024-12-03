@@ -1,0 +1,136 @@
+- provide(:title, "Game Board")
+%div{ data: { controller: "game-actions" } }
+  %div.game-container
+    %div.game-left-panel
+      %div.game-player-stats
+        %h3.text-primary Current Player:
+        %p.text-muted= @server.current_turn_server_user.user.username
+
+        %h3.text-primary Your Stats:
+        %ul
+          %li.text-muted
+            %strong Total AP Remaining:
+            = @server_user.total_ap
+          %li.text-muted
+            %strong Turn AP Remaining:
+            = @server_user.turn_ap
+          %li.text-muted
+            %strong Shard Balance:
+            = @server_user.shard_balance
+
+        %h3.text-primary Inventory:
+        %div.dropdown
+          %button.btn.btn-secondary.dropdown-toggle{ data: { bs_toggle: "dropdown" } }
+            Inventory Items
+          %ul.dropdown-menu
+            - @items = current_user.inventories.includes(:item)
+            - @items.each do |inventory|
+              %li
+                %span= inventory.item.name
+                = button_to "Use #{inventory.item.name}", perform_action_game_path(@server),
+                  class: 'btn-game-action btn-info',
+                  params: { action_type: 'use_item', item_id: inventory.item.id },
+                  method: :post
+
+        %h3.text-primary Treasures:
+        %div.dropdown
+          %button.btn.btn-secondary.dropdown-toggle{ data: { bs_toggle: "dropdown" } }
+            Treasures
+          %ul.dropdown-menu
+            - @server_user.treasures.each do |treasure|
+              %li
+                %span= treasure.name
+                = button_to "Use #{treasure.name}", perform_action_game_path(@server),
+                  class: 'btn-game-action btn-info',
+                  params: { action_type: 'use_treasure', treasure_id: treasure.id },
+                  method: :post
+
+    %div.game-center-panel
+      %h2.text-center.text-secondary Game Board
+      %table.game-board
+        - (0..5).to_a.reverse.each do |y|
+          %tr
+            - (0..5).each do |x|
+              - cell = @grid_cells.find { |c| c.x == x && c.y == y }
+              - classes = ['game-cell']
+              - player = @server_users.find { |su| su.current_position_x == x && su.current_position_y == y }
+              - if player
+                - classes << 'game-player-cell'
+                - classes << "game-symbol-#{player.symbol}"
+              - elsif cell.owner
+                - classes << 'game-owned'
+              - elsif cell.obstacle?
+                - classes << 'game-obstacle'
+              - elsif cell.treasure
+                - classes << 'game-treasure'
+              %td{ class: classes.join(' '), data: { x: x, y: y } }
+                - if player
+                  %span= player.symbol
+                - elsif cell.owner
+                  %span= cell.owner.username[0].upcase
+                - elsif cell.obstacle?
+                  %span O
+                - elsif cell.treasure
+                  %span T
+
+    %div.game-right-panel
+      - if @server.current_turn_server_user == @server_user
+        %div.game-action-controls
+          %h3.text-primary Your Turn:
+
+          %div.game-movement-controls
+            %h4.text-secondary Movement:
+            %div.movement-grid
+              = button_to '↑', perform_action_game_path(@server),
+                class: 'btn-game-movement',
+                params: { action_type: 'move', direction: 'up' },
+                method: :post
+
+              = button_to '←', perform_action_game_path(@server),
+                class: 'btn-game-movement',
+                params: { action_type: 'move', direction: 'left' },
+                method: :post
+
+              = button_to '→', perform_action_game_path(@server),
+                class: 'btn-game-movement',
+                params: { action_type: 'move', direction: 'right' },
+                method: :post
+
+              = button_to '↓', perform_action_game_path(@server),
+                class: 'btn-game-movement',
+                params: { action_type: 'move', direction: 'down' },
+                method: :post
+
+          %div.game-actions
+            %h4.text-secondary Other Actions:
+            = button_to 'Occupy Cell', perform_action_game_path(@server),
+              class: 'btn-game-action btn-primary',
+              params: { action_type: 'occupy' },
+              method: :post
+
+            = button_to 'Capture Cell', perform_action_game_path(@server),
+              class: 'btn-game-action btn-danger',
+              params: { action_type: 'capture', direction: 'right' },
+              method: :post
+
+          %h3.text-primary Legend:
+          %ul.game-legend
+            - @server.server_users.each do |su|
+              %li
+                %span{ class: "game-symbol game-symbol-#{su.symbol}" }= su.symbol
+                = " - #{su.user.username}"
+            %li
+              %span.game-cell.game-obstacle O
+              %span.game-cell.game-treasure T
+              %span.game-cell.game-owned - Owned Cell
+      - else
+        %h3.text-primary Legend:
+        %ul.game-legend
+          - @server.server_users.each do |su|
+            %li
+              %span{ class: "game-symbol game-symbol-#{su.symbol}" }= su.symbol
+              = " - #{su.user.username}"
+          %li
+            %span.game-cell.game-obstacle O
+            %span.game-cell.game-treasure T
+            %span.game-cell.game-owned - Owned Cell
