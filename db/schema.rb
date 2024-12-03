@@ -37,6 +37,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_11_30_101041) do
     t.integer "quantity"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "item_name"
   end
 
   create_table "items", force: :cascade do |t|

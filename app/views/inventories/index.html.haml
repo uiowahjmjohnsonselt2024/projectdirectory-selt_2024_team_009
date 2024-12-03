@@ -1,12 +1,20 @@
-%h1 Your Inventory
+%h1.text-center.my-4.text-uppercase.text-primary Inventory Page
 
-%table
-  %thead
-    %tr
-      %th Item
-      %th Quantity
-  %tbody
-    - @inventories.each do |inventory|
-      %tr
-        %td= inventory.item.name
-        %td= inventory.quantity
+
+.container
+.row.row-cols-1.row-cols-md-3.g-4
+  - @inventories.each do |inventory|
+    .col
+      .card.h-100.shadow-lg{id: "item_#{inventory.item.id}"}
+        .card-img-top
+          = image_tag inventory.item.image_url, alt: inventory.item.name, class: 'img-fluid'
+        .card-body
+          %h5.card-title.text-center= inventory.item.name
+          %p.card-text= inventory.item.description
+        .card-footer.bg-transparent
+          .d-flex.justify-content-between.align-items-center
+            %span.badge.bg-success Price: #{inventory.item.price} Shards
+            %span.badge.bg-info.text-dark Category: #{inventory.item.category}
+            %span.badge.bg-info.text-dark Level: #{inventory.item.required_level}
+            .card-footer.text-center
+              = button_to 'Discard Item', inventories_path(inventory), method: :delete, class: 'btn btn-danger w-100 mt-2'
