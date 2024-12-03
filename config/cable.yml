@@ -6,4 +6,7 @@ test:
 
 production:
   adapter: redis
-  url: <%= ENV["REDIS_URL"] %>
+  url: <%= ENV['REDIS_URL'] %>
+  channel_prefix:  shards-of-the-grid-team-09_production
+  ssl_params:
+    verify_mode: <%= OpenSSL::SSL::VERIFY_NONE %>
