@@ -36,7 +36,7 @@ Rails.application.routes.draw do
   resources :items
   resources :inventories
   resources :servers
-  resources :server_users
+  resources :server_users, only: [:create, :destroy]
   resources :grid_cells
   resources :contents
   resources :treasures
@@ -45,12 +45,31 @@ Rails.application.routes.draw do
   resources :leaderboards
   resources :leaderboard_entries
 
+  # resources :servers do
+  #   member do
+  #     post 'start'
+  #   end
+  # end
   resources :items do
     member do
-      post :purchase
+      post 'purchase'
     end
   end
 
+  resources :servers do
+    member do
+      get 'start_game'
+      post 'start_game'
+      get 'join_game'
+      post 'join_game'
+    end
+  end
+
+  resources :games, only: [:show] do
+    member do
+      post :perform_action
+    end
+  end
 
   get "up" => "rails/health#show", as: :rails_health_check
 
