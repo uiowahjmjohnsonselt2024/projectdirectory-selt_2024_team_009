@@ -6,5 +6,7 @@ test:
 
 production:
   adapter: redis
-  url: <%= ENV.fetch("REDIS_URL") { "redis://localhost:6379/1" } %>
-  channel_prefix: projectdirectory_selt_2024_team_009_production
+  url: <%= ENV['REDIS_URL'] %>
+  channel_prefix:  shards-of-the-grid-team-09_production
+  ssl_params:
+    verify_mode: <%= OpenSSL::SSL::VERIFY_NONE %>
