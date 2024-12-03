@@ -70,7 +70,7 @@ Rails.application.routes.draw do
       post :perform_action
     end
   end
-
+  mount ActionCable.server => '/cable'
   get "up" => "rails/health#show", as: :rails_health_check
 
   # Render dynamic PWA files from app/views/pwa/*
