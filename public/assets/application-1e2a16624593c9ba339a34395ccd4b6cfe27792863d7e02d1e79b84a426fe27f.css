@@ -14957,17 +14957,20 @@ body.profiles {
   background-image: url(/assets/default_background-57980f29fa1caa056e848a2296bc047a9491d9b9748385dc7f3e03521150206c.png);
 }
 
-/* line 42, app/assets/stylesheets/application.scss */
+/* Game Page Specific Styling */
+/* Game Page Refinements */
+/* line 44, app/assets/stylesheets/application.scss */
 body.games {
   background-image: url(/assets/game_background-a4a1aeccc3ff4d4243638f214334ff271c8202088c92f2594af475e71cd14571.png);
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
   background-attachment: fixed;
-  position: relative;
+  font-family: "Eagle Lake", serif;
+  color: #333;
 }
 
-/* line 51, app/assets/stylesheets/application.scss */
+/* line 54, app/assets/stylesheets/application.scss */
 body.games::after {
   content: "";
   position: fixed;
@@ -14976,85 +14979,144 @@ body.games::after {
   width: 100%;
   height: 100%;
   background-color: rgba(255, 255, 255, 0.2);
-  /* Adjust opacity as needed */
   pointer-events: none;
-  /* Allows clicks to pass through the overlay */
 }
 
-/* line 61, app/assets/stylesheets/application.scss */
+/* Main Container */
+/* line 66, app/assets/stylesheets/application.scss */
 .game-container {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 20px;
   padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
-/* line 67, app/assets/stylesheets/application.scss */
-.game-left-panel, .game-right-panel {
+/* Left and Right Panels */
+/* line 76, app/assets/stylesheets/application.scss */
+.game-left-panel,
+.game-right-panel {
   background: rgba(255, 255, 255, 0.9);
   border-radius: 10px;
   padding: 20px;
-  width: 25%;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-/* line 75, app/assets/stylesheets/application.scss */
+/* Center Panel (Game Board) */
+/* line 88, app/assets/stylesheets/application.scss */
 .game-center-panel {
   background: rgba(255, 255, 255, 0.9);
   border-radius: 10px;
   padding: 20px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-  width: 45%;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-/* line 83, app/assets/stylesheets/application.scss */
+/* Game Board */
+/* line 99, app/assets/stylesheets/application.scss */
 .game-board {
   border-collapse: collapse;
-  margin: 0 auto;
+  margin: 20px auto;
 }
 
-/* line 88, app/assets/stylesheets/application.scss */
+/* line 104, app/assets/stylesheets/application.scss */
 .game-board .game-cell {
   width: 80px;
   height: 80px;
-  border: 1px solid #ccc;
+  border: 2px solid #ccc;
   text-align: center;
   vertical-align: middle;
-  position: relative;
   background: rgba(240, 240, 240, 0.8);
 }
 
-/* line 98, app/assets/stylesheets/application.scss */
+/* line 113, app/assets/stylesheets/application.scss */
 .game-board .game-player-cell {
   background: #add8e6;
 }
 
-/* line 102, app/assets/stylesheets/application.scss */
+/* line 118, app/assets/stylesheets/application.scss */
 .game-movement-controls {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 15px;
-}
-
-/* line 109, app/assets/stylesheets/application.scss */
-.btn-game-movement {
-  width: 50px;
-  height: 50px;
-  font-size: 1.2em;
-  background-color: #ffd700;
-  border: none;
-  border-radius: 5px;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
-  transition: all 0.2s;
-}
-
-/* line 120, app/assets/stylesheets/application.scss */
-.btn-game-movement:hover {
-  background-color: #ffa500;
-  transform: translateY(-3px);
+  margin-top: 20px;
+  padding: 15px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
 }
 
 /* line 125, app/assets/stylesheets/application.scss */
+.game-movement-controls h4, .game-movement-controls .h4 {
+  margin-bottom: 15px;
+}
+
+/* line 129, app/assets/stylesheets/application.scss */
+.movement-grid {
+  display: grid;
+  grid-template-areas: ". up ." "left center right" ". down .";
+  grid-template-columns: 50px 50px 50px;
+  grid-template-rows: 50px 50px 50px;
+  gap: 20px;
+  justify-content: center;
+  align-content: center;
+  width: 250px;
+  margin: 20px auto;
+}
+
+/* line 144, app/assets/stylesheets/application.scss */
+.btn-game-movement {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #ffd700;
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  cursor: pointer;
+}
+
+/* line 158, app/assets/stylesheets/application.scss */
+.btn-game-movement.up {
+  grid-area: up;
+}
+
+/* line 159, app/assets/stylesheets/application.scss */
+.btn-game-movement.down {
+  grid-area: down;
+}
+
+/* line 160, app/assets/stylesheets/application.scss */
+.btn-game-movement.left {
+  grid-area: left;
+}
+
+/* line 161, app/assets/stylesheets/application.scss */
+.btn-game-movement.right {
+  grid-area: right;
+}
+
+/* line 162, app/assets/stylesheets/application.scss */
+.btn-game-movement.center {
+  grid-area: center;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* line 168, app/assets/stylesheets/application.scss */
+.btn-game-movement:hover {
+  background-color: #ffa500;
+  /* Darker gold on hover */
+  transform: translateY(-3px);
+  /* Slight lift on hover */
+}
+
+/* line 173, app/assets/stylesheets/application.scss */
 .game-other-actions {
   display: flex;
   flex-wrap: wrap;
@@ -15065,7 +15127,7 @@ body.games::after {
   color: #997404;
 }
 
-/* line 133, app/assets/stylesheets/application.scss */
+/* line 181, app/assets/stylesheets/application.scss */
 .game-other-actions .btn-game-action {
   width: 150px;
   /* Adjust width to make them consistent */
@@ -15080,7 +15142,7 @@ body.games::after {
   transition: all 0.2s ease;
 }
 
-/* line 144, app/assets/stylesheets/application.scss */
+/* line 192, app/assets/stylesheets/application.scss */
 .game-other-actions .btn-game-action:hover {
   background-color: #ffa500;
   /* Hover color */
@@ -15092,7 +15154,7 @@ body.games::after {
   /* Change text color */
 }
 
-/* line 151, app/assets/stylesheets/application.scss */
+/* line 199, app/assets/stylesheets/application.scss */
 .game-other-actions .btn-game-action:active {
   transform: translateY(0);
   /* Reset position on click */
@@ -15100,17 +15162,99 @@ body.games::after {
   /* Reset shadow */
 }
 
-/* line 160, app/assets/stylesheets/application.scss */
-.btn-game-action {
+/* Tables Specific to the Game Page */
+/* line 207, app/assets/stylesheets/application.scss */
+body.games .table {
+  margin: 20px 0;
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   width: 100%;
-  padding: 10px;
-  font-size: 1em;
-  text-align: center;
-  border-radius: 5px;
-  color: #fff;
 }
 
-/* line 169, app/assets/stylesheets/application.scss */
+/* line 215, app/assets/stylesheets/application.scss */
+body.games .table th {
+  background-color: var(--primary-color);
+  color: var(--secondary-color);
+  text-align: center;
+  padding: 10px;
+  font-size: 1.2em;
+}
+
+/* line 223, app/assets/stylesheets/application.scss */
+body.games .table td {
+  text-align: center;
+  vertical-align: middle;
+  padding: 10px;
+  font-size: 1em;
+}
+
+/* line 230, app/assets/stylesheets/application.scss */
+.dropdown {
+  position: relative;
+}
+
+/* line 234, app/assets/stylesheets/application.scss */
+.dropdown-toggle {
+  width: 100%;
+  text-align: left;
+  background: var(--primary-color);
+  color: var(--secondary-color);
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* line 245, app/assets/stylesheets/application.scss */
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: white;
+  border: 1px solid var(--primary-color);
+  border-radius: 5px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  z-index: 10;
+  min-width: 200px;
+}
+
+/* line 259, app/assets/stylesheets/application.scss */
+.dropdown-menu li {
+  padding: 10px;
+  text-align: left;
+}
+
+/* line 264, app/assets/stylesheets/application.scss */
+.dropdown-menu li:hover {
+  background: var(--secondary-color);
+  color: var(--primary-color);
+}
+
+/* line 269, app/assets/stylesheets/application.scss */
+.btn-game-action {
+  display: block;
+  margin: 5px 0;
+  width: 100%;
+  text-align: center;
+  background-color: coral;
+  border: none;
+  padding: 8px;
+  font-size: 1em;
+  border-radius: 5px;
+  color: white;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* line 283, app/assets/stylesheets/application.scss */
+.btn-game-action:hover {
+  background-color: #ffa500;
+  transform: translateY(-3px);
+}
+
+/* line 289, app/assets/stylesheets/application.scss */
 .game-legend {
   margin-top: 20px;
   list-style: none;
@@ -15118,48 +15262,79 @@ body.games::after {
   line-height: 1.8;
 }
 
-/* line 177, app/assets/stylesheets/application.scss */
-.symbol-🟢 {
+/* line 296, app/assets/stylesheets/application.scss */
+.game-symbol {
+  font-size: 1.5em;
+  margin-right: 10px;
+}
+
+/* line 300, app/assets/stylesheets/application.scss */
+.game-symbol-🟢 {
   color: green;
 }
 
-/* line 181, app/assets/stylesheets/application.scss */
-.symbol-🔴 {
+/* line 304, app/assets/stylesheets/application.scss */
+.game-symbol-🔴 {
   color: red;
 }
 
-/* line 185, app/assets/stylesheets/application.scss */
-.symbol-🔵 {
+/* line 308, app/assets/stylesheets/application.scss */
+.game-symbol-🔵 {
   color: blue;
 }
 
-/* line 189, app/assets/stylesheets/application.scss */
-.symbol-🟡 {
+/* line 312, app/assets/stylesheets/application.scss */
+.game-symbol-🟡 {
   color: yellow;
 }
 
-/* line 195, app/assets/stylesheets/application.scss */
+/* line 316, app/assets/stylesheets/application.scss */
+.game-symbol-🟣 {
+  color: purple;
+}
+
+/* line 320, app/assets/stylesheets/application.scss */
+.game-symbol-🟤 {
+  color: brown;
+}
+
+/* line 324, app/assets/stylesheets/application.scss */
+#servers-page .actions {
+  display: flex;
+  gap: 10px;
+  /* Space between buttons */
+  align-items: center;
+  /* Ensures vertical alignment */
+}
+
+/* line 330, app/assets/stylesheets/application.scss */
+#servers-page td {
+  vertical-align: middle;
+  /* Ensures text and buttons align vertically in the cell */
+}
+
+/* line 335, app/assets/stylesheets/application.scss */
 main {
   min-height: 100vh;
   padding-top: 80px;
 }
 
-/* line 200, app/assets/stylesheets/application.scss */
+/* line 340, app/assets/stylesheets/application.scss */
 h6, .h6 {
   margin-bottom: 0.2rem;
 }
 
-/* line 204, app/assets/stylesheets/application.scss */
+/* line 344, app/assets/stylesheets/application.scss */
 .alert-dismissible .btn-close {
   padding: 1rem;
 }
 
-/* line 208, app/assets/stylesheets/application.scss */
+/* line 348, app/assets/stylesheets/application.scss */
 .text-shadow {
   text-shadow: 3px 3px rgba(0, 0, 0, 0.5);
 }
 
-/* line 212, app/assets/stylesheets/application.scss */
+/* line 352, app/assets/stylesheets/application.scss */
 .logo {
   height: 3rem;
   width: 3rem;
@@ -15167,87 +15342,87 @@ h6, .h6 {
   box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.8);
 }
 
-/* line 219, app/assets/stylesheets/application.scss */
+/* line 359, app/assets/stylesheets/application.scss */
 .logo:hover {
   border: 3px solid var(--secondary-color);
   border-radius: 2px;
   transition: 0.5s linear;
 }
 
-/* line 225, app/assets/stylesheets/application.scss */
+/* line 365, app/assets/stylesheets/application.scss */
 .navbar {
   box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.8);
 }
 
-/* line 229, app/assets/stylesheets/application.scss */
+/* line 369, app/assets/stylesheets/application.scss */
 .navbar-toggler {
   border-color: var(--secondary-color);
   color: var(--secondary-color);
 }
 
-/* line 234, app/assets/stylesheets/application.scss */
+/* line 374, app/assets/stylesheets/application.scss */
 .navbar-toggler-icon {
   -webkit-text-stroke-color: var(--secondary-color);
 }
 
-/* line 238, app/assets/stylesheets/application.scss */
+/* line 378, app/assets/stylesheets/application.scss */
 .nav-link {
   color: var(--secondary-color);
 }
 
-/* line 242, app/assets/stylesheets/application.scss */
+/* line 382, app/assets/stylesheets/application.scss */
 .nav-link:hover {
   border-bottom: 1px solid var(--secondary-color);
   color: white;
 }
 
-/* line 247, app/assets/stylesheets/application.scss */
+/* line 387, app/assets/stylesheets/application.scss */
 .btn-primary {
   background-color: var(--primary-color);
   color: var(--secondary-color);
   border: none;
 }
 
-/* line 253, app/assets/stylesheets/application.scss */
+/* line 393, app/assets/stylesheets/application.scss */
 .btn-primary:hover {
   background-color: var(--secondary-color);
   color: var(--primary-color);
   transition: 0.5s linear;
 }
 
-/* line 259, app/assets/stylesheets/application.scss */
+/* line 399, app/assets/stylesheets/application.scss */
 .btn-secondary {
   background-color: var(--secondary-color);
   color: var(--primary-color);
   border: none;
 }
 
-/* line 265, app/assets/stylesheets/application.scss */
+/* line 405, app/assets/stylesheets/application.scss */
 .btn-secondary:hover {
   background-color: var(--primary-color);
   color: var(--secondary-color);
   transition: 0.5s linear;
 }
 
-/* line 270, app/assets/stylesheets/application.scss */
+/* line 410, app/assets/stylesheets/application.scss */
 .form-group {
   margin-bottom: 1rem;
 }
 
-/* line 274, app/assets/stylesheets/application.scss */
+/* line 414, app/assets/stylesheets/application.scss */
 .form-control {
   width: 100%;
   padding: 0.5rem;
   font-size: 1rem;
 }
 
-/* line 280, app/assets/stylesheets/application.scss */
+/* line 420, app/assets/stylesheets/application.scss */
 #action-form {
   max-width: 600px;
   margin: 0 auto;
 }
 
-/* line 285, app/assets/stylesheets/application.scss */
+/* line 425, app/assets/stylesheets/application.scss */
 .form-control:focus {
   border: 2px solid var(--secondary-color);
   color: var(--primary-color);
@@ -15255,19 +15430,19 @@ h6, .h6 {
   box-shadow: none;
 }
 
-/* line 292, app/assets/stylesheets/application.scss */
+/* line 432, app/assets/stylesheets/application.scss */
 .form-label, .form-check-label {
   color: var(--secondary-color);
 }
 
-/* line 296, app/assets/stylesheets/application.scss */
+/* line 436, app/assets/stylesheets/application.scss */
 .form-check-input, .form-check-input:focus {
   border: 1px solid var(--primary-color);
   box-shadow: none;
   outline: none;
 }
 
-/* line 302, app/assets/stylesheets/application.scss */
+/* line 442, app/assets/stylesheets/application.scss */
 .form-check-input:checked {
   background-color: var(--primary-color);
   color: var(--secondary-color);
@@ -15276,18 +15451,18 @@ h6, .h6 {
   outline: none;
 }
 
-/* line 310, app/assets/stylesheets/application.scss */
+/* line 450, app/assets/stylesheets/application.scss */
 .text-color-primary, a.text-color-primary {
   color: var(--primary-color);
 }
 
-/* line 314, app/assets/stylesheets/application.scss */
+/* line 454, app/assets/stylesheets/application.scss */
 .text-color-secondary, a.text-color-secondary {
   color: var(--secondary-color);
 }
 
 /* Flexbox container for the profile and actions */
-/* line 318, app/assets/stylesheets/application.scss */
+/* line 458, app/assets/stylesheets/application.scss */
 .profile-container {
   display: flex;
   justify-content: space-between;
@@ -15297,7 +15472,7 @@ h6, .h6 {
 }
 
 @media (max-width: 768px) {
-  /* line 318, app/assets/stylesheets/application.scss */
+  /* line 458, app/assets/stylesheets/application.scss */
   .profile-container {
     flex-direction: column;
     align-items: center;
@@ -15306,57 +15481,57 @@ h6, .h6 {
 }
 
 /* Profile Section Styling */
-/* line 333, app/assets/stylesheets/application.scss */
+/* line 473, app/assets/stylesheets/application.scss */
 .profile-left {
   width: 50%;
 }
 
-/* line 337, app/assets/stylesheets/application.scss */
+/* line 477, app/assets/stylesheets/application.scss */
 .profile-header {
   margin-bottom: 2rem;
 }
 
-/* line 341, app/assets/stylesheets/application.scss */
+/* line 481, app/assets/stylesheets/application.scss */
 .profile-info p {
   margin: 0.5rem 0;
 }
 
-/* line 345, app/assets/stylesheets/application.scss */
+/* line 485, app/assets/stylesheets/application.scss */
 .profile-actions .btn {
   padding: 0.6rem 1.2rem;
   font-size: 1rem;
 }
 
 /* Actions Section Styling */
-/* line 351, app/assets/stylesheets/application.scss */
+/* line 491, app/assets/stylesheets/application.scss */
 .actions-right {
   width: 50%;
 }
 
-/* line 355, app/assets/stylesheets/application.scss */
+/* line 495, app/assets/stylesheets/application.scss */
 .actions-header {
   margin-bottom: 2rem;
 }
 
-/* line 359, app/assets/stylesheets/application.scss */
+/* line 499, app/assets/stylesheets/application.scss */
 .actions-list-container {
   max-width: 600px;
   margin: 0 auto;
 }
 
-/* line 364, app/assets/stylesheets/application.scss */
+/* line 504, app/assets/stylesheets/application.scss */
 ul.actions-list {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-/* line 370, app/assets/stylesheets/application.scss */
+/* line 510, app/assets/stylesheets/application.scss */
 ul.actions-list li {
   margin: 0.5rem 0;
 }
 
-/* line 374, app/assets/stylesheets/application.scss */
+/* line 514, app/assets/stylesheets/application.scss */
 ul.actions-list li a {
   display: block;
   text-align: center;
@@ -15371,31 +15546,31 @@ ul.actions-list li a {
   transition: all 0.3s ease-in-out;
 }
 
-/* line 388, app/assets/stylesheets/application.scss */
+/* line 528, app/assets/stylesheets/application.scss */
 ul.actions-list li a:hover {
   background: linear-gradient(145deg, #ffffff, #e3e3e3);
   box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.1), inset -2px -2px 5px rgba(255, 255, 255, 0.8);
   color: var(--primary-color);
 }
 
-/* line 394, app/assets/stylesheets/application.scss */
+/* line 534, app/assets/stylesheets/application.scss */
 .bg-color-primary {
   background-color: var(--primary-color);
 }
 
-/* line 398, app/assets/stylesheets/application.scss */
+/* line 538, app/assets/stylesheets/application.scss */
 .bg-color-secondary {
   background-color: var(--secondary-color);
 }
 
-/* line 402, app/assets/stylesheets/application.scss */
+/* line 542, app/assets/stylesheets/application.scss */
 .text-box {
   background-color: var(--primary-color);
   padding: 2rem;
   color: var(--secondary-color);
 }
 
-/* line 408, app/assets/stylesheets/application.scss */
+/* line 548, app/assets/stylesheets/application.scss */
 .card {
   background-color: rgba(0, 0, 0, 0.2);
   background-blend-mode: darken;
@@ -15404,7 +15579,7 @@ ul.actions-list li a:hover {
   border-radius: 8px;
 }
 
-/* line 416, app/assets/stylesheets/application.scss */
+/* line 556, app/assets/stylesheets/application.scss */
 .errors {
   background-color: var(--secondary-color);
   box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.8);

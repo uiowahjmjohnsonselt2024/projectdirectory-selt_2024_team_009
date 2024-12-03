@@ -4,8 +4,9 @@ ruby "3.3.0"
 # Specify the minimum bundler version
 gem "bundler", "~> 2.5"
 # Rails framework
-gem "rails", "~> 7.2.2"
+gem 'hotwire-rails'
 
+gem "rails", "~> 7.2.2"
 # Database adapters
 gem "pg", "~> 1.5", group: :production # PostgreSQL for production
 gem "sqlite3", "~> 2.2", groups: [ :development, :test ] # SQLite for development and test
