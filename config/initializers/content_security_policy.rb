@@ -6,11 +6,12 @@ Rails.application.configure do
     policy.font_src    :self, :https, :data
     policy.img_src     :self, :https, :data
     policy.object_src  :none
-    policy.script_src  :self, :https, "https://cdn.jsdelivr.net", :unsafe_inline
-    policy.style_src   :self, :https, "https://cdn.jsdelivr.net", :unsafe_inline
+    policy.script_src  :self, :https, "https://cdn.jsdelivr.net", :unsafe_inline, -> { "'nonce-#{@csp_nonce}'" }
+    policy.style_src   :self, :https, "https://cdn.jsdelivr.net", :unsafe_inline, -> { "'nonce-#{@csp_nonce}'" }
     # Allow external CDNs for Bootstrap
     policy.connect_src :self, :https
   end
+
 
   # Allow nonces for inline styles and scripts
   config.content_security_policy_nonce_generator = ->(request) { SecureRandom.base64(16) }
