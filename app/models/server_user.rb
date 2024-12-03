@@ -11,10 +11,6 @@ class ServerUser < ApplicationRecord
   validates :symbol, presence: true, allow_nil: true
   validates :turn_order, numericality: { only_integer: true }, allow_nil: true
 
-  # For convenience
-  def symbol
-    super || '🧍'
-  end
 
   # Methods to manage AP and Shards
   def spend_turn_ap(amount)
