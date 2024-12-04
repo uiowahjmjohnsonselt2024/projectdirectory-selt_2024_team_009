@@ -25,7 +25,12 @@ class WalletsController < ApplicationController
       
       trans = current_user.transactions.build()
       trans.amount = amount
+      trans.description = "Shards"
+      trans.quantity = amount
       trans.transaction_type = "purchase"
+      trans.currency = "USD"
+      trans.payment_method = "Credit Card: " + params[:credit_card_number][-4..-1]
+
       trans.save!()
       
       if @wallet.save
