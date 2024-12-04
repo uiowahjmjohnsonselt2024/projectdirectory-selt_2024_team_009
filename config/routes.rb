@@ -21,14 +21,24 @@ Rails.application.routes.draw do
     # Custom routes for profiles
     get 'profile/edit/:id', to: 'profiles#edit', as: :edit_profile
     patch 'profile', to: 'profiles#update'
+    #get '/inventory', to: 'inventory#index'
+
   end
   # Resource routes for your models
-  resources :wallets
+  resources :wallets do
+     member do
+      post :add_shards
+      post :subtract_shards
+      get :buy_shards # Displays the shard purchase page
+      post :purchase_shards # Processes the fake payment and updates wallet balance
+     end
+  end
+
   resources :transactions
   resources :items
   resources :inventories
   resources :servers
-  resources :server_users
+  resources :server_users, only: [:create, :destroy]
   resources :grid_cells
   resources :contents
   resources :treasures
@@ -37,13 +47,32 @@ Rails.application.routes.draw do
   resources :leaderboards
   resources :leaderboard_entries
 
+  # resources :servers do
+  #   member do
+  #     post 'start'
+  #   end
+  # end
   resources :items do
     member do
-      post :purchase
+      post 'purchase'
     end
   end
 
+  resources :servers do
+    member do
+      get 'start_game'
+      post 'start_game'
+      get 'join_game'
+      post 'join_game'
+    end
+  end
 
+  resources :games, only: [:show] do
+    member do
+      post :perform_action
+    end
+  end
+  mount ActionCable.server => '/cable'
   get "up" => "rails/health#show", as: :rails_health_check
 
   # Render dynamic PWA files from app/views/pwa/*

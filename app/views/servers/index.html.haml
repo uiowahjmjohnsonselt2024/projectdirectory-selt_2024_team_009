@@ -1,5 +1,5 @@
 - provide(:title, "My Servers")
-%div.d-flex.justify-content-center
+%div#servers-page.d-flex.justify-content-center
   %div.row
     %div.col-md-12.text-center
       %h1.text-color-secondary My Created Servers
@@ -16,8 +16,25 @@
               %td= server.name
               %td= server.max_players
               %td
-                = link_to 'Show', server_path(server), class: 'btn btn-primary'
-                = link_to 'Edit', edit_server_path(server), class: 'btn btn-secondary'
-                = link_to 'Delete', server_path(server), method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-danger'
+                .actions
+                  = link_to 'Show', server_path(server), class: 'btn btn-primary'
+                  = link_to 'Edit', edit_server_path(server), class: 'btn btn-secondary'
+                  = button_to 'Delete', server_path(server), method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-danger'
 
       = link_to 'New Server', new_server_path, class: 'btn btn-success my-2'
+
+      %h1.text-color-secondary Servers You Have Joined
+
+      %table.text-color-secondary
+        %thead
+          %tr
+            %th Name
+            %th Max Players
+            %th Actions
+        %tbody
+          - @joined_servers.each do |server|
+            %tr
+              %td= server.name
+              %td= server.max_players
+              %td
+                = link_to 'Show', server_path(server), class: 'btn btn-primary'

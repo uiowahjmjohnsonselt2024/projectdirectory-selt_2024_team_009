@@ -1,6 +1,7 @@
 # app/controllers/application_controller.rb
 
 class ApplicationController < ActionController::Base
+  before_action :set_content_security_policy_nonce
   protect_from_forgery with: :exception
 
   # Configure additional parameters for Devise
@@ -13,7 +14,9 @@ class ApplicationController < ActionController::Base
     # 'user_root_path' is the path of the user's profile directory
     user_root_path(resource)
   end
-
+  def set_content_security_policy_nonce
+    @csp_nonce = SecureRandom.base64(16)
+  end
   def configure_permitted_parameters
     # Permit additional fields for sign up and account update
     devise_parameter_sanitizer.permit(:sign_up, keys: %i[username role])
@@ -26,6 +29,6 @@ class ApplicationController < ActionController::Base
   end
 
   def log_flash_messages
-    Rails.logger.debug "Flash contents: #{flash.to_hash}" if flash.any?
+    # Rails.logger.debug "Flash contents: #{flash.to_hash}" if flash.any?
   end
 end

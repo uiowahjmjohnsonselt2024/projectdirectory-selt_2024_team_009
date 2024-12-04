@@ -8,5 +8,22 @@
         %strong Max Players:
         = @server.max_players
 
+      %p.text-color-secondary
+        %strong Status:
+        = @server.status.capitalize
+
+      - if @server.status == 'pending'
+        - if @server.creator == current_user
+          = button_to 'Start Game', start_game_server_path(@server), method: :post, class: 'btn btn-success my-2'
+        - else
+          %p.text-color-secondary Please wait for the creator to start the game.
+      - elsif @server.status == 'in_progress'
+        - unless @server.users.include?(current_user)
+          = button_to 'Join Game', join_game_server_path(@server), method: :post, class: 'btn btn-primary my-2'
+        - else
+          = link_to 'Go to Game', game_path(@server), class: 'btn btn-primary my-2'
+      - elsif @server.status == 'finished'
+        %p The game has finished.
+
       = link_to 'Edit Server', edit_server_path(@server), class: 'btn btn-secondary'
       = link_to 'Back to My Servers', servers_path, class: 'btn btn-primary'

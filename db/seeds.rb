@@ -8,6 +8,60 @@
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
 
+# Clear existing data (optional)
+User.destroy_all
+Server.destroy_all
+ServerUser.destroy_all
+
+# Create Users
+user1 = User.create!(
+  username: 'avinash',
+  email: 'avinash.mudireddy@gmail.com',
+  password: 'Avipasstest',
+  password_confirmation: 'Avipasstest',
+  role: 'player'
+)
+
+user2 = User.create!(
+  username: 'Bob',
+  email: 'bob@example.com',
+  password: 'password',
+  password_confirmation: 'password',
+  role: 'player'
+)
+
+user3 = User.create!(
+  username: 'Carol',
+  email: 'carol@example.com',
+  password: 'password',
+  password_confirmation: 'password',
+  role: 'player'
+)
+
+user4 = User.create!(
+  username: 'Dave',
+  email: 'dave@example.com',
+  password: 'password',
+  password_confirmation: 'password',
+  role: 'player'
+)
+
+# Assume 'current_user' is 'Alice' for the purposes of this seed file
+current_user = user1
+
+# Create a Server
+server = Server.create!(
+  name: 'Test Server',
+  max_players: 4,
+  created_by: current_user.id
+)
+
+# Join the Server
+ServerUser.create!(user: user1, server: server)
+ServerUser.create!(user: user2, server: server)
+ServerUser.create!(user: user3, server: server)
+ServerUser.create!(user: user4, server: server)
+
 
 # db/seeds.rb
 # db/seeds.rb

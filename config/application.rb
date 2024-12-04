@@ -18,7 +18,7 @@ module ProjectdirectorySelt2024Team009
 
     # Automatically load lib subdirectories
     config.autoload_lib(ignore: %w[assets tasks])
-
+    config.autoloader = :classic
     # Example of adding additional paths for eager loading
     # config.eager_load_paths << Rails.root.join("extras")
   end
