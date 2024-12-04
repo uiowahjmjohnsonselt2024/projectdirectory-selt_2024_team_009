@@ -6,7 +6,7 @@ class CreateTransactions < ActiveRecord::Migration[7.2]
       t.decimal :amount, precision: 10, scale: 2
       t.string :currency
       t.string :payment_method
-      t.integer :item_id, null: false
+      t.integer :item_id, null: true
       t.integer :quantity
       t.text :description
 
