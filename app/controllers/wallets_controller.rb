@@ -22,6 +22,12 @@ class WalletsController < ApplicationController
       # Simulate payment processing
       sleep(3) # Fake delay of 3 seconds to simulate processing
       @wallet.balance += amount
+      
+      trans = current_user.transactions.build()
+      trans.amount = amount
+      trans.transaction_type = "purchase"
+      trans.save!()
+      
       if @wallet.save
         redirect_to @wallet, notice: "#{amount} Shards successfully purchased!"
       else
