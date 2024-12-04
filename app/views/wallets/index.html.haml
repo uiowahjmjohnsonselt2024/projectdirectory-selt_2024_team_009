@@ -1,0 +1,24 @@
+%h1 Your Wallet
+
+- if @wallet.present?
+  %p
+    %strong Balance:
+    = @wallet.balance
+    %span Shards
+  %p
+    %strong Wallet Created At:
+    = @wallet.created_at.strftime('%B %d, %Y %H:%M:%S')
+  .actions
+    = link_to 'Edit Wallet', edit_wallet_path(@wallet), class: 'btn btn-warning'
+    = link_to 'Delete Wallet', wallet_path(@wallet), method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-danger'
+    = form_with url: add_shards_wallet_path(@wallet), method: :post, local: true do |f|
+      .form-group
+        = f.label :amount, "Add Shards:"
+        = f.number_field :amount, min: 1, class: 'form-control'
+      .form-group
+        = f.submit "Add Shards", class: 'btn btn-success mt-2'
+    = link_to 'Buy Shards', buy_shards_wallet_path(@wallet), class: 'btn btn-success'
+
+- else
+  %p.text-muted You do not have a wallet yet.
+  = link_to 'Create Wallet', new_wallet_path, class: 'btn btn-success'

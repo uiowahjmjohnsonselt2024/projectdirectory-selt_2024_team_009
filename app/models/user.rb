@@ -28,6 +28,9 @@ class User < ApplicationRecord
   validates :email, presence: true, uniqueness: true
   validates :role, presence: true, inclusion: { in: %w[admin player], message: "%{value} is not a valid role" }
 
+  #Callbacks
+  after_create :create_wallet_with_initial_balance
+
   # Role Methods
   def admin?
     role == 'admin'
@@ -35,5 +38,10 @@ class User < ApplicationRecord
 
   def player?
     role == 'player'
+  end
+
+  private
+  def create_wallet_with_initial_balance
+    Wallet.create(user: self, balance: 500)
   end
 end
