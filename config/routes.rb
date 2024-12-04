@@ -25,12 +25,14 @@ Rails.application.routes.draw do
 
   end
   # Resource routes for your models
-  resources :wallets #do
-    # member do
-    #  post :add_shards
-    #  post :subtract_shards
-    #end
-    #end
+  resources :wallets do
+     member do
+      post :add_shards
+      post :subtract_shards
+      get :buy_shards # Displays the shard purchase page
+      post :purchase_shards # Processes the fake payment and updates wallet balance
+     end
+  end
 
   resources :transactions
   resources :items

@@ -1,0 +1,12 @@
+%h1 Create New Wallet
+
+= form_with model: @wallet, local: true do |f|
+  .form-group
+    = f.label :balance, "Initial Balance:"
+    = f.number_field :balance, value: 500, min: 0, class: 'form-control'
+
+  .actions.mt-3
+    = f.submit 'Create Wallet', class: 'btn btn-success'
+
+.actions.mt-3
+  = link_to 'Back to Wallets', wallets_path, class: 'btn btn-secondary'
