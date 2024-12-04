@@ -1,4 +1,16 @@
 require "openai"
+# lib/scripts/fetch_image_test.rb
+module Scripts
+  class FetchImageTest
+    def initialize
+      # Add any initialization logic here if needed
+    end
+
+    def perform
+      # Add the logic you want to implement here
+    end
+  end
+end
 
 def generate_image(prompt)
   begin
