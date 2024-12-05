@@ -71,7 +71,6 @@ class ServersController < ApplicationController
       Rails.logger.debug "Before deduction: #{wallet.balance} shards for #{server_user.user.email}"
       wallet.update!(balance: wallet.balance - 200)
       Rails.logger.debug "After deduction: #{wallet.balance} shards for #{server_user.user.email}"
-
     end
     @server.start_game
     ActionCable.server.broadcast("game_#{@server.id}", { type: "game_started" })
