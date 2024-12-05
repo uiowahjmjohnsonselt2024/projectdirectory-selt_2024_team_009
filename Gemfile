@@ -18,7 +18,7 @@ end
 gem "puma", "~> 6"
 
 #open ai
-gem 'ruby-openai', '~> 4.0'
+gem 'ruby-openai', '~> 7.3'
 # Asset pipeline
 gem "propshaft" # Modern asset pipeline for Rails
 gem "sprockets-rails" # For compatibility with older assets
