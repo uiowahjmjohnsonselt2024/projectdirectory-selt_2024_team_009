@@ -4,7 +4,32 @@ class GamesController < ApplicationController
   before_action :set_server_user
   before_action :ensure_game_in_progress
   before_action :ensure_current_player_turn, only: %i[perform_action]
+  before_action :ensure_shard_payment, only: [:start_game]
 
+  # POST /games/:id/start_game
+  def start_game
+    if @server.update(status: 'in_progress')
+      redirect_to game_path(@server), notice: 'Game has started successfully'
+    else
+      redirect_to servers_path, alert: 'Failed to start the game.'
+    end
+
+  end
+
+  def ensure_shard_payment
+    wallet = current_user.wallet
+
+    if wallet.balance < 200
+      redirect_to wallets_path, alert: 'Need at least 200 shards to start game'
+      return false
+    end
+    wallet.balance -= 200
+    if wallet.save
+      flash[:notice] = '200 shards have been deducted to start the game.'
+    else
+      redirect_to wallets_path, alert: 'Shard deduction failed. Please try again.'
+    end
+  end
   # GET /games/:id
   def show
     @grid_cells = @server.grid_cells.includes(:owner, :treasure)
