@@ -55,7 +55,6 @@ class ServersController < ApplicationController
     end
   end
   # POST /servers/:id/start_game
-  # POST /servers/:id/start_game
   def start_game
     if @server.status != 'pending'
       redirect_to @server, alert: 'Game has already started or finished.'
@@ -66,7 +65,14 @@ class ServersController < ApplicationController
       redirect_to @server, alert: 'At least 2 players are required to start the game.'
       return
     end
+    # Deduct 200 shards from each player
+    @server.server_users.each do |server_user|
+      wallet = server_user.user.wallet
+      Rails.logger.debug "Before deduction: #{wallet.balance} shards for #{server_user.user.email}"
+      wallet.update!(balance: wallet.balance - 200)
+      Rails.logger.debug "After deduction: #{wallet.balance} shards for #{server_user.user.email}"
 
+    end
     @server.start_game
     ActionCable.server.broadcast("game_#{@server.id}", { type: "game_started" })
     redirect_to game_path(@server), notice: 'Game started successfully.'

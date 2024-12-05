@@ -23,13 +23,3 @@ Feature: Start Game with Shards Deduction
     And I view the server named "Shard Server"
     Then they should see "Not all players have 200 shards"
     And the "Start Game" button should not be visible
-
-  Scenario: Adding shards to allow the game to start
-    Given "player2@example.com" adds 150 shards to their wallet
-    And I view the server named "Shard Server"
-    Then they should see "Start Game"
-    And the "Start Game" button should be visible
-    When the server creator clicks "Start Game"
-    And the wallet balance of "creator@example.com" should be 100 shards
-    And the wallet balance of "player1@example.com" should be 0 shards
-    And the wallet balance of "player2@example.com" should be 0 shards

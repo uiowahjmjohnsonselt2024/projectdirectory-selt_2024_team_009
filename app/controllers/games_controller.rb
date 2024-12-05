@@ -4,33 +4,6 @@ class GamesController < ApplicationController
   before_action :set_server_user
   before_action :ensure_game_in_progress
   before_action :ensure_current_player_turn, only: %i[perform_action]
-  before_action :ensure_shard_payment, only: [:start_game]
-
-  # POST /games/:id/start_game
-  def start_game
-    if @server.status != 'pending'
-      redirect_to @server, alert: 'Game has already started or finished.'
-      return
-    end
-
-    unless @server.server_users.all? { |su| su.user.wallet.balance >= 200 }
-      redirect_to @server, alert: 'Not all players have 200 shards. Ensure every player has sufficient balance to start the game.'
-      return
-    end
-
-    # Deduct 200 shards from each player
-    @server.server_users.each do |server_user|
-      wallet = server_user.user.wallet
-      Rails.logger.debug "Before deduction: #{wallet.balance} shards for #{server_user.user.email}"
-      wallet.update!(balance: wallet.balance - 200)
-      Rails.logger.debug "After deduction: #{wallet.balance} shards for #{server_user.user.email}"
-
-    end
-
-    @server.start_game
-    redirect_to game_path(@server), notice: 'Game started successfully.'
-
-  end
 
   def ensure_shard_payment
     wallet = current_user.wallet
