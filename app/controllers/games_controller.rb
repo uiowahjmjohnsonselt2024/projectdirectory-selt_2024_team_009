@@ -8,11 +8,27 @@ class GamesController < ApplicationController
 
   # POST /games/:id/start_game
   def start_game
-    if @server.update(status: 'in_progress')
-      redirect_to game_path(@server), notice: 'Game has started successfully'
-    else
-      redirect_to servers_path, alert: 'Failed to start the game.'
+    if @server.status != 'pending'
+      redirect_to @server, alert: 'Game has already started or finished.'
+      return
     end
+
+    unless @server.server_users.all? { |su| su.user.wallet.balance >= 200 }
+      redirect_to @server, alert: 'Not all players have 200 shards. Ensure every player has sufficient balance to start the game.'
+      return
+    end
+
+    # Deduct 200 shards from each player
+    @server.server_users.each do |server_user|
+      wallet = server_user.user.wallet
+      Rails.logger.debug "Before deduction: #{wallet.balance} shards for #{server_user.user.email}"
+      wallet.update!(balance: wallet.balance - 200)
+      Rails.logger.debug "After deduction: #{wallet.balance} shards for #{server_user.user.email}"
+
+    end
+
+    @server.start_game
+    redirect_to game_path(@server), notice: 'Game started successfully.'
 
   end
 
@@ -30,6 +46,24 @@ class GamesController < ApplicationController
       redirect_to wallets_path, alert: 'Shard deduction failed. Please try again.'
     end
   end
+
+  def distribute_shard_pool_to_winner(winner)
+
+    total_shard_pool = @server.server_users.sum(:shards_paid_to_start)
+    winner.adjust_shard_balance(total_shard_pool)
+
+    flash[:notice] = "#{total_shard_pool} Shards have been awarded to the winner!"
+  end
+
+  def deduct_shards_for_game_start
+    if @server_user.wallet.balance >= 200
+      @server_user.wallet.update(balance: @server_user.wallet.balance - 200)
+      @server_user.update(shards_paid_to_start: 200)
+    else
+      redirect_to game_path(@server), alert: 'Not enough shards to start the game.'
+    end
+  end
+
   # GET /games/:id
   def show
     @grid_cells = @server.grid_cells.includes(:owner, :treasure)

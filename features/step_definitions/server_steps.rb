@@ -1,19 +1,50 @@
 Given('a server exists with name {string}') do |server_name|
-  @server = Server.create!(name: server_name, max_players: 3, status: 'pending')
+  creator = User.find_or_create_by!(email: 'creator@example.com') do |new_user|
+    new_user.username = 'creator'
+    new_user.password = 'password123'
+    new_user.password_confirmation = 'password123'
+  end
+
+  server = Server.create!(
+    name: server_name,
+    max_players: 10,
+    status: "pending",
+    creator: creator
+  )
+  puts "Created server with name: #{server.name}"
+  puts(Server.pluck(:name)).inspect
 end
+
+Given('I am logged in as a user with email {string} and password {string} and want to visit servers page') do |email, password|
+  user = User.find_or_create_by!(email: email) do |new_user|
+    new_user.password = password
+    new_user.password_confirmation = password
+    new_user.username = email.split('@').first # Use the first part of the email as the username
+  end
+
+  visit '/users/sign_in'
+  fill_in 'user_email', with: email
+  fill_in 'user_password', with: password
+  click_button 'Log in'
+  click_link 'Your Servers'
+  expect(page).to have_content("My Created Servers")
+end
+
 
 Given('the server has max players {int}') do |max_players|
   @server.update!(max_players: max_players)
 end
 
-Given('a user with email {string} has {int} shards') do |email, shard_balance|
-  user = User.create!(
-    username: email.split('@').first,
-    email: email,
-    password: 'password123',
-    password_confirmation: 'password123'
-  )
-  user.create_wallet!(balance: shard_balance)
+Given('a user with email {string} has {int} shards') do |email, shards|
+  user = User.find_or_create_by!(email: email) do |new_user|
+    new_user.username = email.split('@').first
+    new_user.password = 'password123'
+    new_user.password_confirmation = 'password123'
+  end
+
+  # Ensure the user has a wallet with the specified shards
+  wallet = user.wallet || user.create_wallet!(balance: shards)
+  wallet.update!(balance: shards)
 end
 
 Given('all users have joined the server') do
@@ -22,13 +53,18 @@ Given('all users have joined the server') do
   end
 end
 
-When('the server creator views the server page') do
-  creator = @server.creator
-  login_as(creator, scope: :user) # Assuming Devise for authentication
-  visit server_path(@server)
+When('I view the server named {string}') do |server_name|
+  page.refresh
+  expect(page).to have_content(server_name) # Debugging line to ensure the name is visible on the page
+  row = find('tr', text: server_name)
+  within(row) do
+    click_link 'Show'
+  end
+  expect(page).to have_content('Status: Pending')
 end
 
-Then('they should see {string}') do |message|
+
+Then(/^they should see the server's status as "([^"]*)"$/) do |message|
   expect(page).to have_content(message)
 end
 
@@ -49,6 +85,8 @@ Then('the game should be marked as {string}') do |status|
 end
 
 And(/^the wallet balance of "([^"]*)" should be (\d+) shards$/) do |email, expected_balance|
+  page.refresh
+  expect(page).to have_content("Game Board")
   user = User.find_by!(email: email)
   expect(user.wallet.reload.balance.to_i).to eq(expected_balance)
 end
@@ -60,5 +98,7 @@ end
 
 And(/^"([^"]*)" is the creator of the server$/) do |email|
   creator = User.find_by!(email: email)
+  @server = Server.find_by!(name: "Shard Server")
   @server.update!(creator: creator)
+
 end
