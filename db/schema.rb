@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_12_03_091053) do
+ActiveRecord::Schema[7.2].define(version: 2024_12_06_194229) do
   create_table "contents", force: :cascade do |t|
     t.text "story_text"
     t.string "image_url"
@@ -68,6 +68,16 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_03_091053) do
     t.integer "server_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "messages", force: :cascade do |t|
+    t.text "content"
+    t.integer "user_id", null: false
+    t.integer "game_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["game_id"], name: "index_messages_on_game_id"
+    t.index ["user_id"], name: "index_messages_on_user_id"
   end
 
   create_table "scores", force: :cascade do |t|
@@ -169,6 +179,8 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_03_091053) do
   add_foreign_key "leaderboard_entries", "leaderboards"
   add_foreign_key "leaderboard_entries", "users"
   add_foreign_key "leaderboards", "servers"
+  add_foreign_key "messages", "games"
+  add_foreign_key "messages", "users"
   add_foreign_key "scores", "servers"
   add_foreign_key "scores", "users"
   add_foreign_key "server_users", "servers"

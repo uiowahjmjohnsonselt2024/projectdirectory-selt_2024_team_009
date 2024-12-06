@@ -5,21 +5,6 @@ class GamesController < ApplicationController
   before_action :ensure_game_in_progress
   before_action :ensure_current_player_turn, only: %i[perform_action]
 
-  def ensure_shard_payment
-    wallet = current_user.wallet
-
-    if wallet.balance < 200
-      redirect_to wallets_path, alert: 'Need at least 200 shards to start game'
-      return false
-    end
-    wallet.balance -= 200
-    if wallet.save
-      flash[:notice] = '200 shards have been deducted to start the game.'
-    else
-      redirect_to wallets_path, alert: 'Shard deduction failed. Please try again.'
-    end
-  end
-
   def distribute_shard_pool_to_winner(winner)
 
     total_shard_pool = @server.server_users.sum(:shards_paid_to_start)
@@ -657,7 +642,6 @@ class GamesController < ApplicationController
 
     winner
   end
-
 
   def distribute_bounty(winner)
     # Distributes a game-ending bounty to the winner
