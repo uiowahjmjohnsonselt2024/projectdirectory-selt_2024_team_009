@@ -107,6 +107,7 @@ class GamesController < ApplicationController
 
 
   private
+
   def handle_error(message)
     respond_to do |format|
       format.html { redirect_to game_path(@server), alert: message }

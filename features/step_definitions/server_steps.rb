@@ -56,7 +56,7 @@ end
 When('I view the server named {string}') do |server_name|
   page.refresh
   expect(page).to have_content(server_name) # Debugging line to ensure the name is visible on the page
-  row = find('tr', text: server_name)
+  row = find('tr', text: server_name, match: :first)
   within(row) do
     click_link 'Show'
   end
