@@ -131,4 +131,8 @@
                   %span{ class: "game-symbol game-symbol-#{su.symbol}" }= su.symbol
                   = "#{su.user.username} (AP: #{su.total_ap})"
 
-
+  %div.chatbox{ id: "chatbox", data: { game_id: @server.id } }
+    %div#messages.messages-container
+    %form#chat-form
+      %input#chat-input{ type: "text", placeholder: "Type a message..." }
+      %button{ type: "submit" } Send

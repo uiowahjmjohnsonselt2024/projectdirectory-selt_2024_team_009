@@ -15,7 +15,5 @@ Given('a user with email {string} and password {string}') do |email, password|
     click_button button
   end
   
-  Then('I should see {string}') do |text|
-    expect(page).to have_content(text)
-  end
+
   

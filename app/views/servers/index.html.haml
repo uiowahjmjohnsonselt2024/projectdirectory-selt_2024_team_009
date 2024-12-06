@@ -12,7 +12,7 @@
             %th Actions
         %tbody
           - @servers.each do |server|
-            %tr
+            %tr{ data: { server_name: server.name } }
               %td= server.name
               %td= server.max_players
               %td
@@ -33,7 +33,7 @@
             %th Actions
         %tbody
           - @joined_servers.each do |server|
-            %tr
+            %tr{ data: { server_name: server.name } }
               %td= server.name
               %td= server.max_players
               %td

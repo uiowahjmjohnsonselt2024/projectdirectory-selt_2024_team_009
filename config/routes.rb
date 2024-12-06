@@ -70,6 +70,7 @@ Rails.application.routes.draw do
   resources :games, only: [:show] do
     member do
       post :perform_action
+      post :start_game
     end
   end
   mount ActionCable.server => '/cable'
