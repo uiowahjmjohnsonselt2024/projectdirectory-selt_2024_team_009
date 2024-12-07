@@ -79,36 +79,19 @@
         pointer-events: none;
     }
 
-    /* Main Container */
-    .game-container {
-        display: grid;
-        grid-template-columns: 1fr 2fr 1fr;
-        gap: 20px;
-        padding: 20px;
-        max-width: 1400px;
-        margin: 0 auto;
-        position: relative;
-        overflow: hidden; /* Prevent content duplication */
-        animation: fade-in 0.3s ease-in-out; /* Smooth transitions */
-    }
-    @keyframes fade-in {
-        from {
-            opacity: 0;
-        }
-        to {
-            opacity: 1;
-        }
-    }
-    /* Fix for incremental stacking of Turbo Streams */
-    .turbo-frame {
-        position: absolute;
-        z-index: 0;
-    }
+body.servers {
+    background-image: linear-gradient(180deg, rgba(36,0,0,1) 0%, rgba(115,14,21,1) 40%, rgba(255,241,187,1) 100%);
+}
 
-    .turbo-frame:empty {
-        display: none;
-    }
-
+/* Main Container */
+.game-container {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    gap: 20px;
+    padding: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
 
     /* Left and Right Panels */
     .game-left-panel,
