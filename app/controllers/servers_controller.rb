@@ -66,15 +66,20 @@ class ServersController < ApplicationController
       return
     end
     # Deduct 200 shards from each player
+    insufficient_shards_users = @server.users.select { |user| user.wallet&.balance.to_i < 200 }
+    if insufficient_shards_users.any?
+      redirect_to new_transaction_path, alert: "Not all players have 200 shards. Please purchase more shards."
+    else
     @server.server_users.each do |server_user|
+
       wallet = server_user.user.wallet
-      Rails.logger.debug "Before deduction: #{wallet.balance} shards for #{server_user.user.email}"
+
       wallet.update!(balance: wallet.balance - 200)
-      Rails.logger.debug "After deduction: #{wallet.balance} shards for #{server_user.user.email}"
     end
     @server.start_game
     ActionCable.server.broadcast("game_#{@server.id}", { type: "game_started" })
     redirect_to game_path(@server), notice: 'Game started successfully.'
+    end
   end
 
   # POST /servers/:id/join_game

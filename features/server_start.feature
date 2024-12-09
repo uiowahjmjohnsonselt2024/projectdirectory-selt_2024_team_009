@@ -23,3 +23,16 @@ Feature: Start Game with Shards Deduction
     And I view the server named "Shard Server"
     Then they should see "Not all players have 200 shards"
     And the "Start Game" button should not be visible
+
+  Scenario: Redirect to transaction page due to insufficient shards
+    Given a user with email "creator@example.com" has 50 shards
+    And I view the server named "Shard Server"
+    And they should see "Not all players have 200 shards. Ensure every player has sufficient balance to start the game"
+    And I fill in "Number of Shards" with "200"
+    And I fill in "Credit Card Number" with "1234 5678 9012 3456"
+    And I fill in "Expiry Date (MM/YY)" with "12/25"
+    And I fill in "CVV" with "123"
+    And I click the "Purchase Shards" button
+    Then I should see "200 Shards successfully purchased!"
+    Then I should see "Shards successfully purchased"
+    And the wallet balance of "creator@example.com" should be 250 shards

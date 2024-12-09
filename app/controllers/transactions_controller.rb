@@ -19,8 +19,10 @@ class TransactionsController < ApplicationController
 
   # POST /transactions
   def create
+    puts params.inspect
     @transaction = current_user.transactions.build(transaction_params)
     if @transaction.save
+      current_user.wallet.add(@transaction.amount)
       redirect_to @transaction, notice: 'Transaction was successfully created.'
     else
       render :new, status: :unprocessable_entity

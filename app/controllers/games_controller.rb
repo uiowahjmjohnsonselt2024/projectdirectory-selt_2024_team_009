@@ -18,7 +18,7 @@ class GamesController < ApplicationController
       @server_user.wallet.update(balance: @server_user.wallet.balance - 200)
       @server_user.update(shards_paid_to_start: 200)
     else
-      redirect_to game_path(@server), alert: 'Not enough shards to start the game.'
+      redirect_to new_transaction_path, alert: 'Not enough shards to start the game.'
     end
   end
 

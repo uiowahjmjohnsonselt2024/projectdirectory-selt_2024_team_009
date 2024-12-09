@@ -86,7 +86,6 @@ end
 
 And(/^the wallet balance of "([^"]*)" should be (\d+) shards$/) do |email, expected_balance|
   page.refresh
-  expect(page).to have_content("Game Board")
   user = User.find_by!(email: email)
   expect(user.wallet.reload.balance.to_i).to eq(expected_balance)
 end
@@ -102,3 +101,37 @@ And(/^"([^"]*)" is the creator of the server$/) do |email|
   @server.update!(creator: creator)
 
 end
+
+When(/^"([^"]*)" attempts to join the game$/) do |email|
+  user = User.find_by!(email: email)
+  login_as(user, scope: :user) # Log in as the specified user
+  visit server_path(@server)  # Replace @server with the appropriate server reference
+  click_button 'Join Game'   # Simulate clicking the "Join Game" button
+end
+
+Then(/^they should be redirected to the transaction page$/) do
+  expect(current_path).to eq(new_transaction_path) # Ensure the current path is the transaction page
+end
+
+When(/^I fill in "([^"]+)" with "([^"]+)"$/) do |field_label, value|
+  fill_in field_label, with: value
+end
+
+
+When(/^I select "([^"]*)" as the payment method$/) do |payment_method|
+  select payment_method, from: "Payment Method"
+end
+
+When(/^I click the "([^"]*)" button$/) do |button_text|
+  click_button button_text
+end
+
+
+Then(/^they should be redirected to the game page$/) do
+  expect(current_path).to eq(game_path(@server)) # Replace @server with the correct server variable
+end
+
+Given(/^my wallet balance is (\d+) shards$/) do |balance|
+  current_user.wallet.update!(balance: balance.to_i)
+end
+

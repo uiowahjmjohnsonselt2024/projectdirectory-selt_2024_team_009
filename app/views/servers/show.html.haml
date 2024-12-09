@@ -14,13 +14,25 @@
 
       - if @server.status == 'pending'
         - if @server.creator == current_user
+          %p.text-color-secondary
+            %strong Players Shard Balances:
+          %ul
+            - @server.users.each do |user|
+              %li
+                = "#{user.username}: #{user.wallet&.balance || 0} shards"
+                - if user.wallet&.balance.to_i < 200
+                  %span.text-danger (Insufficient shards)
+
           - all_have_sufficient_shards = @server.users.all? { |user| user.wallet&.balance.to_i >= 200 }
           - if all_have_sufficient_shards
             = button_to 'Start Game', start_game_server_path(@server), method: :post, class: 'btn btn-success my-2'
           - else
+            = button_to 'Start Game', '#', class: 'btn btn-secondary my-2', disabled: true
             %p.text-danger Not all players have 200 shards. Ensure every player has sufficient balance to start the game.
+
         - else
           %p.text-color-secondary Please wait for the creator to start the game.
+
       - elsif @server.status == 'in_progress'
         - unless @server.users.include?(current_user)
           = button_to 'Join Game', join_game_server_path(@server), method: :post, class: 'btn btn-primary my-2'
@@ -28,6 +40,36 @@
           = link_to 'Go to Game', game_path(@server), class: 'btn btn-primary my-2'
       - elsif @server.status == 'finished'
         %p The game has finished.
+
+      %hr
+
+      %h2.text-color-secondary Purchase Shards
+      %p.text-color-secondary Enter the number of shards you want to purchase and your payment details:
+
+      = form_with url: purchase_shards_wallet_path(current_user.wallet), method: :post, local: true do |f|
+        .form-group
+          = f.label :amount, "Number of Shards:"
+          = f.number_field :amount, min: 1, class: 'form-control'
+
+        %h2 Payment Details
+        .form-group
+          = f.label :credit_card_number, "Credit Card Number:"
+          = f.text_field :credit_card_number, placeholder: "1234 5678 9012 3456", class: 'form-control'
+        .form-group
+          = f.label :expiry_date, "Expiry Date (MM/YY):"
+          = f.text_field :expiry_date, placeholder: "MM/YY", class: 'form-control'
+        .form-group
+          = f.label :cvv, "CVV:"
+          = f.text_field :cvv, placeholder: "123", maxlength: 3, class: 'form-control'
+
+        .actions.mt-3
+          = f.submit 'Purchase Shards', class: 'btn btn-success'
+
+      .actions.mt-3
+        = link_to 'Back to Servers', servers_path, class: 'btn btn-secondary'
+
+
+      %hr
 
       = link_to 'Edit Server', edit_server_path(@server), class: 'btn btn-secondary'
       = link_to 'Back to My Servers', servers_path, class: 'btn btn-primary'
