@@ -22,21 +22,28 @@ class WalletsController < ApplicationController
       # Simulate payment processing
       sleep(3) # Fake delay of 3 seconds to simulate processing
       @wallet.balance += amount
-      
-      trans = current_user.transactions.build()
-      trans.amount = amount
-      trans.description = "Shards"
-      trans.quantity = amount
-      trans.transaction_type = "purchase"
-      trans.currency = params[:currency]
-      trans.payment_method = "Credit Card: " + params[:credit_card_number][-4..-1]
 
-      trans.save!()
-      
-      if @wallet.save
-        redirect_to @wallet, notice: "#{amount} Shards successfully purchased!"
+      # required fields for credit cards
+      if params[:credit_card_number] == "" || params[:credit_card_number].size < 4 || params[:cvv] == "" || params[:currency] == ""
+        redirect_to buy_shards_wallet_path(@wallet), alert: "Invalid card info: A field is null or credit card number is improper (<4 chars)."
       else
-        redirect_to buy_shards_wallet_path(@wallet), alert: "Failed to update wallet."
+
+        # update transactions (linkage)
+        trans = current_user.transactions.build()
+        trans.amount = amount
+        trans.description = "Shards"
+        trans.quantity = amount
+        trans.transaction_type = "purchase"
+        trans.currency = params[:currency]
+        trans.payment_method = "Credit Card: " + params[:credit_card_number][-4..-1]
+
+        trans.save!()
+        
+        if @wallet.save
+          redirect_to @wallet, notice: "#{amount} Shards successfully purchased!"
+        else
+          redirect_to buy_shards_wallet_path(@wallet), alert: "Failed to update wallet."
+        end
       end
     else
       redirect_to buy_shards_wallet_path(@wallet), alert: "Invalid amount. Please enter a positive number."
@@ -80,6 +87,7 @@ class WalletsController < ApplicationController
   def add_shards
     shard_amount = params[:amount].to_i
     if shard_amount.positive?
+
       @wallet.balance += shard_amount
       if @wallet.save
         redirect_to @wallet, notice: "#{shard_amount} Shards successfully added"
