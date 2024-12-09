@@ -18,7 +18,10 @@
       .form-group
         = f.submit "Add Shards", class: 'btn btn-success mt-2'
     = link_to 'Buy Shards', buy_shards_wallet_path(@wallet), class: 'btn btn-success'
+  = link_to 'Back to Servers', servers_path, class: 'btn btn-secondary mt-5'
+
 
 - else
   %p.text-muted You do not have a wallet yet.
   = link_to 'Create Wallet', new_wallet_path, class: 'btn btn-success'
+  = link_to 'Back to Servers', servers_path, class: 'btn btn-secondary'
