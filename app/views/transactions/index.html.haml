@@ -13,7 +13,6 @@
             - @transactions.each do |transaction|
                 %tr{ style: "text-align: center;" }
                     %td{ style: "padding: 10px; border: 1px solid #ddd;" }=  "#{transaction.description} (x#{transaction.quantity})"
-                    %td{ style: "padding: 10px; border: 1px solid #ddd;" }= "#{transaction.amount} (#{transaction.currency})"
-                    %td{ style: "padding: 10px; border: 1px solid #ddd;" }=  transaction.payment_method
-
+                    %td{ style: "padding: 10px; border: 1px solid #ddd;" }= transaction.amount
+                    %td{ style: "padding: 10px; border: 1px solid #ddd;" }=  "#{transaction.payment_method} (#{transaction.currency})"
                     %td{ style: "padding: 10px; border: 1px solid #ddd;" }= transaction.created_at

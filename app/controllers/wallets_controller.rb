@@ -28,7 +28,7 @@ class WalletsController < ApplicationController
       trans.description = "Shards"
       trans.quantity = amount
       trans.transaction_type = "purchase"
-      trans.currency = "USD"
+      trans.currency = params[:currency]
       trans.payment_method = "Credit Card: " + params[:credit_card_number][-4..-1]
 
       trans.save!()
