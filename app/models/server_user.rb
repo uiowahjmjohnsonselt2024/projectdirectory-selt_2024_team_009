@@ -3,7 +3,7 @@ class ServerUser < ApplicationRecord
   belongs_to :user
   has_many :grid_cells, foreign_key: :owner_id
   has_many :treasures, through: :grid_cells
-
+  #before_create :deduct_entry_fee
   # Validations
   validates :total_ap, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
   validates :turn_ap, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
@@ -24,6 +24,12 @@ class ServerUser < ApplicationRecord
     end
   end
 
+  def deduct_entry_fee
+    if user.wallet.balance < 200
+      raise InsufficientFundsError, "Not enough shards to join game"
+    end
+    user.wallet.deduct(200)
+  end
   def spend_total_ap(amount)
     if total_ap >= amount
       self.total_ap -= amount

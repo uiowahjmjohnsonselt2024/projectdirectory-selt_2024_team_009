@@ -5,6 +5,23 @@ class GamesController < ApplicationController
   before_action :ensure_game_in_progress
   before_action :ensure_current_player_turn, only: %i[perform_action]
 
+  def distribute_shard_pool_to_winner(winner)
+
+    total_shard_pool = @server.server_users.sum(:shards_paid_to_start)
+    winner.adjust_shard_balance(total_shard_pool)
+
+    flash[:notice] = "#{total_shard_pool} Shards have been awarded to the winner!"
+  end
+
+  def deduct_shards_for_game_start
+    if @server_user.wallet.balance >= 200
+      @server_user.wallet.update(balance: @server_user.wallet.balance - 200)
+      @server_user.update(shards_paid_to_start: 200)
+    else
+      redirect_to new_transaction_path, alert: 'Not enough shards to start the game.'
+    end
+  end
+
   # GET /games/:id
   def show
     @grid_cells = @server.grid_cells.includes(:owner, :treasure)
@@ -90,6 +107,7 @@ class GamesController < ApplicationController
 
 
   private
+
   def handle_error(message)
     respond_to do |format|
       format.html { redirect_to game_path(@server), alert: message }
@@ -625,7 +643,6 @@ class GamesController < ApplicationController
 
     winner
   end
-
 
   def distribute_bounty(winner)
     # Distributes a game-ending bounty to the winner
