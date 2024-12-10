@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_12_06_213439) do
+ActiveRecord::Schema[7.2].define(version: 2024_12_09_210349) do
   create_table "contents", force: :cascade do |t|
     t.text "story_text"
     t.string "image_url"
@@ -121,6 +121,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_06_213439) do
     t.datetime "updated_at", null: false
     t.string "status", default: "pending"
     t.integer "current_turn_server_user_id"
+    t.string "background_image_url"
   end
 
   create_table "transactions", force: :cascade do |t|

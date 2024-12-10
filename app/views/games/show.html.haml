@@ -40,9 +40,9 @@
                     method: :post
 
     %div.game-center-panel
-
       %h2.text-center.text-secondary Game Board
-      %table.game-board
+
+      %table.game-board{ style: "background-image: url(#{@server.background_image_url})" }
         - (0..5).to_a.reverse.each do |y|
           %tr
             - (0..5).each do |x|
@@ -67,8 +67,10 @@
                   %span O
                 - elsif cell.treasure
                   %span T
+
       %div#opponent-details
         = render partial: "games/opponent_details", locals: { opponents: @opponents }
+
     %div.game-right-panel
       %div.game-player-stats
         %h3.text-primary Current Player:

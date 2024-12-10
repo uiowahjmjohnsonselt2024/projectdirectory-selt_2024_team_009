@@ -1,0 +1,63 @@
+.container.mx-auto.p-4
+  %h1.text-4xl.mb-6 Game Board
+
+  .grid.grid-cols-6.gap-2
+    - (0..5).each do |y|
+      - (0..5).each do |x|
+        - cell = @grid_cells.find_by(x: x, y: y)
+        .w-24.h-24.border.border-gray-300.relative.transition-all.duration-300.hover:shadow-lg{
+          id: "cell-#{cell&.id}",
+          style: cell&.background_image_url ? "background-image: url('#{cell.background_image_url}'); background-size: cover;" : 'background-color: #f0f0f0;'
+        }
+          - if cell
+            .absolute.top-0.left-0.p-1
+              - if cell.obstacle?
+                %span.bg-red-500.text-white.text-xs.px-1.rounded O
+              - if cell.fortified?
+                %span.bg-blue-500.text-white.text-xs.px-1.rounded F
+
+            = button_to "Generate",
+                        generate_background_grid_cell_path(cell),
+                        method: :post,
+                        remote: true,
+                        class: "absolute bottom-0 right-0 bg-blue-500 text-white text-xs p-1 m-1 rounded",
+                        data: { cell_id: cell.id }
+
+:javascript
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('[data-cell-id]').forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        const cellId = this.dataset.cellId;
+
+        fetch(this.getAttribute('formaction'), {
+          method: 'POST',
+          headers: {
+            'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          credentials: 'same-origin'
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            const cell = document.querySelector(`#cell-${cellId}`);
+            cell.style.backgroundImage = `url(${data.background_url})`;
+            cell.style.backgroundSize = 'cover';
+          } else {
+            alert('Failed to generate background');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Error generating background');
+        });
+      });
+    });
+  });
