@@ -45,7 +45,7 @@ class GamesController < ApplicationController
       return handle_error('Not enough players have joined the game.')
     end
     @server_users = @server.server_users.includes(:user)
-
+    action_type = params[:action_type]
     case action_type
     when 'move'
       unless handle_move_action(params[:direction])
