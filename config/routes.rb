@@ -34,6 +34,7 @@ Rails.application.routes.draw do
      end
   end
 
+  resources :grid_cells
   resources :transactions
   resources :items
   resources :inventories
@@ -58,13 +59,17 @@ Rails.application.routes.draw do
     end
   end
 
+  # Nest grid_cells under servers
   resources :servers do
     member do
       get 'start_game'
       post 'start_game'
       get 'join_game'
       post 'join_game'
+      post :generate_background # Generate shared background image
     end
+
+    resources :grid_cells, only: [:index, :show, :new, :create, :edit, :update, :destroy]
   end
 
   resources :games, only: [:show] do
