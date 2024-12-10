@@ -17,7 +17,7 @@
 
           %div.d-flex.justify-content-center
             .actions
-            = link_to 'Delete Wallet', wallet_path(@wallet), method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-danger text-color-secondary me-2'
+            = button_to 'Delete Wallet', wallet_path(@wallet), method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-danger text-color-secondary me-2'
             = link_to 'Buy Shards', buy_shards_wallet_path(@wallet), class: 'btn btn-success text-color-secondary me-2'
             = link_to 'Back to Servers', servers_path, class: 'btn btn-dark text-color-secondary'
 
