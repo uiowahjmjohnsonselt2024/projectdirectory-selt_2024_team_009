@@ -31,7 +31,7 @@ class WalletsController < ApplicationController
       elsif params[:cvv].length != 3 || !params[:cvv].match?(/\A\d+\z/)
         redirect_to buy_shards_wallet_path(@wallet), alert: "Invalid card info: CVV must be 3 digits long."
 
-      elsif !params[:expiry_date].match?(/^(0[1-9]|1[0-2])\/(0[0-9]|1[0-9]|2[0-3])$/)
+      elsif !params[:expiry_date].match?(/^(0[1-9]|1[0-2])\/(0[0-9]|1[0-9]|2[0-9])$/)
         redirect_to buy_shards_wallet_path(@wallet), alert: "Invalid card info: Expiry date is in wrong format"
   
       else
