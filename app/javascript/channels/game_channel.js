@@ -39,13 +39,9 @@ document.addEventListener("turbo:load", () => {
                 alert(data.message);
                 window.location.href = `/servers/${serverId}`;
             } else if (data.type === "update_stats") {
-                if (data.opponents_html) {
-                    const opponentDetails = document.querySelector("#opponent-details");
-                    if (opponentDetails) opponentDetails.innerHTML = data.opponents_html;
-                }
-                if (data.player_stats_html) {
-                    const playerStats = document.querySelector("#player-stats");
-                    if (playerStats) playerStats.innerHTML = data.player_stats_html;
+                const gameContainer = document.querySelector("#game-container");
+                if (gameContainer) {
+                    gameContainer.innerHTML = data.html;
                 }
             }
         }

@@ -71,8 +71,12 @@ class GamesController < ApplicationController
       return handle_error('Invalid action type.')
     end
     Rails.logger.info "[perform_action] Action handled successfully, broadcasting updates."
-
-    GameChannel.broadcast_to(@server, { type: "page_reload", reason: "Player action" })
+    Turbo::StreamsChannel.broadcast_replace_to(
+      @server,
+      target: "game-container",
+      html: render_to_string(action: :show, layout: false)
+    )
+    # GameChannel.broadcast_to(@server, { type: "page_reload", reason: "Player action" })
     check_game_end_conditions
 
     if @server_user.turn_ap <= 0
@@ -84,21 +88,42 @@ class GamesController < ApplicationController
     else
       message = 'Action performed successfully.'
     end
-    GameChannel.broadcast_to(@server, { type: "page_reload", reason: "Player turn ended" })
-
+    # GameChannel.broadcast_to(@server, { type: "page_reload", reason: "Player turn ended" })
+    Turbo::StreamsChannel.broadcast_replace_to(
+      @server,
+      target: "game-container",
+      html: render_to_string(action: :show, layout: false)
+    )
+    #
+    # respond_to do |format|
+    #   format.html { redirect_to game_path(@server), notice: message }
+    #   format.json { render json: { success: true, message: message }, status: :ok }
+    # end
     respond_to do |format|
-      format.html { redirect_to game_path(@server), notice: message }
-      format.json { render json: { success: true, message: message }, status: :ok }
+      format.turbo_stream
+      format.html { redirect_to game_path(@server), notice: 'Action performed successfully.' }
     end
   end
 
 
 
   private
+  # def handle_error(message)
+  #   respond_to do |format|
+  #     format.html { redirect_to game_path(@server), alert: message }
+  #     format.json { render json: { success: false, message: message }, status: :unprocessable_entity }
+  #   end
+  # end
   def handle_error(message)
     respond_to do |format|
+      format.turbo_stream do
+        Turbo::StreamsChannel.broadcast_replace_to(
+          @server,
+          target: "game-container",
+          html: render_to_string(action: :show, layout: false, locals: { error_message: message })
+        )
+      end
       format.html { redirect_to game_path(@server), alert: message }
-      format.json { render json: { success: false, message: message }, status: :unprocessable_entity }
     end
   end
   def update_opponents

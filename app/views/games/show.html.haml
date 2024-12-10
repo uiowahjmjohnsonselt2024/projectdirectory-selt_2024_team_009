@@ -1,4 +1,7 @@
 - provide(:title, "Game Board")
+= action_cable_meta_tag
+= turbo_stream_from @server, include: ['server_users', 'grid_cells', 'server_users.user', 'server_users.treasures', 'server_users.inventories', 'server_users.server_user_items', 'server_users.server_user_treasures']
+
 %div{ data: { controller: "game-actions", server_id: @server.id } }
   %div.game-container
     %div.game-left-panel
