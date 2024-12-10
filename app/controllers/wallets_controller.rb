@@ -1,20 +1,18 @@
 class WalletsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_wallet, only: %i[show edit update destroy add_shards subtract_shards buy_shards purchase_shards]
+  before_action :set_wallet, only: %i[show edit destroy subtract_shards purchase_shards]
 
   # GET /wallets
   def index
     @wallet = current_user.wallet
+    puts @wallet.user_id
   end
 
   # GET /wallets/:id
   def show
   end
-  # GET /wallets/:id/buy_shards
-  def buy_shards
-    # Displays the shard purchase form
-  end
 
+  # GET /wallets/:id/purchase_shards
   def purchase_shards
     amount = params[:amount].to_i
 
@@ -23,11 +21,20 @@ class WalletsController < ApplicationController
       sleep(3) # Fake delay of 3 seconds to simulate processing
       @wallet.balance += amount
 
-      # required fields for credit cards
-      if params[:credit_card_number] == "" || params[:credit_card_number].size < 4 || params[:cvv] == "" || params[:currency] == ""
-        redirect_to buy_shards_wallet_path(@wallet), alert: "Invalid card info: A field is null or credit card number is improper (<4 chars)."
-      else
+      # validation on credit cards
+      if params[:credit_card_number].gsub(/\s+/, '').match?(/\A\d{16}\z/)
 
+        redirect_to buy_shards_wallet_path(@wallet), alert: "Invalid card info: Card number must be 16 digits long."
+
+      elsif params[:cvv].size != 3
+
+        redirect_to buy_shards_wallet_path(@wallet), alert: "Invalid card info: CVV must be 3 digits long."
+
+      elsif params[:expiry_date].match?(/^(0[1-9]|1[0-2])\/(0[0-9]|1[0-9]|2[0-3])$/)
+
+        redirect_to buy_shards_wallet_path(@wallet), alert: "Invalid card info: Expiry date is in wrong format"
+
+      else
         # update transactions (linkage)
         trans = current_user.transactions.build()
         trans.amount = amount
@@ -49,6 +56,7 @@ class WalletsController < ApplicationController
       redirect_to buy_shards_wallet_path(@wallet), alert: "Invalid amount. Please enter a positive number."
     end
   end
+
   # GET /wallets/new
   def new
     @wallet = current_user.build_wallet
@@ -68,39 +76,17 @@ class WalletsController < ApplicationController
   def edit
   end
 
-  # PATCH/PUT /wallets/:id
-  def update
-    if @wallet.update(wallet_params)
-      redirect_to @wallet, notice: 'Wallet was successfully updated.'
-    else
-      render :edit, status: :unprocessable_entity
-    end
-  end
-
   # DELETE /wallets/:id
   def destroy
     @wallet.destroy
     redirect_to wallets_url, notice: 'Wallet was successfully destroyed.'
   end
 
-  # POST /wallets/:id/add_shards
-  def add_shards
-    shard_amount = params[:amount].to_i
-    if shard_amount.positive?
-
-      @wallet.balance += shard_amount
-      if @wallet.save
-        redirect_to @wallet, notice: "#{shard_amount} Shards successfully added"
-      else
-        redirect_to @wallet, alert: "Operation Failed"
-      end
-    else
-      redirect_to @wallet, alert: "Invalid amount"
-    end
-  end
-
   # POST /wallets/:id/subtract_shards
   def subtract_shards
+    puts "Uncanny run"
+    puts params.inspect
+
     amount = params[:amount].to_i
     if amount.positive? && @wallet.balance >= amount
       @wallet.balance -= amount
