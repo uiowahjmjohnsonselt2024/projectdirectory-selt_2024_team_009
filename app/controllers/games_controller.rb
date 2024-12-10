@@ -9,8 +9,8 @@ class GamesController < ApplicationController
   def show
     Rails.logger.info "[GamesController#show] server_id: #{@server.id}, user: #{current_user.username}"
     @waiting_for_players = @server.server_users.count < @server.max_players
+
     if @waiting_for_players
-      Rails.logger.info "[GamesController#show] Waiting for players: current: #{@server.server_users.count}, max: #{@server.max_players}"
       GameChannel.broadcast_to(
         @server,
         type: "waiting_for_players",
@@ -19,14 +19,14 @@ class GamesController < ApplicationController
         max_players: @server.max_players
       )
     else
-      Rails.logger.info "[GamesController#show] All players joined. Broadcasting all_players_joined."
       GameChannel.broadcast_to(@server, { type: "all_players_joined" })
     end
+
     @grid_cells = @server.grid_cells.includes(:owner, :treasure)
     @server_users = @server.server_users.includes(:user)
     @server_user ||= @server.server_users.find_by(user: current_user)
     @current_turn_user = @server.current_turn_server_user || @server.server_users.order(:turn_order).first
-    @opponents = @server.server_users.includes(:user, :treasures)|| []
+    @opponents = @server.server_users.includes(:user, :treasures) || []
   end
 
 
@@ -46,7 +46,6 @@ class GamesController < ApplicationController
     end
     @server_users = @server.server_users.includes(:user)
 
-    action_type = params[:action_type]
     case action_type
     when 'move'
       unless handle_move_action(params[:direction])
@@ -62,16 +61,18 @@ class GamesController < ApplicationController
       end
     when 'use_treasure'
       unless handle_use_treasure_action(params[:treasure_id])
-        return handle_error('Treasure usage failed. Ensure you have the treasure.')
+        return handle_error('Treasure usage failed.')
+      end
+    when 'use_item'
+      unless handle_use_item_action(params[:item_id])
+        return handle_error('Item usage failed.')
       end
     else
       return handle_error('Invalid action type.')
     end
     Rails.logger.info "[perform_action] Action handled successfully, broadcasting updates."
 
-    broadcast_game_updates
-    update_player_stats
-    update_opponents
+    GameChannel.broadcast_to(@server, { type: "page_reload", reason: "Player action" })
     check_game_end_conditions
 
     if @server_user.turn_ap <= 0
@@ -83,6 +84,7 @@ class GamesController < ApplicationController
     else
       message = 'Action performed successfully.'
     end
+    GameChannel.broadcast_to(@server, { type: "page_reload", reason: "Player turn ended" })
 
     respond_to do |format|
       format.html { redirect_to game_path(@server), notice: message }
@@ -100,33 +102,32 @@ class GamesController < ApplicationController
     end
   end
   def update_opponents
-    @opponents = @server.server_users.where.not(id: @server_user.id)
-    GameChannel.broadcast_to(
-      @server,
-      type: "opponent_stats_updated",
-      html: render_to_string(partial: "games/opponent_details", locals: { opponents: @opponents })
-    )
+    @opponents = @server.server_users
+    @opponents.each do |opponent|
+      GameChannel.broadcast_to(
+        @server,
+        type: "opponent_stats_updated",
+        html: render_to_string(partial: "games/opponent_details", locals: { opponents: @opponents })
+      )
+    end
   end
 
   def update_player_stats
     GameChannel.broadcast_to(
-      @server,
+      @server_user,
       type: "player_stats_updated",
       html: render_to_string(partial: "games/player_stats", locals: { player: @server_user })
     )
   end
   def broadcast_game_updates
-    # Render updated partials for opponents and player stats
-    opponents_html = render_to_string(partial: "games/opponent_details", locals: { opponents: @opponents })
-    player_stats_html = render_to_string(partial: "games/player_stats", locals: { player: @server_user })
-
-    # Broadcast the updates
-    GameChannel.broadcast_to(
-      @server,
-      type: "update_stats",
-      opponents_html: opponents_html,
-      player_stats_html: player_stats_html
-    )
+    @server.server_users.each do |server_user|
+      GameChannel.broadcast_to(
+        @server,
+        type: "update_stats",
+        opponents_html: render_to_string(partial: "games/opponent_details", locals: { opponents: @opponents }),
+        player_stats_html: render_to_string(partial: "games/player_stats", locals: { player: server_user })
+      )
+    end
   end
 
 

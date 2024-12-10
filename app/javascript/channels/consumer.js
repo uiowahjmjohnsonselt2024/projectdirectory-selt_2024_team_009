@@ -3,9 +3,8 @@
 
 import { createConsumer } from "@rails/actioncable";
 
-// Set the WebSocket URL based on the environment
-const cableURL = process.env.NODE_ENV === 'production'
-    ? 'wss://shards-of-the-grid-team-09.herokuapp.com/cable' // Production WebSocket URL
-    : 'ws://localhost:3000/cable'; // Development WebSocket URL
+const cableURL = process.env.RAILS_ENV === 'production'
+    ? 'wss://shards-of-the-grid-team-09.herokuapp.com/cable'
+    : 'ws://localhost:3000/cable';
 
 export default createConsumer(cableURL);

@@ -68,7 +68,7 @@ class ServersController < ApplicationController
     end
 
     @server.start_game
-    GameChannel.broadcast_to(@server, { type: "game_started" })
+    GameChannel.broadcast_to(@server, { type: "page_reload", reason: "Game started" })
     redirect_to game_path(@server), notice: 'Game started successfully.'
   end
 
@@ -106,11 +106,7 @@ class ServersController < ApplicationController
     end
 
     # Broadcast to other players
-    GameChannel.broadcast_to(
-      @server,
-      type: "player_joined",
-      html: render_to_string(partial: "games/player_stats", locals: { player: @server_user })
-    )
+    GameChannel.broadcast_to(@server, { type: "page_reload", reason: "Player joined" })
 
     redirect_to game_path(@server), notice: 'You have joined the game.'
   end

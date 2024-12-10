@@ -15,41 +15,22 @@ document.addEventListener("turbo:load", () => {
     consumer.subscriptions.create({ channel: "GameChannel", server_id: serverId }, {
         received(data) {
             console.log("[game_channel.js] Received data:", data);
-            if (data.type === "waiting_for_players") {
+
+            if (data.type === "page_reload") {
+                console.log("[game_channel.js] Page reload triggered for reason:", data.reason);
+                window.location.reload();
+            } else if (data.type === "waiting_for_players") {
                 const waitingMessage = document.getElementById("waiting-message");
                 if (waitingMessage) {
                     waitingMessage.style.display = "block";
                     waitingMessage.innerHTML = `
-            <h2 class="text-center text-warning">${data.message}</h2>
-            <p class="text-center text-muted">
-              Current players: ${data.current_count}/${data.max_players}
-            </p>
-          `;
+                        <h2 class="text-center text-warning">${data.message}</h2>
+                        <p class="text-center text-muted">
+                          Current players: ${data.current_count}/${data.max_players}
+                        </p>
+                    `;
                 }
             } else if (data.type === "all_players_joined") {
-                const waitingMessage = document.getElementById("waiting-message");
-                if (waitingMessage) {
-                    waitingMessage.style.display = "none";
-                }
-            } else if (data.type === "player_joined") {
-                console.log("[game_channel.js] player_joined event received. Updating opponents.");
-                const opponentDetails = document.querySelector("#opponent-details");
-                if (opponentDetails && data.html) {
-                    opponentDetails.innerHTML = data.html;
-                }
-            } else if (data.type === "opponent_stats_updated") {
-                const opponentDetails = document.querySelector("#opponent-details");
-                if (opponentDetails && data.html) {
-                    opponentDetails.innerHTML = data.html;
-                }
-            } else if (data.type === "player_stats_updated") {
-                const playerStats = document.querySelector("#player-stats");
-                if (playerStats && data.html) {
-                    playerStats.innerHTML = data.html;
-                }
-            } else if (data.type === "game_started") {
-                // If needed, you can handle game_started differently,
-                // but currently, we rely on 'all_players_joined' to enable gameplay.
                 const waitingMessage = document.getElementById("waiting-message");
                 if (waitingMessage) {
                     waitingMessage.style.display = "none";
