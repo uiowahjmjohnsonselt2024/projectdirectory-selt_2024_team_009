@@ -35,8 +35,17 @@ class WalletsController < ApplicationController
         redirect_to buy_shards_wallet_path(@wallet), alert: "Invalid card info: Expiry date is in wrong format"
   
       else
-      
-        if @wallet.save
+        trans = current_user.transactions.build()
+        trans.amount = amount
+        trans.description = "Shards"
+        trans.quantity = amount
+        trans.transaction_type = "purchase"
+        trans.currency = params[:currency]
+        trans.payment_method = "Credit Card: " + params[:credit_card_number][-4..-1]
+
+        trans.save!()
+
+        if @wallet.save          
           redirect_to @wallet, notice: "#{amount} Shards successfully purchased!"
         else
           redirect_to buy_shards_wallet_path(@wallet), alert: "Failed to update wallet."
