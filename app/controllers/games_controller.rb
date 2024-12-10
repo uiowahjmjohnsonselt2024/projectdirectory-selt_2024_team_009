@@ -8,6 +8,12 @@ class GamesController < ApplicationController
   # GET /games/:id
   def show
     Rails.logger.info "[GamesController#show] server_id: #{@server.id}, user: #{current_user.username}"
+
+    @grid_cells ||= @server.grid_cells.includes(:owner, :treasure)|| []
+    @server_users ||= @server.server_users.includes(:user)|| []
+    @server_user ||= @server.server_users.find_by(user: current_user)|| []
+    @current_turn_user ||= @server.current_turn_server_user || @server.server_users.order(:turn_order).first|| []
+    @opponents ||= @server.server_users.includes(:user, :treasures) || []
     @waiting_for_players = @server.server_users.count < @server.max_players
 
     if @waiting_for_players
@@ -21,12 +27,6 @@ class GamesController < ApplicationController
     else
       GameChannel.broadcast_to(@server, { type: "all_players_joined" })
     end
-
-    @grid_cells = @server.grid_cells.includes(:owner, :treasure)
-    @server_users = @server.server_users.includes(:user)
-    @server_user ||= @server.server_users.find_by(user: current_user)
-    @current_turn_user = @server.current_turn_server_user || @server.server_users.order(:turn_order).first
-    @opponents = @server.server_users.includes(:user, :treasures) || []
   end
 
 
@@ -71,11 +71,7 @@ class GamesController < ApplicationController
       return handle_error('Invalid action type.')
     end
     Rails.logger.info "[perform_action] Action handled successfully, broadcasting updates."
-    Turbo::StreamsChannel.broadcast_replace_to(
-      @server,
-      target: "game-container",
-      html: render_to_string(action: :show, layout: false)
-    )
+    broadcast_game_updates
     # GameChannel.broadcast_to(@server, { type: "page_reload", reason: "Player action" })
     check_game_end_conditions
 
@@ -89,22 +85,12 @@ class GamesController < ApplicationController
       message = 'Action performed successfully.'
     end
     # GameChannel.broadcast_to(@server, { type: "page_reload", reason: "Player turn ended" })
-    Turbo::StreamsChannel.broadcast_replace_to(
-      @server,
-      target: "game-container",
-      html: render_to_string(action: :show, layout: false)
-    )
-    #
-    # respond_to do |format|
-    #   format.html { redirect_to game_path(@server), notice: message }
-    #   format.json { render json: { success: true, message: message }, status: :ok }
-    # end
     respond_to do |format|
-      format.turbo_stream
       format.html { redirect_to game_path(@server), notice: 'Action performed successfully.' }
+      format.json { head :no_content }
     end
-  end
 
+  end
 
 
   private
@@ -117,15 +103,15 @@ class GamesController < ApplicationController
   def handle_error(message)
     respond_to do |format|
       format.turbo_stream do
-        Turbo::StreamsChannel.broadcast_replace_to(
-          @server,
-          target: "game-container",
-          html: render_to_string(action: :show, layout: false, locals: { error_message: message })
+        render turbo_stream: turbo_stream.replace(
+          "game-container",
+          html: render_to_string(template: "games/show", layout: false)
         )
       end
       format.html { redirect_to game_path(@server), alert: message }
     end
   end
+
   def update_opponents
     @opponents = @server.server_users
     @opponents.each do |opponent|
@@ -144,15 +130,29 @@ class GamesController < ApplicationController
       html: render_to_string(partial: "games/player_stats", locals: { player: @server_user })
     )
   end
+  # def broadcast_game_updates
+  #   @server.server_users.each do |server_user|
+  #     GameChannel.broadcast_to(
+  #       @server,
+  #       type: "update_stats",
+  #       opponents_html: render_to_string(partial: "games/opponent_details", locals: { opponents: @opponents }),
+  #       player_stats_html: render_to_string(partial: "games/player_stats", locals: { player: server_user })
+  #     )
+  #   end
+  # end
   def broadcast_game_updates
-    @server.server_users.each do |server_user|
-      GameChannel.broadcast_to(
-        @server,
-        type: "update_stats",
-        opponents_html: render_to_string(partial: "games/opponent_details", locals: { opponents: @opponents }),
-        player_stats_html: render_to_string(partial: "games/player_stats", locals: { player: server_user })
-      )
-    end
+    Turbo::StreamsChannel.broadcast_replace_to(
+      @server,
+      target: "game-container",
+      html: render_to_string(template: "games/show", locals: {
+        server: @server,
+        server_user: @server_user,
+        server_users: @server_users,
+        grid_cells: @grid_cells,
+        opponents: @opponents,
+        current_turn_user: @current_turn_user
+      })
+    )
   end
 
 

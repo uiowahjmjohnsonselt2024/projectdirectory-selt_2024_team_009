@@ -5,12 +5,12 @@ class GridCellsController < ApplicationController
 
   # GET /grid_cells
   def index
-    @grid_cells = @server.grid_cells.includes(:content, :treasure)
+    @grid_cells = GridCell.all.includes(:server, :content, :treasure)
 
     # Ensure the shared background image is generated for the server
     if @server.background_image_url.blank?
-      prompt = "A beautiful 6x6 game grid with a strategic design in pixel art style"
-      image_url = @server.generate_game_board_image(prompt)
+
+      image_url = @server.generate_game_board_image
 
       if image_url
         Rails.logger.info "Generated and saved background image for server #{@server.id}: #{image_url}"

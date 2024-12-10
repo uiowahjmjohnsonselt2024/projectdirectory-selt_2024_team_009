@@ -39,7 +39,7 @@ class Server < ApplicationRecord
   def generate_game_board_image
     # Skip if image already exists
     return if background_image_url.present?
-
+    # prompt = "A beautiful 6x6 game grid with a strategic design in pixel art style"
     prompt = "A top-down view of a 6x6 game grid, pixel art style, colorful and vibrant"
     client = OpenAI::Client.new(access_token: ENV['OPENAI_API_KEY'])
 

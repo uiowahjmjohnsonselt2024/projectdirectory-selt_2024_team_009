@@ -3,8 +3,7 @@ Rails.application.routes.draw do
   get "/about", to: "static_pages#about"
   mount ActionCable.server => '/cable'
   # Devise routes for user authentication
-  devise_for :users
-
+  devise_for :users,  controllers: { sessions: 'users/sessions' }
   # Define user_root_path
   devise_scope :user do
     get 'profile/:id', to: 'profiles#show', as: :user_root

@@ -16,6 +16,7 @@ group :development, :test do
 end
 # Web server interface for Ruby/Rack applications
 gem "puma", "~> 6"
+gem 'bond'
 
 #open ai
 gem 'ruby-openai', '~> 4.0'

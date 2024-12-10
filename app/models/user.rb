@@ -27,7 +27,9 @@ class User < ApplicationRecord
   validates :username, presence: true, uniqueness: true
   validates :email, presence: true, uniqueness: true
   validates :role, presence: true, inclusion: { in: %w[admin player], message: "%{value} is not a valid role" }
+  validates :cable_token, presence: true, uniqueness: true
 
+  before_create :generate_cable_token
   #Callbacks
   after_create :create_wallet_with_initial_balance
 
@@ -43,5 +45,11 @@ class User < ApplicationRecord
   private
   def create_wallet_with_initial_balance
     Wallet.create(user: self, balance: 500)
+  end
+  def generate_cable_token
+    # Generate a unique cable_token
+    begin
+      self.cable_token = SecureRandom.hex(16)
+    end while self.class.exists?(cable_token: cable_token)
   end
 end

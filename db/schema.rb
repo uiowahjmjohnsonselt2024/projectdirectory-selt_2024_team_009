@@ -10,10 +10,16 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_12_10_110557) do
+ActiveRecord::Schema[7.2].define(version: 2024_12_10_211438) do
   create_table "contents", force: :cascade do |t|
     t.text "story_text"
     t.string "image_url"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "games", force: :cascade do |t|
+    t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -69,6 +75,16 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_10_110557) do
     t.integer "server_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "messages", force: :cascade do |t|
+    t.text "content"
+    t.integer "user_id", null: false
+    t.integer "game_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["game_id"], name: "index_messages_on_game_id"
+    t.index ["user_id"], name: "index_messages_on_user_id"
   end
 
   create_table "scores", force: :cascade do |t|
@@ -151,6 +167,8 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_10_110557) do
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
     t.string "role", default: "player", null: false
+    t.string "cable_token"
+    t.index ["cable_token"], name: "index_users_on_cable_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["username"], name: "index_users_on_username", unique: true
@@ -171,6 +189,8 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_10_110557) do
   add_foreign_key "leaderboard_entries", "leaderboards"
   add_foreign_key "leaderboard_entries", "users"
   add_foreign_key "leaderboards", "servers"
+  add_foreign_key "messages", "games"
+  add_foreign_key "messages", "users"
   add_foreign_key "scores", "servers"
   add_foreign_key "scores", "users"
   add_foreign_key "server_users", "servers"

@@ -7,6 +7,7 @@
 #   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
+require 'securerandom'
 
 # Clear existing data (optional)
 User.destroy_all
@@ -19,7 +20,8 @@ user1 = User.create!(
   email: 'avinash.mudireddy@gmail.com',
   password: 'Avipasstest',
   password_confirmation: 'Avipasstest',
-  role: 'player'
+  role: 'player',
+  cable_token: SecureRandom.hex(16)
 )
 
 user2 = User.create!(
@@ -27,7 +29,8 @@ user2 = User.create!(
   email: 'bob@example.com',
   password: 'password',
   password_confirmation: 'password',
-  role: 'player'
+  role: 'player',
+  cable_token: SecureRandom.hex(16)
 )
 
 user3 = User.create!(
@@ -35,7 +38,8 @@ user3 = User.create!(
   email: 'carol@example.com',
   password: 'password',
   password_confirmation: 'password',
-  role: 'player'
+  role: 'player',
+  cable_token: SecureRandom.hex(16)
 )
 
 user4 = User.create!(
@@ -43,7 +47,8 @@ user4 = User.create!(
   email: 'dave@example.com',
   password: 'password',
   password_confirmation: 'password',
-  role: 'player'
+  role: 'player',
+  cable_token: SecureRandom.hex(16)
 )
 
 # Assume 'current_user' is 'Alice' for the purposes of this seed file
