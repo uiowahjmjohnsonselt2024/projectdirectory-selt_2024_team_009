@@ -29,7 +29,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_09_210349) do
     t.integer "owner_id"
     t.boolean "obstacle", default: false
     t.integer "fortified"
-  endve
+  end
 
   create_table "inventories", force: :cascade do |t|
     t.integer "user_id", null: false
