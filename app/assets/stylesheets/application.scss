@@ -97,8 +97,9 @@ body.games::after {
 
 /* Game Board */
 .game-board {
-    border-collapse: collapse;
-    margin: 20px auto;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 .game-board .game-cell {
