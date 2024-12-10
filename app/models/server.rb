@@ -13,6 +13,9 @@ class Server < ApplicationRecord
 
   # Start the game and generate the game board background image
   def start_game
+    user_names = server_users.includes(:user).map { |su| su.user.username }
+    Rails.logger.info "Starting game on server_model, startgame #{id} with users: #{user_names.join(', ')}"
+
     # Ensure the creator is added as a player
     server_users.find_or_create_by(user: creator)
 

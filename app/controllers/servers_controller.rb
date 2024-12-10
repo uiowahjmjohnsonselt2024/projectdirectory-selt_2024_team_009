@@ -68,7 +68,7 @@ class ServersController < ApplicationController
     end
 
     @server.start_game
-    ActionCable.server.broadcast("game_#{@server.id}", { type: "game_started" })
+    GameChannel.broadcast_to(@server, { type: "game_started" })
     redirect_to game_path(@server), notice: 'Game started successfully.'
   end
 
@@ -76,6 +76,10 @@ class ServersController < ApplicationController
   # POST /servers/:id/join_game
   # POST /servers/:id/join_game
   def join_game
+    # Log the usernames of all current users in the server
+    current_usernames = @server.users.pluck(:username)
+    Rails.logger.info "Users currently in servercontroller join_game #{@server.id}: #{current_usernames.join(', ')}"
+
     if @server.users.include?(current_user)
       redirect_to game_path(@server), alert: 'You have already joined this game.'
       return
@@ -102,12 +106,10 @@ class ServersController < ApplicationController
     end
 
     # Broadcast to other players
-    ActionCable.server.broadcast(
-      "game_#{@server.id}",
-      {
-        type: "player_joined",
-        html: render_to_string(partial: "games/player_stats", locals: { player: @server_user })
-      }
+    GameChannel.broadcast_to(
+      @server,
+      type: "player_joined",
+      html: render_to_string(partial: "games/player_stats", locals: { player: @server_user })
     )
 
     redirect_to game_path(@server), notice: 'You have joined the game.'

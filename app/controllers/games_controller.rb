@@ -7,29 +7,28 @@ class GamesController < ApplicationController
 
   # GET /games/:id
   def show
+    Rails.logger.info "[GamesController#show] server_id: #{@server.id}, user: #{current_user.username}"
+    @waiting_for_players = @server.server_users.count < @server.max_players
+    if @waiting_for_players
+      Rails.logger.info "[GamesController#show] Waiting for players: current: #{@server.server_users.count}, max: #{@server.max_players}"
+      GameChannel.broadcast_to(
+        @server,
+        type: "waiting_for_players",
+        message: "Waiting for players to join.",
+        current_count: @server.server_users.count,
+        max_players: @server.max_players
+      )
+    else
+      Rails.logger.info "[GamesController#show] All players joined. Broadcasting all_players_joined."
+      GameChannel.broadcast_to(@server, { type: "all_players_joined" })
+    end
     @grid_cells = @server.grid_cells.includes(:owner, :treasure)
     @server_users = @server.server_users.includes(:user)
     @server_user ||= @server.server_users.find_by(user: current_user)
-
     @current_turn_user = @server.current_turn_server_user || @server.server_users.order(:turn_order).first
-    # Check if the required number of players has joined
-    @waiting_for_players = @server.server_users.count < @server.max_players
-    if @waiting_for_players
-      ActionCable.server.broadcast(
-        "game_#{@server.id}",
-        {
-          type: "waiting_for_players",
-          message: "Waiting for players to join. Current: #{@server.server_users.count}/#{@server.max_players}"
-        }
-      )
-    else
-      ActionCable.server.broadcast(
-        "game_#{@server.id}",
-        { type: "all_players_joined" }
-      )
-    end
     @opponents = @server.server_users.includes(:user, :treasures)|| []
   end
+
 
   # GET /games/:id/play_turn
   # def play_turn
@@ -40,6 +39,8 @@ class GamesController < ApplicationController
   # POST /games/:id/perform_action
   # POST /games/:id/perform_action
   def perform_action
+    Rails.logger.info "[perform_action] user: #{current_user.username}, server: #{@server.id}, action_type: #{params[:action_type]}"
+
     if @server.server_users.count < @server.max_players
       return handle_error('Not enough players have joined the game.')
     end
@@ -66,6 +67,8 @@ class GamesController < ApplicationController
     else
       return handle_error('Invalid action type.')
     end
+    Rails.logger.info "[perform_action] Action handled successfully, broadcasting updates."
+
     broadcast_game_updates
     update_player_stats
     update_opponents
@@ -118,13 +121,11 @@ class GamesController < ApplicationController
     player_stats_html = render_to_string(partial: "games/player_stats", locals: { player: @server_user })
 
     # Broadcast the updates
-    ActionCable.server.broadcast(
-      "game_#{@server.id}",
-      {
-        type: "update_stats",
-        opponents_html: opponents_html,
-        player_stats_html: player_stats_html
-      }
+    GameChannel.broadcast_to(
+      @server,
+      type: "update_stats",
+      opponents_html: opponents_html,
+      player_stats_html: player_stats_html
     )
   end
 
@@ -575,8 +576,9 @@ class GamesController < ApplicationController
         @server.update(status: 'finished')
 
         # Broadcast game over and winner information
-        ActionCable.server.broadcast(
-          "game_#{@server.id}",
+        # Broadcast game over and winner information using GameChannel
+        GameChannel.broadcast_to(
+          @server,
           {
             type: "game_over",
             message: "Game Over! The winner is #{winner.user.username} with #{winner.total_ap} AP and #{winner.shard_balance} Shards!",

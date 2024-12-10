@@ -1,9 +1,9 @@
 - provide(:title, "Game Board")
-%div{ data: { controller: "game-actions" } }
+%div{ data: { controller: "game-actions", server_id: @server.id } }
   %div.game-container
     %div.game-left-panel
       - if @waiting_for_players
-        %div.waiting-message
+        %div#waiting-message.waiting-message
           %h2.text-center.text-warning
             = "Waiting for players to join. Required: #{@server.max_players}."
           %p.text-center.text-muted
@@ -42,7 +42,7 @@
     %div.game-center-panel
       %h2.text-center.text-secondary Game Board
 
-      %table.game-board{ style: "background-image: url(#{@server.background_image_url})" }
+      %table.game-board
         - (0..5).to_a.reverse.each do |y|
           %tr
             - (0..5).each do |x|

@@ -1,7 +1,7 @@
 Rails.application.routes.draw do
   root "static_pages#home"
   get "/about", to: "static_pages#about"
-
+  mount ActionCable.server => '/cable'
   # Devise routes for user authentication
   devise_for :users
 
@@ -77,7 +77,8 @@ Rails.application.routes.draw do
       post :perform_action
     end
   end
-  mount ActionCable.server => '/cable'
+
+
   get "up" => "rails/health#show", as: :rails_health_check
 
   # Render dynamic PWA files from app/views/pwa/*

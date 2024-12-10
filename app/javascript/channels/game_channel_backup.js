@@ -1,7 +1,7 @@
 // app/javascript/channels/game_channel.js
 import consumer from "./consumer";
 
-document.addEventListener("turbolinks:load", () => {
+document.addEventListener("turbo:load", () => {
     const serverId = document.querySelector("[data-server-id]")?.dataset.serverId;
     if (!serverId) return;
 

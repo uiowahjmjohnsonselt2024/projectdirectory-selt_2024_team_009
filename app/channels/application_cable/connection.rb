@@ -4,13 +4,17 @@ module ApplicationCable
 
     def connect
       self.current_user = find_verified_user
+      Rails.logger.info "['ActionCable', 'Connection',] User: #{current_user.email}"
     end
 
     private
     def find_verified_user
-      if verified_user = User.find_by(id: cookies.encrypted[:user_id])
-        verified_user
+      user = env['warden'].user
+      if user
+        Rails.logger.info "Action Cable: Connected as #{user.email}"
+        user
       else
+        Rails.logger.warn "Action Cable: Unauthorized connection attempt."
         reject_unauthorized_connection
       end
     end

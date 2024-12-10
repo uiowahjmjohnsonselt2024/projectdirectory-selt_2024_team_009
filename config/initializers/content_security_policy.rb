@@ -5,10 +5,10 @@ Rails.application.configure do
     # Add the Azure Blob Storage domain to img_src
     policy.img_src     :self, :https, :data, "https://oaidalleapiprodscus.blob.core.windows.net"
     policy.object_src  :none
-    policy.script_src  :self, :https, "https://cdn.jsdelivr.net", :unsafe_inline, -> { "'nonce-#{@csp_nonce}'" }
-    policy.style_src   :self, :https, "https://cdn.jsdelivr.net", :unsafe_inline, -> { "'nonce-#{@csp_nonce}'" }
+    policy.script_src  :self, :https, :unsafe_inline
+    policy.style_src   :self, :https, :unsafe_inline
     # Allow external CDNs for Bootstrap
-    policy.connect_src :self, :https
+    policy.connect_src :self, :https, "ws://localhost:3000", "wss://localhost:3000",  "wss://shards-of-the-grid-team-09.herokuapp.com"
   end
 
   # Allow nonces for inline styles and scripts

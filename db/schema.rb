@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_12_10_070012) do
+ActiveRecord::Schema[7.2].define(version: 2024_12_10_110557) do
   create_table "contents", force: :cascade do |t|
     t.text "story_text"
     t.string "image_url"
@@ -29,6 +29,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_10_070012) do
     t.integer "owner_id"
     t.boolean "obstacle", default: false
     t.integer "fortified"
+    t.index ["server_id", "x", "y"], name: "index_grid_cells_on_server_id_and_x_and_y", unique: true
   end
 
   create_table "inventories", force: :cascade do |t|
