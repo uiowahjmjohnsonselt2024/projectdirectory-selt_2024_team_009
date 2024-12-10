@@ -55,7 +55,6 @@ class ServersController < ApplicationController
     end
   end
   # POST /servers/:id/start_game
-  # POST /servers/:id/start_game
   def start_game
     if @server.status != 'pending'
       redirect_to @server, alert: 'Game has already started or finished.'
@@ -66,10 +65,21 @@ class ServersController < ApplicationController
       redirect_to @server, alert: 'At least 2 players are required to start the game.'
       return
     end
+    # Deduct 200 shards from each player
+    insufficient_shards_users = @server.users.select { |user| user.wallet&.balance.to_i < 200 }
+    if insufficient_shards_users.any?
+      redirect_to new_transaction_path, alert: "Not all players have 200 shards. Please purchase more shards."
+    else
+    @server.server_users.each do |server_user|
 
+      wallet = server_user.user.wallet
+
+      wallet.update!(balance: wallet.balance - 200)
+    end
     @server.start_game
     GameChannel.broadcast_to(@server, { type: "page_reload", reason: "Game started" })
     redirect_to game_path(@server), notice: 'Game started successfully.'
+    end
   end
 
   # POST /servers/:id/join_game
