@@ -10,9 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-
 ActiveRecord::Schema[7.2].define(version: 2024_12_10_070012) do
-
   create_table "contents", force: :cascade do |t|
     t.text "story_text"
     t.string "image_url"
