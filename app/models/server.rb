@@ -10,7 +10,10 @@ class Server < ApplicationRecord
 
   # Validations
   validates :status, inclusion: { in: %w[pending in_progress finished] }
-
+  validates :max_players, numericality: { only_integer: true, greater_than_or_equal_to: 2, less_than_or_equal_to: 6 }
+  validate :validate_creator_presence_as_server_user
+  # Callbacks
+  before_validation :ensure_creator_is_server_user
   # Start the game and generate the game board background image
   def start_game
     user_names = server_users.includes(:user).map { |su| su.user.username }
@@ -152,6 +155,7 @@ class Server < ApplicationRecord
       current_position_y: cell.y
     )
   end
+  private
 
   # Check if a cell is a valid starting position
   def valid_starting_position?(cell, server_user)
@@ -160,4 +164,25 @@ class Server < ApplicationRecord
       [(cell.x - x).abs, (cell.y - y).abs].max >= 2 && !cell.obstacle?
     end
   end
+  def validate_server_users_presence
+    errors.add(:base, "Server must have at least one server user") if server_users.empty?
+    # Add any other custom validations here
+  end
+  # Ensure the creator is a server user
+  # Ensure the creator is a server user
+  # Ensure the creator is a server user
+  def ensure_creator_is_server_user
+    if creator.present? && !server_users.exists?(user_id: creator.id)
+      server_users.build(user: creator, role: 'player')
+    end
+  end
+
+
+  # Custom validation to ensure the creator is a server user
+  def validate_creator_presence_as_server_user
+    unless server_users.any? { |su| su.user_id == creator.id }
+      errors.add(:base, "Server must include the creator as a server user")
+    end
+  end
+
 end

@@ -7,12 +7,14 @@
 #   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
+# db/seeds.rb
 require 'securerandom'
 
-# Clear existing data (optional)
-User.destroy_all
-Server.destroy_all
+# Clear existing data
 ServerUser.destroy_all
+GridCell.destroy_all
+Server.destroy_all
+User.destroy_all
 
 # Create Users
 user1 = User.create!(
@@ -51,23 +53,29 @@ user4 = User.create!(
   cable_token: SecureRandom.hex(16)
 )
 
-# Assume 'current_user' is 'Alice' for the purposes of this seed file
-current_user = user1
+# Define the creator
+creator = user1
 
-# Create a Server
-server = Server.create!(
+# Create the Server
+server = Server.new(
   name: 'Test Server',
   max_players: 4,
-  created_by: current_user.id
+  creator: creator,
+  status: 'pending'
 )
 
-# Join the Server
-ServerUser.create!(user: user1, server: server)
-ServerUser.create!(user: user2, server: server)
-ServerUser.create!(user: user3, server: server)
-ServerUser.create!(user: user4, server: server)
+# Add the creator as a ServerUser before saving the server
+server.server_users.build(user: creator, cable_token: SecureRandom.hex(16))
 
+# Save the server
+server.save!
 
+# Add additional ServerUsers (excluding the creator, since they were already added)
+[user2, user3, user4].each do |user|
+  server.server_users.create!(user: user)
+end
+
+puts "Seeding completed successfully!"
 # db/seeds.rb
 # db/seeds.rb
 Item.create!([

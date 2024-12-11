@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_12_10_211438) do
+ActiveRecord::Schema[7.2].define(version: 2024_12_11_010115) do
   create_table "contents", force: :cascade do |t|
     t.text "story_text"
     t.string "image_url"
@@ -112,6 +112,10 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_10_211438) do
     t.integer "diagonal_moves_left"
     t.boolean "mirror_shield"
     t.integer "turns_skipped"
+    t.string "cable_token"
+    t.integer "role", null: false
+    t.index ["cable_token"], name: "index_server_users_on_cable_token", unique: true
+    t.index ["role"], name: "index_server_users_on_role"
   end
 
   create_table "servers", force: :cascade do |t|
@@ -123,6 +127,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_10_211438) do
     t.string "status", default: "pending"
     t.integer "current_turn_server_user_id"
     t.string "background_image_url"
+    t.string "role"
   end
 
   create_table "transactions", force: :cascade do |t|

@@ -10,14 +10,15 @@ module ApplicationCable
     private
 
     def find_verified_user
-      token = request.params[:cable_token]
-      Rails.logger.info "ActionCable: Attempting to authenticate with cable_token: #{token}"
+      token = request.params[:cable_token] || request.query_parameters["cable_token"]
+      Rails.logger.info "ActionCable: Attempting to authenticate with cable_token: #{token.inspect}"
 
-      if (current_user = User.find_by(cable_token: token))
-        Rails.logger.info "ActionCable: Authentication successful for user: #{current_user.email}"
-        current_user
+      # Directly query the ServerUser model
+      if (current_server_user = ServerUser.find_by(cable_token: token))
+        Rails.logger.info "ActionCable: Authentication successful for user: #{current_server_user.user.email}"
+        current_server_user
       else
-        Rails.logger.warn "ActionCable: Authentication failed for cable_token: #{token}"
+        Rails.logger.warn "ActionCable: Authentication failed for cable_token: #{token.inspect}"
         reject_unauthorized_connection
       end
     end

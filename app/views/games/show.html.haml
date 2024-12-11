@@ -1,7 +1,6 @@
 - provide(:title, "Game Board")
 = action_cable_meta_tag
 = turbo_stream_from @server, include: ['server_users', 'grid_cells', 'server_users.user', 'server_users.treasures', 'server_users.inventories', 'server_users.server_user_items', 'server_users.server_user_treasures']
-%meta{name: "cable-token", content: "#{current_user.cable_token if current_user}"}
 
 %div{ id: "game-container", data: { controller: "game-actions", server_id: @server.id } }
   %div.game-container

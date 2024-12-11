@@ -8,9 +8,13 @@ class ServerUser < ApplicationRecord
   validates :total_ap, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
   validates :turn_ap, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
   validates :shard_balance, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
-  validates :symbol, presence: true, allow_nil: true
+  validates :symbol, inclusion: { in: %w[🟢 🔴 🔵 🟡 🟣 🟤] }, allow_nil: true
   validates :turn_order, numericality: { only_integer: true }, allow_nil: true
+  validates :cable_token, presence: true, uniqueness: true
+  validates :role, presence: true
 
+  # Callbacks
+  after_initialize :set_default_role, if: :new_record?
 
   # Methods to manage AP and Shards
   def spend_turn_ap(amount)
@@ -63,4 +67,9 @@ class ServerUser < ApplicationRecord
 
     save
   end
+  def set_default_role
+    self.role ||= 'player'
+  end
+  private
+
 end
