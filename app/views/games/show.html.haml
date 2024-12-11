@@ -42,7 +42,7 @@
     %div.game-center-panel
       %h2.text-center.text-secondary Game Board
 
-      %table.game-board{ style: "background-image: url(#{@server.background_image_url})" }
+      %table.game-board
         - (0..5).to_a.reverse.each do |y|
           %tr
             - (0..5).each do |x|

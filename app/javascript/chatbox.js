@@ -1,4 +1,4 @@
-import createChatChannel from "./channels/chat_channel";
+import createChatChannel from "../channels/chat_channel";
 
 document.addEventListener("DOMContentLoaded", () => {
     const chatboxElement = document.getElementById("chatbox");
