@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_12_11_010115) do
+ActiveRecord::Schema[7.2].define(version: 2024_12_11_031813) do
   create_table "contents", force: :cascade do |t|
     t.text "story_text"
     t.string "image_url"
@@ -128,6 +128,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_11_010115) do
     t.integer "current_turn_server_user_id"
     t.string "background_image_url"
     t.string "role"
+    t.index ["created_by"], name: "index_servers_on_created_by"
   end
 
   create_table "transactions", force: :cascade do |t|
@@ -200,6 +201,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_11_010115) do
   add_foreign_key "scores", "users"
   add_foreign_key "server_users", "servers"
   add_foreign_key "server_users", "users"
+  add_foreign_key "servers", "users", column: "created_by"
   add_foreign_key "transactions", "items"
   add_foreign_key "transactions", "users"
   add_foreign_key "treasure_finds", "servers"

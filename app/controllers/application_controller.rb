@@ -27,7 +27,9 @@ class ApplicationController < ActionController::Base
     # 'root_path' is the path of the app's home directory
     root_path
   end
-
+  def after_sign_up_path_for(resource)
+    new_user_session_path
+  end
   def log_flash_messages
     # Rails.logger.debug "Flash contents: #{flash.to_hash}" if flash.any?
   end

@@ -12,6 +12,9 @@ class ServerUser < ApplicationRecord
   validates :turn_order, numericality: { only_integer: true }, allow_nil: true
   validates :cable_token, presence: true, uniqueness: true
   validates :role, presence: true
+  validates :user_id, presence: true
+  validates :server_id, presence: true
+  validates :cable_token, presence: true, uniqueness: true
 
   # Callbacks
   after_initialize :set_default_role, if: :new_record?

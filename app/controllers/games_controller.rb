@@ -7,16 +7,17 @@ class GamesController < ApplicationController
 
   # GET /games/:id
   def show
-    Rails.logger.info "[GamesController#show] server_id: #{@server.id}, user: #{current_user.username}"
+    Rails.logger.info "[GamesController#show] Displaying game for server #{@server.id}. Current user: #{current_user.username}"
 
-    @grid_cells ||= @server.grid_cells.includes(:owner, :treasure)|| []
-    @server_users ||= @server.server_users.includes(:user)|| []
-    @server_user ||= @server.server_users.find_by(user: current_user)|| []
-    @current_turn_user ||= @server.current_turn_server_user || @server.server_users.order(:turn_order).first|| []
-    @opponents ||= @server.server_users.includes(:user, :treasures) || []
+    @grid_cells = @server.grid_cells.includes(:owner, :treasure) || []
+    @server_users = @server.server_users.includes(:user) || []
+    @server_user = @server.server_users.find_by(user: current_user) || nil
+    @current_turn_user = @server.current_turn_server_user || @server.server_users.order(:turn_order).first
+    @opponents = @server.server_users.includes(:user, :treasures) || []
     @waiting_for_players = @server.server_users.count < @server.max_players
 
     if @waiting_for_players
+      Rails.logger.info "[GamesController#show] Waiting for players on server #{@server.id} (#{@server.server_users.count}/#{@server.max_players})"
       GameChannel.broadcast_to(
         @server,
         type: "waiting_for_players",
@@ -112,6 +113,7 @@ class GamesController < ApplicationController
     end
   end
 
+
   def update_opponents
     @opponents = @server.server_users
     @opponents.each do |opponent|
@@ -156,12 +158,21 @@ class GamesController < ApplicationController
   end
 
 
+
   def set_server
     @server = Server.find(params[:id])
+    Rails.logger.info "[GamesController#set_server] Loaded server #{@server.id} for game display"
+
   end
 
   def set_server_user
     @server_user = @server.server_users.find_by(user: current_user)
+    if @server_user.nil?
+      Rails.logger.warn "[GamesController#set_server_user] User #{current_user.username} is not part of server #{@server.id}"
+      redirect_to servers_path, alert: 'You are not part of this game.'
+    else
+      Rails.logger.info "[GamesController#set_server_user] ServerUser found for #{current_user.username} on server #{@server.id}"
+    end
   end
 
   def ensure_game_in_progress
@@ -212,38 +223,25 @@ class GamesController < ApplicationController
 
   # Action Handlers
   def handle_move_action(direction)
-    if @server_user == @server.current_turn_server_user && @server_user.spend_turn_ap(1)
-      dx, dy = movement_delta(direction)
-      target_x = @server_user.current_position_x + dx
-      target_y = @server_user.current_position_y + dy
+    return false unless @server_user == @server.current_turn_server_user
 
-      if valid_position?(target_x, target_y)
-        is_diagonal = dx.abs == 1 && dy.abs == 1
-        if is_diagonal && !@server_user.can_move_diagonally
-          flash[:alert] = 'Diagonal movement is not allowed.'
-          return false
-        end
+    dx, dy = movement_delta(direction)
+    target_x = @server_user.current_position_x + dx
+    target_y = @server_user.current_position_y + dy
 
-        target_cell = @server.grid_cells.find_by(x: target_x, y: target_y)
-        if target_cell.obstacle?
-          flash[:alert] = 'Cannot move to an obstacle.'
-        elsif @server.server_users.any? { |su| su.current_position_x == target_x && su.current_position_y == target_y }
-          flash[:alert] = 'Cell is occupied by another player.'
-        else
-          @server_user.update(current_position_x: target_x, current_position_y: target_y)
-          check_for_treasure(target_cell)
-          flash[:notice] = 'Moved successfully.'
-          broadcast_game_updates
-          return true
-        end
-      else
-        flash[:alert] = 'Invalid move.'
-      end
+    target_cell = @grid_cells.find { |cell| cell.x == target_x && cell.y == target_y }
+
+    if target_cell&.obstacle?
+      handle_error('Cannot move to an obstacle.')
+    elsif @server_users.any? { |su| su.current_position_x == target_x && su.current_position_y == target_y }
+      handle_error('Cell is occupied by another player.')
     else
-      flash[:alert] = 'Not enough AP to move.'
+      @server_user.update(current_position_x: target_x, current_position_y: target_y)
+      flash[:notice] = 'Moved successfully.'
+      true
     end
-    false
   end
+
 
   def handle_occupy_action
     if @server_user == @server.current_turn_server_user && @server_user.spend_turn_ap(1)

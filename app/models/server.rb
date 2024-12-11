@@ -11,9 +11,9 @@ class Server < ApplicationRecord
   # Validations
   validates :status, inclusion: { in: %w[pending in_progress finished] }
   validates :max_players, numericality: { only_integer: true, greater_than_or_equal_to: 2, less_than_or_equal_to: 6 }
-  validate :validate_creator_presence_as_server_user
+  after_create :add_creator_as_server_user
+
   # Callbacks
-  before_validation :ensure_creator_is_server_user
   # Start the game and generate the game board background image
   def start_game
     user_names = server_users.includes(:user).map { |su| su.user.username }
@@ -110,7 +110,6 @@ class Server < ApplicationRecord
     symbols = %w[🟢 🔴 🔵 🟡 🟣 🟤].freeze
     assigned_symbols = server_users.pluck(:symbol).compact
     available_symbols = symbols - assigned_symbols
-
     server_users.each_with_index do |server_user, index|
       next if server_user.symbol.present?
 
@@ -124,16 +123,27 @@ class Server < ApplicationRecord
   # Assign starting positions for players
   def assign_starting_positions(new_user: nil)
     available_cells = grid_cells.where(obstacle: false, owner: nil).to_a
+    Rails.logger.info "Available cells for assignment: #{available_cells.map { |cell| [cell.x, cell.y] }}"
+
     users_to_assign = new_user ? [new_user] : server_users
 
     users_to_assign.each do |server_user|
+      # Ensure the server_user is persisted with a valid cable_token
+      if !server_user.persisted? || server_user.cable_token.blank?
+        Rails.logger.error "ServerUser #{server_user.user.username} has invalid or duplicate cable_token."
+        next
+      end
+
       next if server_user.current_position_x && server_user.current_position_y
 
+      # Assign a valid starting cell
       starting_cell = find_valid_starting_cell(available_cells, server_user)
       assign_cell_to_user(starting_cell, server_user)
       available_cells.delete(starting_cell)
     end
   end
+
+
 
   # Find a valid starting cell for a player
   def find_valid_starting_cell(available_cells, server_user)
@@ -149,12 +159,25 @@ class Server < ApplicationRecord
 
   # Assign a cell to a user
   def assign_cell_to_user(cell, server_user)
+    unless server_user.persisted?
+      Rails.logger.error "Cannot assign cell to non-persisted ServerUser #{server_user.inspect}"
+      raise ActiveRecordError, "ServerUser must be persisted before assigning a cell"
+    end
+
+    Rails.logger.info "Assigning cell [#{cell.x}, #{cell.y}] to ServerUser #{server_user.id} (persisted? #{server_user.persisted?})"
+
+    # Update the grid cell
     cell.update!(owner: server_user)
+
+    # Explicitly update only the position attributes
     server_user.update!(
       current_position_x: cell.x,
       current_position_y: cell.y
     )
   end
+
+
+
   private
 
   # Check if a cell is a valid starting position
@@ -168,21 +191,18 @@ class Server < ApplicationRecord
     errors.add(:base, "Server must have at least one server user") if server_users.empty?
     # Add any other custom validations here
   end
-  # Ensure the creator is a server user
-  # Ensure the creator is a server user
-  # Ensure the creator is a server user
-  def ensure_creator_is_server_user
-    if creator.present? && !server_users.exists?(user_id: creator.id)
-      server_users.build(user: creator, role: 'player')
-    end
+  # Ensure the creator is a ServerUser
+
+  def add_creator_as_server_user
+    server_users.create!(
+      user: creator,
+      role: 'player',
+      cable_token: creator.cable_token,
+      turn_order: 1,
+      symbol: '🟢'
+    )
+  rescue ActiveRecord::RecordInvalid => e
+    Rails.logger.error "Failed to add creator as ServerUser: #{e.message}"
+    raise
   end
-
-
-  # Custom validation to ensure the creator is a server user
-  def validate_creator_presence_as_server_user
-    unless server_users.any? { |su| su.user_id == creator.id }
-      errors.add(:base, "Server must include the creator as a server user")
-    end
-  end
-
 end

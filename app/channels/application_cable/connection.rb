@@ -4,7 +4,7 @@ module ApplicationCable
 
     def connect
       self.current_user = find_verified_user
-      logger.add_tags 'ActionCable', current_user.email
+      logger.add_tags "ActionCable", "User #{current_user.user.email}" # Access associated User's email
     end
 
     private
@@ -13,14 +13,19 @@ module ApplicationCable
       token = request.params[:cable_token] || request.query_parameters["cable_token"]
       Rails.logger.info "ActionCable: Attempting to authenticate with cable_token: #{token.inspect}"
 
-      # Directly query the ServerUser model
-      if (current_server_user = ServerUser.find_by(cable_token: token))
-        Rails.logger.info "ActionCable: Authentication successful for user: #{current_server_user.user.email}"
-        current_server_user
+      # Find the ServerUser by cable_token
+      server_user = ServerUser.find_by(cable_token: token)
+
+      if server_user&.user # Ensure the associated User exists
+        Rails.logger.info "ActionCable: Authentication successful for user: #{server_user.user.email}"
+        server_user # Return the ServerUser instance
       else
         Rails.logger.warn "ActionCable: Authentication failed for cable_token: #{token.inspect}"
         reject_unauthorized_connection
       end
+    rescue StandardError => e
+      Rails.logger.error "ActionCable: Unexpected error during authentication - #{e.message}"
+      reject_unauthorized_connection
     end
   end
 end

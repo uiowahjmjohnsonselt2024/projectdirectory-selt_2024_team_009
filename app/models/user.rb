@@ -44,7 +44,7 @@ class User < ApplicationRecord
   end
 
   def generate_cable_token
-    Rails.logger.debug "Generating cable token for user: #{self.username}"
     self.cable_token ||= SecureRandom.hex(16)
   end
+
 end

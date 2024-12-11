@@ -10,13 +10,6 @@ Rails.application.routes.draw do
   end
 
   devise_scope :user do
-    get 'users/confirmation/new', to: 'devise/confirmations#new'
-    get 'users/password/edit', to: 'devise/passwords#edit'
-    get 'users/password/new', to: 'devise/passwords#new'
-    get 'users/registration/edit', to: 'devise/registrations#edit'
-    get 'users/registration/new', to: 'devise/registrations#new'
-    get 'users/session/new', to: 'devise/sessions#new'
-    get 'users/unlock/new', to: 'devise/unlocks#new'
     # Custom routes for profiles
     get 'profile/edit/:id', to: 'profiles#edit', as: :edit_profile
     patch 'profile', to: 'profiles#update'
