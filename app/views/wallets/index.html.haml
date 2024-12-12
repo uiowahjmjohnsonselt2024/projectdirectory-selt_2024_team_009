@@ -9,12 +9,12 @@
     %strong Wallet Created At:
     = @wallet.created_at.strftime('%B %d, %Y %H:%M:%S')
   .actions
-    = link_to 'Delete Wallet', wallet_path(@wallet), method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-danger'
-    = link_to 'Buy Shards', buy_shards_wallet_path(@wallet), class: 'btn btn-success'
-  = link_to 'Back to Servers', servers_path, class: 'btn btn-secondary mt-5'
+    = link_to 'Delete Wallet', wallet_path(@wallet), method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-danger', title: "This will delete your balance. It does not actually delete anything (this would break the app), rather, just resets it."
+    = link_to 'Buy Shards', buy_shards_wallet_path(@wallet), class: 'btn btn-success', title:"Feeling poor? This button is the key to power- of course, it comes at a price :D" 
+  = link_to 'Back to Servers', servers_path, class: 'btn btn-secondary mt-5', title:"This will move you to/back to the servers listing page where you can play the game."
 
 
 - else
   %p.text-muted You do not have a wallet yet.
   = link_to 'Create Wallet', new_wallet_path, class: 'btn btn-success'
-  = link_to 'Back to Servers', servers_path, class: 'btn btn-secondary'
+  = link_to 'To Servers', servers_path, class: 'btn btn-secondary', title:"This will move you to/back to the servers listing page where you can play the game."

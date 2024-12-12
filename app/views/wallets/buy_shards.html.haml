@@ -10,24 +10,24 @@
 = form_with url: purchase_shards_wallet_path(@wallet), method: :post, local: true, id: "shard-purchase-form" do |f|
   .form-group
     = f.label :amount, "Number of Shards:"
-    = f.number_field :amount, min: 1, class: 'form-control', id: "shard-amount"
+    = f.number_field :amount, min: 1, class: 'form-control', id: "shard-amount", title:"How many shards you want? 1000? 100000? It all depends on your real wallet!"
 
   %h2 Payment Details
   .form-group
     = f.label :credit_card_number, "Credit Card Number:"
-    = f.text_field :credit_card_number, placeholder: "1234 5678 9012 3456", class: 'form-control' 
+    = f.text_field :credit_card_number, placeholder: "1234 5678 9012 3456", class: 'form-control', title:"Read the 16 digits on the front of the credit card."
   .form-group
     = f.label :expiry_date, "Expiry Date (MM/YY):"
-    = f.text_field :expiry_date, placeholder: "MM/YY", class: 'form-control'
+    = f.text_field :expiry_date, placeholder: "MM/YY", class: 'form-control',  title:"On the back has the exp date. It shoud look like DD/DD."
   .form-group
     = f.label :cvv, "CVV:"
-    = f.text_field :cvv, placeholder: "123", maxlength: 3, class: 'form-control'
+    = f.text_field :cvv, placeholder: "123", maxlength: 3, class: 'form-control', title:"The back 3 digits of the credit card."
   .form-group
     = f.label :currency, "Currency:"
     = f.select :currency, options_for_select([['USD', 'USD'], ['JPY', 'JPY'], ['EUR', 'EUR']], 'USD'), class: 'form-control', id: "curr-select"
 
   .actions.mt-3
-    = f.submit 'Purchase Shards - $0.00', class: 'btn btn-success', id: "purchase-button"
+    = f.submit 'Purchase Shards - $0.00', class: 'btn btn-success', id: "purchase-button", title:"Make the purchase using your money. Price should be shown."
 
 .actions.mt-3
-  = link_to 'Back to Wallet', wallet_path(@wallet), class: 'btn btn-secondary'
+  = link_to 'Back to Wallet', wallets_path, class: 'btn btn-secondary', title:"Go back to see your wallet details."

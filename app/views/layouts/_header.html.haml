@@ -11,7 +11,7 @@
                         %li.nav-item
                             %a.nav-link.text-color-secondary{:href => user_root_path(current_user.id), :title => "Go to homescreen & see your stats."} Profile
                         %li.nav-item
-                            %a.nav-link.text-color-secondary{:href => destroy_user_session_path} Logout
+                            %a.nav-link.text-color-secondary{:href => destroy_user_session_path, :title => "Leave the application :\("} Logout
                     -else
                         %li.nav-item
                             %a.nav-link.text-color-secondary{:href => new_user_session_path, :title => "Already have an account and what to play?"} Login

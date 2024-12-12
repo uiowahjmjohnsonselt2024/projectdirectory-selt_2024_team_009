@@ -8,73 +8,32 @@
 
 // This program may be extended to ALL attributes on the page, however, this will likely result in performance issues.
 
+helpBoss = document.getElementById('helphead');
+helperText = document.getElementById('helptext')
+
 document.addEventListener('DOMContentLoaded', () => {
     console.log("I think I am working")
     // Select all buttons on the page
-    const links = document.querySelectorAll('a');
-    const inputs = document.querySelectorAll('input');
-    const selects = document.querySelectorAll('select')
+    const types =  ['a', 'input', 'select', 'button', 'h2']
 
-    // Select the helper text element
-    const helperText = document.getElementById('helptext');
-    const helpBoss = document.getElementById('helphead');
-
-    if (!helperText) {
-      console.warn('Helper text element not found. Please add a <p class="helptext"> element to your HTML.');
-      return;
-    }
-    console.log("I think I am working2")
-
-  
-  // Add hover listeners to all links
-  links.forEach(link => {
-    link.addEventListener('mouseenter', () => {
-      const title = link.getAttribute('title');
-
-      if (title) {
-        helpBoss.textContent = "T9 Bot Says"
-        helperText.textContent = title; // Update the helper text
-      }
-    });
-
-    link.addEventListener('mouseleave', () => {
-      helpBoss.textContent = "Help"
-      helperText.textContent = 'If you are unsure how to use this application, hover over a button. (or maybe the button doesn\'t have a description)'; // Clear the helper text
-    });
-  });
-
-  // incase inputs need description
-  inputs.forEach(input => {
-    input.addEventListener('mouseenter', () => {
-      const title = input.getAttribute('title');
-
-      if (title) {
-        helpBoss.textContent = "T9 Bot Says"
-        helperText.textContent = title; // Update the helper text
-      }
-    });
-
-    input.addEventListener('mouseleave', () => {
-      helpBoss.textContent = "Help"
-      helperText.textContent = 'If you are unsure how to use this application, hover over a button. (or maybe the button doesn\'t have a description)'; // Clear the helper text
-    });
-  });
-
-
-  // incase selects need description
-  selects.forEach(select => {
-    select.addEventListener('mouseenter', () => {
-      const title = select.getAttribute('title');
-
-      if (title) {
-        helpBoss.textContent = "T9 Bot Says"
-        helperText.textContent = title; // Update the helper text
-      }
-    });
-
-    select.addEventListener('mouseleave', () => {
-      helpBoss.textContent = "Help"
-      helperText.textContent = 'If you are unsure how to use this application, hover over a button. (or maybe the button doesn\'t have a description)'; // Clear the helper text
-    });
-  });
+    types.forEach(type => {
+        console.log(type);
+        const elements = document.querySelectorAll(type);
+        console.log(elements.size)
+        elements.forEach(elem => {
+            elem.addEventListener('mouseenter', () => {
+              const title = elem.getAttribute('title');
+        
+              if (title) {
+                helpBoss.textContent = "T9 Bot Says"
+                helperText.textContent = title; // Update the helper text
+              }
+            });
+        
+            elem.addEventListener('mouseleave', () => {
+              helpBoss.textContent = "Help"
+              helperText.textContent = 'If you are unsure how to use this application, hover over a button. (or maybe the button doesn\'t have a description)'; // Clear the helper text
+            });
+          });        
+    })
 });

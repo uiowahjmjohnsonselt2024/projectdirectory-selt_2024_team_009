@@ -11,7 +11,7 @@
 
         .form-group.text-color-secondary
           = f.label :max_players
-          = f.number_field :max_players, class: 'form-control', title:'This controls how much players are needed to start the game (and no more can join after that.)'
+          = f.number_field :max_players, class: 'form-control', title:"This field controls how much players you need to play the game. Beware, you need exactly this amount of players (if you set it to 5, 3/6 players cannot play.)"
 
         = f.submit 'Create Server', class: 'btn btn-primary my-2'
 
