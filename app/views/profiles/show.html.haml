@@ -22,9 +22,9 @@
 
     %div.actions-list-container.mt-4
       %ul.actions-list
-        %li= link_to 'Create Server', new_server_path
-        %li= link_to 'Your Servers', servers_path
-        %li= link_to 'Items', items_path
-        %li= link_to 'View Inventory', inventories_path
-        %li= link_to 'View Transactions', transactions_path
-        %li= link_to 'My Wallet', wallets_path
+        %li= link_to 'Create Server', new_server_path, title: 'This creates a game that you can play on.'
+        %li= link_to 'Your Servers', servers_path, title: 'This takes you to the list of games that you have created.'
+        %li= link_to 'Items', items_path, title: 'This takes you to the items shop, where you can buy custom objects to boost your ability in the game.'
+        %li= link_to 'View Inventory', inventories_path, title: 'This takes you to your inventory, where you can see all the things you\'ve purchased.'
+        %li= link_to 'View Transactions', transactions_path, title: 'This takes you to all the purchases you have done (with money).'
+        %li= link_to 'My Wallet', wallets_path, title: 'This takes you to your money (shards) management, where you can see how much you have/buy more.'
