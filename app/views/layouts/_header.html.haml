@@ -9,13 +9,13 @@
                 %ul.navbar-nav.ms-auto
                     - if user_signed_in?
                         %li.nav-item
-                            %a.nav-link.text-color-secondary{:href => user_root_path(current_user.id)} Profile
+                            %a.nav-link.text-color-secondary{:href => user_root_path(current_user.id), :title => "Go to homescreen & see your stats."} Profile
                         %li.nav-item
                             %a.nav-link.text-color-secondary{:href => destroy_user_session_path} Logout
                     -else
                         %li.nav-item
-                            %a.nav-link.text-color-secondary{:href => new_user_session_path} Login
+                            %a.nav-link.text-color-secondary{:href => new_user_session_path, :title => "Already have an account and what to play?"} Login
                         %li.nav-item
-                            %a.nav-link.text-color-secondary{:href => new_user_registration_path} Sign Up
+                            %a.nav-link.text-color-secondary{:href => new_user_registration_path, :title => "For users that want to play but don't have an account."} Sign Up
                         %li.nav-item
-                            %a.nav-link.text-color-secondary{:href => about_path} About
+                            %a.nav-link.text-color-secondary{:href => about_path, :title => "Want to learn more about our game?"} About

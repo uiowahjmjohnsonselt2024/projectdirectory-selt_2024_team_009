@@ -17,9 +17,9 @@
 
     %div{id: "helpbox"}
       %footer.container-fluid.py-3.bg-color-primary.mb-2
-        %p.text-center.my-auto.text-color-secondary Help
+        %p{id: "helphead", class:"text-center my-auto text-color-secondary"} Help
       %p{id: "helptext", class: "my-0"}
-        If you are unsure how to use this application, hover over a button.
+        If you are unsure how to use this application, hover over a button. (or maybe the button doesn't have a description)
 
     %main.container
       = render 'layouts/flash'
