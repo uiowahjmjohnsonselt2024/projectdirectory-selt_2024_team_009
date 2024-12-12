@@ -67,34 +67,6 @@ class ServersController < ApplicationController
       redirect_to servers_url, alert: 'You are not authorized to delete this server.'
     end
   end
-  # POST /servers/:id/start_game
-  # def start_game
-  #   if @server.status != 'pending'
-  #     redirect_to @server, alert: 'Game has already started or finished.'
-  #     return
-  #   end
-  #
-  #   if @server.server_users.count < 2 && @server.creator != current_user
-  #     redirect_to @server, alert: 'At least 2 players are required to start the game.'
-  #     return
-  #   end
-  #   # Deduct 200 shards from each player
-  #   insufficient_shards_users = @server.users.select { |user| user.wallet&.balance.to_i < 200 }
-  #   if insufficient_shards_users.any?
-  #     redirect_to new_transaction_path, alert: "Not all players have 200 shards. Please purchase more shards."
-  #   else
-  #   @server.server_users.each do |server_user|
-  #
-  #     wallet = server_user.user.wallet
-  #
-  #     wallet.update!(balance: wallet.balance - 200)
-  #   end
-  #   @server.start_game
-  #   GameChannel.broadcast_to(@server, { type: "page_reload", reason: "Game started" })
-  #   redirect_to game_path(@server), notice: 'Game started successfully.'
-  #   end
-  # end
-
 
   def start_game
     Rails.logger.info "[ServersController#start_game] Attempting to start game on server #{@server.id} by #{current_user.username}"
@@ -130,12 +102,12 @@ class ServersController < ApplicationController
       respond_to do |format|
         format.html { redirect_to server_game_path(@server, @game), notice: "Game started!" }
         format.turbo_stream {
-          @grid_cells = @server.grid_cells.includes(:owner, :treasure)
-          @server_users = @server.server_users.includes(:user) # Eager load users
-          @server_user = @server_users.find_by(user: current_user).try(:includes, :inventories, :treasures) # Correct eager loading
+          @grid_cells = @server.grid_cells.includes(:owner, :treasure) || []
+          @server_users = @server.server_users.includes(:user) || []
+          @server_user = @server.server_users.includes(:inventories, :treasures).find_by(user: current_user) || nil
           @current_turn_user = @server.current_turn_server_user
           @current_turn_user ||= @server.server_users.order(:turn_order).first
-          @opponents = @server.server_users.includes(:user, :treasures).where.not(id: @server_user&.id)
+          @opponents = @server.server_users.includes(:user, :treasures) || []
           @waiting_for_players = @server.server_users.count < @server.max_players
 
           render turbo_stream:
@@ -168,7 +140,7 @@ class ServersController < ApplicationController
 
     if @server.users.include?(current_user)
       Rails.logger.warn "[ServersController#join_game] User #{current_user.username} already joined server #{@server.id}"
-      redirect_to game_path(@server), alert: 'You have already joined this game.'
+      redirect_to server_game_path(@server, @server.game), alert: 'You have already joined this game.'
       return
     end
     Rails.logger.info "[ServersController#join_game] Current user's cable_token: #{current_user.cable_token}"
@@ -195,12 +167,12 @@ class ServersController < ApplicationController
 
   private
   def broadcast_game_update
-    @grid_cells = @server.grid_cells.includes(:owner, :treasure)
-    @server_users = @server.server_users.includes(:user) # Eager load users
-    @server_user = @server_users.find_by(user: current_user).try(:includes, :inventories, :treasures) # Correct eager loading
+    @grid_cells = @server.grid_cells.includes(:owner, :treasure) || []
+    @server_users = @server.server_users.includes(:user) || []
+    @server_user = @server.server_users.includes(:inventories, :treasures).find_by(user: current_user) || nil
     @current_turn_user = @server.current_turn_server_user
     @current_turn_user ||= @server.server_users.order(:turn_order).first
-    @opponents = @server.server_users.includes(:user, :treasures).where.not(id: @server_user&.id)
+    @opponents = @server.server_users.includes(:user, :treasures) || []
     @waiting_for_players = @server.server_users.count < @server.max_players
 
     GameChannel.broadcast_to @server, turbo_stream:

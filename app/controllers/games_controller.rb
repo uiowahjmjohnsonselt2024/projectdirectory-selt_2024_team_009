@@ -81,7 +81,7 @@ class GamesController < ApplicationController
     flash[:alert] = message
     respond_to do |format|
       format.turbo_stream { render turbo_stream: turbo_stream.replace("game-container", html: render_to_string(template: "games/show", layout: false)) }
-      format.html { redirect_to game_path(@server) }
+      format.html { redirect_to server_game_path(@server, @server.game) }
     end
     false
   end
@@ -137,7 +137,7 @@ class GamesController < ApplicationController
   def ensure_current_player_turn
     unless @server.current_turn_server_user == @server_user
       respond_to do |format|
-        format.html { redirect_to game_path(@server), alert: 'It is not your turn.' }
+        format.html { redirect_to server_game_path(@server, @server.game), alert: 'It is not your turn.' }
         format.json { render json: { success: false, message: 'It is not your turn.' }, status: :forbidden }
       end
     end

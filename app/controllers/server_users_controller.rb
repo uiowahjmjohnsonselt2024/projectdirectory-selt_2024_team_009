@@ -21,7 +21,7 @@ class ServerUsersController < ApplicationController
     @server.assign_starting_positions(new_user: @server_user)
 
     broadcast_game_update
-    redirect_to game_path(@server), notice: 'You have joined the game.'
+    redirect_to server_game_path(@server, @server.game), notice: 'You have joined the game.'
   end
 
   def leave

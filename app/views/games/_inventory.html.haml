@@ -3,7 +3,7 @@
     - items.each do |inventory|
       %li
         %span= inventory.item.name
-        = button_to "Use #{inventory.item.name}", perform_action_game_path(@server),
+        = button_to "Use #{inventory.item.name}", perform_action_server_game_path(@server),
           class: 'btn-game-action btn-info',
           params: { action_type: 'use_item', item_id: inventory.item.id },
           method: :post
