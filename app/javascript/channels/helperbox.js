@@ -14,7 +14,7 @@ helperText = document.getElementById('helptext')
 document.addEventListener('DOMContentLoaded', () => {
     console.log("I think I am working")
     // Select all buttons on the page
-    const types =  ['a', 'input', 'select', 'button', 'h2']
+    const types =  ['a', 'input', 'select', 'button', 'h2', 'h3']
 
     types.forEach(type => {
         console.log(type);

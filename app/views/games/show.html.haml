@@ -4,7 +4,7 @@
     %div.game-left-panel
       - if @waiting_for_players
         %div.waiting-message
-          %h2.text-center.text-warning
+          %h2.text-center.text-warning{ "title":"Game cannot start unless the player count is met. You cannot do anything but wait."}
             = "Waiting for players to join. Required: #{@server.max_players}."
           %p.text-center.text-muted
             = "Current players: #{@server.server_users.count}/#{@server.max_players}."
@@ -77,7 +77,7 @@
         %p.text-muted= @current_turn_user.user.username
       - if @server.current_turn_server_user == @server_user
         %div.game-action-controls
-          %h3.text-primary Your Turn
+          %h3.text-primary{title:"You are allowed to make a move by clicking those arrow buttons, then occupy cells"} Your Turn
 
         %div.game-movement-controls
           %h4.text-secondary Movement:
@@ -85,34 +85,40 @@
             = button_to '↑', perform_action_game_path(@server),
               class: 'btn-game-movement up',
               params: { action_type: 'move', direction: 'up' },
-              method: :post
+              method: :post,
+              title: "Move your icon up."
 
             = button_to '←', perform_action_game_path(@server),
               class: 'btn-game-movement left',
               params: { action_type: 'move', direction: 'left' },
-              method: :post
+              method: :post,
+              title: "Move your icon left."
 
             = button_to '→', perform_action_game_path(@server),
               class: 'btn-game-movement right',
               params: { action_type: 'move', direction: 'right' },
-              method: :post
+              method: :post,
+              title: "Move your icon right."
 
             = button_to '↓', perform_action_game_path(@server),
               class: 'btn-game-movement down',
               params: { action_type: 'move', direction: 'down' },
-              method: :post
+              method: :post,
+              title: "Move your icon down."
 
         %div.game-actions
           %h4.text-secondary Other Actions:
           = button_to 'Occupy Cell', perform_action_game_path(@server),
             class: 'btn-game-action btn-primary',
             params: { action_type: 'occupy' },
-            method: :post
+            method: :post,
+            title: "Take the cell. It is freely available. Otherwise, you need to fight. If so, capture the cell instead."
 
           = button_to 'Capture Cell', perform_action_game_path(@server),
             class: 'btn-game-action btn-danger',
             params: { action_type: 'capture', direction: 'right' },
-            method: :post
+            method: :post,
+            title: "Capture the cell. Your opponents don't deserve this square. If there are no opponents, do not waste this effort. Just take it instead."
 
         %div.d-flex.justify-content-center
           %div.game-legend
