@@ -15,7 +15,14 @@ class ServerUsersController < ApplicationController
       return
     end
 
-    @server_user = @server.server_users.create(user: current_user, cable_token: current_user.cable_token)
+    @server_user = @server.server_users.create!(
+      user: current_user,
+      cable_token: current_user.cable_token,
+      total_ap: 200,
+      turn_ap: 2,
+      shard_balance: 0
+    )
+
     Rails.logger.info "[ServersController#join_game] User #{current_user.username} joined server #{@server.id} with cable_token: #{@server_user.cable_token}"
     @server.assign_symbols_and_turn_order
     @server.assign_starting_positions(new_user: @server_user)
@@ -63,30 +70,33 @@ class ServerUsersController < ApplicationController
   private
   def broadcast_game_update
     @grid_cells = @server.grid_cells.includes(:owner, :treasure)
-    @server_users = @server.server_users.includes(:user)
-    @server_user = @server.server_users.find_by(user: current_user).includes(:inventories, :treasures)
-    @current_turn_user = @server.current_turn_server_user
-    @current_turn_user ||= @server.server_users.order(:turn_order).first
-    @opponents = @server.server_users.includes(:user, :treasures).where.not(id: @server_user&.id)
-    @waiting_for_players = @server.server_users.count < @server.max_players # Calculate the value
+    @server_users = @server.server_users.includes(:user) # Do not use `as_json`
+    @server_user = @server.server_users.includes(:inventories, :treasures).find_by(user: current_user) # Return full Active Record object
+    @current_turn_user = @server.current_turn_server_user || @server.server_users.order(:turn_order).first
+    @opponents = @server.server_users.includes(:user, :treasures)
+    @waiting_for_players = @server.server_users.count < @server.max_players
 
     GameChannel.broadcast_to @server, turbo_stream:
       turbo_stream.replace("game-container", partial: "games/game_area", locals: {
         server: @server,
-        game: @game,
-        server_users: @server_users,
+        game: @server.game,
+        server_users: @server_users, # Pass Active Record objects
         grid_cells: @grid_cells,
-        server_user: @server_user,
+        server_user: @server_user, # Pass Active Record object
         current_turn_user: @current_turn_user,
         opponents: @opponents,
-        waiting_for_players: @waiting_for_players # Pass it as a local
+        waiting_for_players: @waiting_for_players
       })
   end
+
   def set_server_user
     @server_user = current_user.server_users.find(params[:id])
+    Rails.logger.info "[ServerUsersController#set_server_user] User ID: #{@server_user.user_id}, Cable Token: #{@server_user.cable_token}"
+
   end
   def set_server
     @server = Server.includes(:game).find(params[:server_id])
     @game = @server.game
+    Rails.logger.info "[ServerUsersController#set_server] Loaded server #{@server.id} for game #{@game.id}"
   end
 end

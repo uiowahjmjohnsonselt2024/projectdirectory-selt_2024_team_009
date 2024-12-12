@@ -18,7 +18,7 @@ class ServerUser < ApplicationRecord
 
   # Callbacks
   after_initialize :set_default_role, if: :new_record?
-
+  after_initialize :set_defaults, if: :new_record?
   # Methods to manage AP and Shards
   def spend_turn_ap(amount)
     if turn_ap >= amount
@@ -70,9 +70,14 @@ class ServerUser < ApplicationRecord
 
     save
   end
+
+  private
   def set_default_role
     self.role ||= 'player'
   end
-  private
-
+  def set_defaults
+    self.total_ap ||= 200
+    self.turn_ap ||= 2
+    self.shard_balance ||= 0
+  end
 end

@@ -9,9 +9,11 @@ document.addEventListener('turbo:load', () => {
         const cableToken = cableTokenMeta.content;
         const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
         consumer.connection.url = `${protocol}://${window.location.hostname}:${window.location.port}/cable?cable_token=${cableToken}`;
+        console.log("Updated ActionCable URL:", consumer.connection.url);
     } else {
         console.error("[consumer.js] No cable token found.");
     }
 });
+
 
 export default consumer;

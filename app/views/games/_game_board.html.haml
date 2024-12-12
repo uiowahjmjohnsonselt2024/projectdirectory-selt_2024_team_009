@@ -1,4 +1,5 @@
-%table.game-board
+- background_image = @server.background_image_url || asset_path('game_background.png')
+%table.game-board{ style: "background-image: image-url('#{background_image}');" }
   - (0..5).to_a.reverse.each do |y|
     %tr
       - (0..5).each do |x|

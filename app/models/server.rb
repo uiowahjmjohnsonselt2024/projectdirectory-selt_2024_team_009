@@ -45,38 +45,38 @@ class Server < ApplicationRecord
   # Generate the game board imagewsDz  end
   # Generate the game board image
   def generate_game_board_image
-    # Skip if image already exists
     return if background_image_url.present?
-    # prompt = "A beautiful 6x6 game grid with a strategic design in pixel art style"
+
     prompt = "A top-down view of a 6x6 game grid, pixel art style, colorful and vibrant"
     client = OpenAI::Client.new(access_token: ENV['OPENAI_API_KEY'])
 
     begin
-      # Generate the image with correct DALL-E 3 size
       response = client.images.generate(
         parameters: {
           prompt: prompt,
           model: "dall-e-3",
-          size: "1024x1024",  # DALL-E 3 supports 1024x1024, 1792x1024, or 1024x1792
+          size: "100x100", # Ensure DALL-E 3 supports this size
           n: 1
         }
       )
 
-      # Save the image URL if successful
-      if response.dig("data", 0, "url").present?
-        update!(background_image_url: response["data"][0]["url"])
-        Rails.logger.info "Generated game board image for server #{id}"
+      image_url = response.dig("data", 0, "url")
+      if image_url.present?
+        update!(background_image_url: image_url)
+        Rails.logger.info "Generated game board image for server #{id}: #{image_url}"
       else
-        Rails.logger.error "Failed to get image URL for server #{id}"
+        Rails.logger.error "No image URL returned for server #{id}, setting default image"
         set_default_game_board_image
       end
 
-    rescue => e
-      Rails.logger.error "Error generating image: #{e.message}"
+    rescue OpenAI::Error => e
+      Rails.logger.error "OpenAI API error: #{e.message}"
+      set_default_game_board_image
+    rescue StandardError => e
+      Rails.logger.error "Unexpected error: #{e.message}"
       set_default_game_board_image
     end
   end
-
   def set_default_game_board_image
     update!(background_image_url: "/assets/images/game_background.png")
     Rails.logger.info "Default game board image set for server #{id}: #{background_image_url}"

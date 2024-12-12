@@ -11,14 +11,14 @@ class GamesController < ApplicationController
     @game = @server.game # Access the associated game
 
     # Important Debugging:
+    Rails.logger.debug "[GamesController#show] Current user token: #{current_user.cable_token}"
     Rails.logger.debug "@server: #{@server.inspect}"
     Rails.logger.debug "@game: #{@game.inspect}"
 
     @grid_cells = @server.grid_cells.includes(:owner, :treasure) || []
-    @server_users = @server.server_users.includes(:user) || []
-    @server_user = @server.server_users.includes(:inventories, :treasures).find_by(user: current_user) || nil
-    @current_turn_user = @server.current_turn_server_user
-    @current_turn_user ||= @server.server_users.order(:turn_order).first
+    @server_users = @server.server_users.includes(:user) # This should return AR objects
+    @server_user = @server.server_users.includes(:inventories, :treasures).find_by(user: current_user)
+    @current_turn_user = @server.current_turn_server_user || @server.server_users.order(:turn_order).first
     @opponents = @server.server_users.includes(:user, :treasures) || []
     @waiting_for_players = @server.server_users.count < @server.max_players
 
@@ -29,15 +29,16 @@ class GamesController < ApplicationController
         type: "waiting_for_players",
         message: "Waiting for players to join.",
         current_count: @server.server_users.count,
-        max_players: @server.max_players
+        max_players: @server.max_players,
+        cable_token: current_user.cable_token
       )
     else
-      GameChannel.broadcast_to(@server, { type: "all_players_joined" })
+      GameChannel.broadcast_to(@server, { type: "all_players_joined", cable_token: current_user.cable_token })
     end
   end
 
   def perform_action
-    Rails.logger.info "[perform_action] User: #{current_user.username}, Server: #{@server.id}, Action: #{params[:action_type]}"
+    Rails.logger.info "[perform_action] User: #{current_user.username}, Token: #{current_user.cable_token}, Server: #{@server.id}, Action: #{params[:action_type]}"
     @server.reload
     @grid_cells = @server.grid_cells.includes(:owner, :treasure)
     @server_users = @server.server_users.includes(:user)
@@ -60,7 +61,7 @@ class GamesController < ApplicationController
               end
     return unless success
 
-    broadcast_game_state
+    broadcast_game_state(current_user.cable_token)
 
     if @server_user.turn_ap <= 0 || @end_turn
       advance_turn
@@ -86,8 +87,18 @@ class GamesController < ApplicationController
     false
   end
 
-  def broadcast_game_state
+  def broadcast_game_state(cable_token = nil)
     GameChannel.broadcast_to @server, turbo_stream:
+      turbo_stream.replace("game-container", partial: "games/game_area", locals: {
+        server: @server,
+        game: @server.game,
+        server_users: @server_users, # Pass Active Record objects
+        grid_cells: @grid_cells,
+        server_user: @server_user, # Pass Active Record object
+        current_turn_user: @current_turn_user,
+        opponents: @opponents,
+        waiting_for_players: @waiting_for_players
+      })+
       turbo_stream.replace("game-board", partial: "games/game_board", locals: { grid_cells: @grid_cells, server_user: @server_user, server_users: @server_users }) +
         turbo_stream.replace("player-stats", partial: "games/player_stats", locals: { server_user: @server_user }) +
         turbo_stream.replace("opponents-list", partial: "games/opponent_details", locals: { opponents: @opponents }) +
@@ -97,12 +108,14 @@ class GamesController < ApplicationController
 
 
   def broadcast_turn_ended
-    GameChannel.broadcast_to(@server, { type: "turn_ended", current_turn_user_id: @server.current_turn_server_user.id })
+    GameChannel.broadcast_to(@server, {
+      turbo_stream: turbo_stream.replace("current-turn", partial: "games/current_turn", locals: { current_turn_user: @current_turn_user })
+    })
   end
 
   def update_opponents
     GameChannel.broadcast_to @server, turbo_stream:
-      turbo_stream.replace("opponent-details", partial: "games/opponent_details", locals: { opponents: @opponents, server: @server })
+      turbo_stream.replace("opponent-details", partial: "games/opponent_details", locals: { opponents: @opponents, server: @server, cable_token: current_user.cable_token })
   end
 
   def update_player_stats
@@ -132,7 +145,7 @@ class GamesController < ApplicationController
   end
 
   def broadcast_action_performed(message)
-    GameChannel.broadcast_to(@server, { type: "action_performed", message: message })
+    GameChannel.broadcast_to(@server, { type: "action_performed", message: message, cable_token: current_user.cable_token })
   end
   def ensure_current_player_turn
     unless @server.current_turn_server_user == @server_user
@@ -175,7 +188,7 @@ class GamesController < ApplicationController
     end
 
     @server.current_turn_server_user.update(turn_ap: 2)
-    broadcast_game_state
+    broadcast_game_state(current_user.cable_token)
     broadcast_turn_ended
   end
 
@@ -207,7 +220,7 @@ class GamesController < ApplicationController
           @server_user.update(current_position_x: target_x, current_position_y: target_y)
           check_for_treasure(target_cell)
           flash[:notice] = 'Moved successfully.'
-          broadcast_game_state
+          broadcast_game_state(current_user.cable_token)
           return true
         end
       else
@@ -226,7 +239,7 @@ class GamesController < ApplicationController
       if current_cell.owner.nil?
         current_cell.update(owner: @server_user)
         flash[:notice] = 'Cell occupied successfully.'
-        broadcast_game_state
+        broadcast_game_state(current_user.cable_token)
         return true
       else
         flash[:alert] = 'Cell is already occupied.'
@@ -247,7 +260,7 @@ class GamesController < ApplicationController
         process_treasure(treasure) # Use the existing process_treasure method
         @server_user.treasures.delete(treasure)
         flash[:notice] = "Used treasure: #{treasure.name}"
-        broadcast_game_state
+        broadcast_game_state(current_user.cable_token)
         true
       else
         handle_error('Treasure not found.')
@@ -274,7 +287,7 @@ class GamesController < ApplicationController
           else
             target_cell.update(owner: @server_user)
             flash[:notice] = 'Captured opponent\'s cell.'
-            broadcast_game_state
+            broadcast_game_state(current_user.cable_token)
             return true
           end
         else
@@ -300,7 +313,7 @@ class GamesController < ApplicationController
           apply_item_effect(item)
           inventory.destroy
           flash[:notice] = "Used item: #{item.name}"
-          broadcast_game_state
+          broadcast_game_state(current_user.cable_token)
           return true
         else
           flash[:alert] = 'Not enough AP to use this item.'
@@ -322,7 +335,7 @@ class GamesController < ApplicationController
         @server_user.adjust_shard_balance(-item.price)
         current_user.inventories.create(item: item)
         flash[:notice] = 'Item purchased successfully.'
-        broadcast_game_state
+        broadcast_game_state(current_user.cable_token)
         return true
       else
         flash[:alert] = 'Not enough Shards to purchase this item.'
