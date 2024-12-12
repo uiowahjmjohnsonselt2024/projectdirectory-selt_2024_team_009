@@ -62,7 +62,8 @@ class GridCellsController < ApplicationController
 
   def set_server
     # Each grid cell belongs to a server
-    @server = Server.find(params[:server_id])
+    @server = Server.includes(:game).find(params[:server_id])
+    @game = @server.game
   end
 
   def set_grid_cell

@@ -22,11 +22,12 @@ class User < ApplicationRecord
   validates :username, presence: true, uniqueness: true
   validates :email, presence: true, uniqueness: true
   validates :role, presence: true, inclusion: { in: %w[admin player], message: "%{value} is not a valid role" }
-  validates :cable_token, presence: true, uniqueness: true
+  validates :cable_token, uniqueness: true, allow_nil: true # Key change: allow_nil
 
   # Callbacks
-  before_validation :generate_cable_token, on: :create
+  before_validation :ensure_cable_token # Key change: before_validation and new method
   after_create :create_wallet_with_initial_balance
+
 
   # Role Methods
   def admin?
@@ -43,8 +44,12 @@ class User < ApplicationRecord
     Wallet.create(user: self, balance: 500)
   end
 
-  def generate_cable_token
-    self.cable_token ||= SecureRandom.hex(16)
+  def ensure_cable_token # New method to handle token generation
+    if cable_token.nil?
+      self.cable_token = loop do
+        token = SecureRandom.hex(16) # Use hex as before
+        break token unless User.exists?(cable_token: token)
+      end
+    end
   end
-
 end

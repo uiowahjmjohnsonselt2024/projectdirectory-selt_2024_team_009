@@ -5,6 +5,7 @@ class Server < ApplicationRecord
   has_many :server_users, dependent: :destroy
   has_many :grid_cells, dependent: :destroy
   has_many :users, through: :server_users
+  has_one :game, dependent: :destroy
   belongs_to :creator, class_name: 'User', foreign_key: 'created_by'
   belongs_to :current_turn_server_user, class_name: 'ServerUser', optional: true
 
@@ -17,27 +18,31 @@ class Server < ApplicationRecord
   # Start the game and generate the game board background image
   def start_game
     user_names = server_users.includes(:user).map { |su| su.user.username }
-    Rails.logger.info "Starting game on server_model, startgame #{id} with users: #{user_names.join(', ')}"
+    Rails.logger.info "[Server#start_game] Starting game for server #{id} with users: #{user_names.join(', ')}"
 
-    # Ensure the creator is added as a player
-    server_users.find_or_create_by(user: creator)
+    if game.present?
+      Rails.logger.warn "[Server#start_game] Game already exists for server #{id}"
+      return # Important: Return if the game already exists to prevent duplicate grid creation
+    else
+      @game = self.create_game! # Create the game record if it doesn't exist
+    end
 
-    # Generate the game board background image
+    unless grid_cells.exists?
+      Rails.logger.info "[Server#start_game] Initializing grid"
+      initialize_grid
+    else
+      Rails.logger.info "[Server#start_game] Grid already exists, skipping initialization"
+    end
+
     generate_game_board_image
-
-    # Initialize the game board grid
-    initialize_grid
-
-    # Assign symbols and turn order
     assign_symbols_and_turn_order
-
-    # Assign starting positions for players
     assign_starting_positions
-
-    # Mark game as in progress
     update!(status: 'in_progress', current_turn_server_user: server_users.order(:turn_order).first)
+    Rails.logger.info "[Server#start_game] Server status updated to 'in_progress'"
+    Rails.logger.info "[Server#start_game] Game started successfully"
   end
 
+  # Generate the game board imagewsDz  end
   # Generate the game board image
   def generate_game_board_image
     # Skip if image already exists
@@ -113,7 +118,7 @@ class Server < ApplicationRecord
     server_users.each_with_index do |server_user, index|
       next if server_user.symbol.present?
 
-      server_user.update(
+      server_user.update!(
         symbol: available_symbols.shift,
         turn_order: index + 1
       )
@@ -123,27 +128,16 @@ class Server < ApplicationRecord
   # Assign starting positions for players
   def assign_starting_positions(new_user: nil)
     available_cells = grid_cells.where(obstacle: false, owner: nil).to_a
-    Rails.logger.info "Available cells for assignment: #{available_cells.map { |cell| [cell.x, cell.y] }}"
-
-    users_to_assign = new_user ? [new_user] : server_users
+    users_to_assign = new_user ? [new_user] : server_users.reload
 
     users_to_assign.each do |server_user|
-      # Ensure the server_user is persisted with a valid cable_token
-      if !server_user.persisted? || server_user.cable_token.blank?
-        Rails.logger.error "ServerUser #{server_user.user.username} has invalid or duplicate cable_token."
-        next
-      end
-
       next if server_user.current_position_x && server_user.current_position_y
 
-      # Assign a valid starting cell
       starting_cell = find_valid_starting_cell(available_cells, server_user)
       assign_cell_to_user(starting_cell, server_user)
       available_cells.delete(starting_cell)
     end
   end
-
-
 
   # Find a valid starting cell for a player
   def find_valid_starting_cell(available_cells, server_user)
@@ -157,26 +151,10 @@ class Server < ApplicationRecord
     raise "Unable to find a valid starting position for #{server_user.user.username}"
   end
 
-  # Assign a cell to a user
   def assign_cell_to_user(cell, server_user)
-    unless server_user.persisted?
-      Rails.logger.error "Cannot assign cell to non-persisted ServerUser #{server_user.inspect}"
-      raise ActiveRecordError, "ServerUser must be persisted before assigning a cell"
-    end
-
-    Rails.logger.info "Assigning cell [#{cell.x}, #{cell.y}] to ServerUser #{server_user.id} (persisted? #{server_user.persisted?})"
-
-    # Update the grid cell
     cell.update!(owner: server_user)
-
-    # Explicitly update only the position attributes
-    server_user.update!(
-      current_position_x: cell.x,
-      current_position_y: cell.y
-    )
+    server_user.update!(current_position_x: cell.x, current_position_y: cell.y)
   end
-
-
 
   private
 
@@ -193,16 +171,20 @@ class Server < ApplicationRecord
   end
   # Ensure the creator is a ServerUser
 
+
   def add_creator_as_server_user
-    server_users.create!(
-      user: creator,
-      role: 'player',
-      cable_token: creator.cable_token,
-      turn_order: 1,
-      symbol: '🟢'
-    )
-  rescue ActiveRecord::RecordInvalid => e
-    Rails.logger.error "Failed to add creator as ServerUser: #{e.message}"
-    raise
+    begin
+      server_users.create!(
+        user: creator,
+        role: 'player',
+        cable_token: creator.cable_token, # Use the user's existing token
+        turn_order: 1,
+        symbol: '🟢'
+      )
+    rescue ActiveRecord::RecordInvalid => e
+      Rails.logger.error "Failed to add creator as ServerUser: #{e.message}"
+      raise e
+    end
   end
+
 end

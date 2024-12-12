@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_12_11_031813) do
+ActiveRecord::Schema[7.2].define(version: 2024_12_12_103250) do
   create_table "contents", force: :cascade do |t|
     t.text "story_text"
     t.string "image_url"
@@ -22,6 +22,8 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_11_031813) do
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "server_id", null: false
+    t.index ["server_id"], name: "index_games_on_server_id"
   end
 
   create_table "grid_cells", force: :cascade do |t|
@@ -45,6 +47,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_11_031813) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "item_name"
+    t.integer "server_user_id"
   end
 
   create_table "items", force: :cascade do |t|
@@ -114,7 +117,6 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_11_031813) do
     t.integer "turns_skipped"
     t.string "cable_token"
     t.integer "role", null: false
-    t.index ["cable_token"], name: "index_server_users_on_cable_token", unique: true
     t.index ["role"], name: "index_server_users_on_role"
   end
 
@@ -128,6 +130,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_11_031813) do
     t.integer "current_turn_server_user_id"
     t.string "background_image_url"
     t.string "role"
+    t.integer "turn_count"
     t.index ["created_by"], name: "index_servers_on_created_by"
   end
 
@@ -187,6 +190,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_11_031813) do
     t.datetime "updated_at", null: false
   end
 
+  add_foreign_key "games", "servers"
   add_foreign_key "grid_cells", "contents"
   add_foreign_key "grid_cells", "servers"
   add_foreign_key "grid_cells", "treasures"

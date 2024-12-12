@@ -7,13 +7,14 @@ class ServersController < ApplicationController
     Rails.logger.info "[ServersController#index] Current user: #{current_user.username}"
     @servers = Server.all
     @created_servers = current_user.created_servers
-    @joined_servers = current_user.servers.includes(:server_users) || []
+    @joined_servers = current_user.servers.where.not(created_by: current_user.id) || []
   end
 
 
 
   # GET /servers/:id
   def show
+    @server = Server.includes(:game).find(params[:id])
     Rails.logger.info "[ServersController#show] Server ID: #{@server.id}, Current user: #{current_user.username}"
   end
 
@@ -25,9 +26,10 @@ class ServersController < ApplicationController
   # POST /servers
   def create
     Rails.logger.info "[ServersController#create] Creating server for user: #{current_user.username}"
+    Rails.logger.info "[ServersController#create] Creating server for user token: #{current_user.cable_token}"
     @server = current_user.created_servers.build(server_params) # Automatically associates the server with the logged-in user
     @server.created_by = current_user.id # Explicitly set the created_by field if it's not handled automatically
-
+    Rails.logger.info "[ServersController#create] Server #{@server.creator} created"
     if @server.save
       Rails.logger.info "[ServersController#create] Server #{@server.id} created successfully by #{current_user.username}"
       redirect_to servers_path, notice: 'Server created successfully.'
@@ -93,8 +95,10 @@ class ServersController < ApplicationController
   #   end
   # end
 
+
   def start_game
     Rails.logger.info "[ServersController#start_game] Attempting to start game on server #{@server.id} by #{current_user.username}"
+
     if @server.status != 'pending'
       Rails.logger.warn "[ServersController#start_game] Game already started or finished on server #{@server.id}"
       redirect_to @server, alert: 'Game has already started or finished.'
@@ -107,26 +111,50 @@ class ServersController < ApplicationController
       return
     end
 
+    insufficient_shards_users = @server.users.select { |user| user.wallet&.balance.to_i < 200 }
+    if insufficient_shards_users.any?
+      redirect_to new_transaction_path, alert: "Not all players have 200 shards. Please purchase more shards."
+      return
+    end
+
     @server.server_users.each do |server_user|
-      # Rails.logger.info "DEBUG: ServerUser token before deduction: #{server_user.cable_token}, User ID: #{server_user.user.id}" # Debug token
       wallet = server_user.user.wallet
-      if wallet.balance < 200
-        Rails.logger.error "[ServersController#start_game] Insufficient balance for user #{server_user.user.username} (User ID: #{server_user.user.id})"
-        Rails.logger.error "ERROR: Insufficient balance for User ID: #{server_user.user.id}" # Log balance issue
-        redirect_to new_transaction_path, alert: "Not all players have 200 shards. Please purchase more shards."
-        return
-      end
       wallet.update!(balance: wallet.balance - 200)
     end
 
-    @server.start_game
-    #
-    # @server.server_users.each do |su|
-    #   puts "ServerUser ID: #{su.id}, Cable Token: #{su.cable_token}, Valid: #{su.valid?}, Errors: #{su.errors.full_messages.join(', ')}"
-    # end
-    Rails.logger.info "[ServersController#start_game] Game started successfully on server #{@server.id}"
-    GameChannel.broadcast_to(@server, { type: "page_reload", reason: "Game started" })
-    redirect_to game_path(@server), notice: 'Game started successfully.'
+    if @server.start_game
+      @game = @server.game
+
+      GameChannel.broadcast_to(@server, { type: "game_started" })
+
+      respond_to do |format|
+        format.html { redirect_to server_game_path(@server, @game), notice: "Game started!" }
+        format.turbo_stream {
+          @grid_cells = @server.grid_cells.includes(:owner, :treasure)
+          @server_users = @server.server_users.includes(:user) # Eager load users
+          @server_user = @server_users.find_by(user: current_user).try(:includes, :inventories, :treasures) # Correct eager loading
+          @current_turn_user = @server.current_turn_server_user
+          @current_turn_user ||= @server.server_users.order(:turn_order).first
+          @opponents = @server.server_users.includes(:user, :treasures).where.not(id: @server_user&.id)
+          @waiting_for_players = @server.server_users.count < @server.max_players
+
+          render turbo_stream:
+                   turbo_stream.replace("game-container", partial: "games/game_area", locals: {
+                     server: @server,
+                     game: @game,
+                     server_users: @server_users,
+                     grid_cells: @grid_cells,
+                     server_user: @server_user,
+                     current_turn_user: @current_turn_user,
+                     opponents: @opponents,
+                     waiting_for_players: @waiting_for_players
+                   })
+        }
+      end
+    else
+      Rails.logger.error "[ServersController#start_game] Game creation failed on server #{@server.id}"
+      redirect_to @server, alert: "Failed to start the game. Please try again."
+    end
   end
 
   # POST /servers/:id/join_game
@@ -152,28 +180,45 @@ class ServersController < ApplicationController
     end
 
     # Add the current user to the server
-    @server_user = @server.server_users.create(
-      user: current_user,
-      cable_token: current_user.cable_token
-    )
-
-    Rails.logger.info "[ServersController#join_game] User #{current_user.username} joined server #{@server.id}"
+    @server_user = @server.server_users.create(user: current_user, cable_token: current_user.cable_token)
+    Rails.logger.info "[ServersController#join_game] User #{current_user.username} joined server #{@server.id} with cable_token: #{@server_user.cable_token}"
 
     # Assign symbol and turn order
     @server.assign_symbols_and_turn_order
     @server.assign_starting_positions(new_user: @server_user)
     # Assign starting position ONLY for the new user
-    GameChannel.broadcast_to(@server, { type: "page_reload", reason: "Player joined" })
-    redirect_to game_path(@server), notice: 'You have joined the game.'
+    broadcast_game_update
 
   end
 
 
 
   private
+  def broadcast_game_update
+    @grid_cells = @server.grid_cells.includes(:owner, :treasure)
+    @server_users = @server.server_users.includes(:user) # Eager load users
+    @server_user = @server_users.find_by(user: current_user).try(:includes, :inventories, :treasures) # Correct eager loading
+    @current_turn_user = @server.current_turn_server_user
+    @current_turn_user ||= @server.server_users.order(:turn_order).first
+    @opponents = @server.server_users.includes(:user, :treasures).where.not(id: @server_user&.id)
+    @waiting_for_players = @server.server_users.count < @server.max_players
+
+    GameChannel.broadcast_to @server, turbo_stream:
+      turbo_stream.replace("game-container", partial: "games/game_area", locals: {
+        server: @server,
+        game: @game,
+        server_users: @server_users,
+        grid_cells: @grid_cells,
+        server_user: @server_user,
+        current_turn_user: @current_turn_user,
+        opponents: @opponents,
+        waiting_for_players: @waiting_for_players
+      })
+  end
   # Set the @server based on the ID in params
   def set_server
-    @server = Server.find(params[:id])
+    @server = Server.includes(:game).find(params[:id])
+    @game = @server.game
     Rails.logger.info "[ServersController#set_server] Loaded server #{@server.id} with users: #{@server.users.pluck(:username).join(', ')}"
   end
 

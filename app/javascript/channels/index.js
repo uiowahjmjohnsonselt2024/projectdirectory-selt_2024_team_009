@@ -2,3 +2,4 @@
 import "./game_channel"
 import "./consumer";
 import "./chat_channel";
+import "./test_channel";

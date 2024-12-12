@@ -1,25 +1,24 @@
+// controllers/game_actions_controller.js
 import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
+    static targets = ["error"];
+
     connect() {
         console.log("GameActionsController connected");
     }
 
     move(event) {
-        const direction = event.currentTarget.dataset.direction;
-        console.log(`Move triggered in direction: ${direction}`);
-        this.sendAction("move", { direction });
+        this.sendAction("move", { direction: event.currentTarget.dataset.direction });
     }
 
     occupy() {
-        console.log("Occupy action triggered");
         this.sendAction("occupy");
     }
 
     capture() {
         const direction = prompt("Enter direction to capture (Up, Down, Left, Right):");
         if (direction) {
-            console.log(`Capture action triggered in direction: ${direction}`);
             this.sendAction("capture", { direction });
         }
     }
@@ -27,21 +26,26 @@ export default class extends Controller {
     useItem() {
         const itemId = prompt("Enter Item ID to use:");
         if (itemId) {
-            console.log(`Use Item action triggered. Item ID: ${itemId}`);
             this.sendAction("use_item", { item_id: itemId });
+        }
+    }
+
+    useTreasure(){
+        const treasureId = prompt("Enter Treasure ID to use:");
+        if (treasureId) {
+            this.sendAction("use_treasure", { treasure_id: treasureId });
         }
     }
 
     purchaseItem() {
         const itemId = prompt("Enter Item ID to purchase:");
         if (itemId) {
-            console.log(`Purchase Item action triggered. Item ID: ${itemId}`);
             this.sendAction("purchase_item", { item_id: itemId });
         }
     }
 
     sendAction(actionType, extraParams = {}) {
-        const gameId = this.gameId;
+        const gameId = document.querySelector('[data-server-id]').dataset.serverId;
         const csrfToken = document.querySelector("meta[name='csrf-token']").content;
 
         fetch(`/games/${gameId}/perform_action`, {
@@ -53,23 +57,18 @@ export default class extends Controller {
             },
             body: JSON.stringify({ action_type: actionType, ...extraParams }),
         })
-            .then((response) => response.json())
-            .then((data) => {
-                if (data.success) {
-                    console.log("Action successful:", data.message);
-                    window.location.reload();
-                } else {
-                    console.error("Action failed:", data.message);
-                    alert(data.message || "Action failed.");
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.message) });
                 }
+                return response.json();
             })
-            .catch((error) => {
-                console.error("Error occurred:", error);
-                alert("An error occurred. Please try again.");
+            .then(data => {
+                console.log("Action successful:", data.message);
+            })
+            .catch(error => {
+                console.error("Action failed:", error.message);
+                alert(error.message || "An error occurred. Please try again.");
             });
-    }
-
-    get gameId() {
-        return window.location.pathname.split("/")[2];
     }
 }

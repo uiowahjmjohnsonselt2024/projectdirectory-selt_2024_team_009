@@ -1,19 +1,17 @@
-// Action Cable provides the framework to deal with WebSockets in Rails.
-// You can generate new channels where WebSocket features live using the `bin/rails generate channel` command.
+// consumer.js
 import { createConsumer } from "@rails/actioncable";
-// Read the cable_token from the meta tag
-const cableTokenMeta = document.querySelector('meta[name="cable-token"]')
-const cableToken = cableTokenMeta ? cableTokenMeta.getAttribute('content') : null
 
-if (!cableToken) {
-    console.error("[consumer.js] No cable token found. WebSocket connection will not be authenticated.")
-}
-else {
-    console.log("[consumer.js] Cable token found:", cableToken)
-}// Dynamically determine the WebSocket URL based on the environment
-const cableURL = window.location.hostname === 'shards-of-the-grid-team-09.herokuapp.com'
-    ? `wss://shards-of-the-grid-team-09.herokuapp.com/cable?cable_token=${cableToken}`
-    : `ws://localhost:3000/cable?cable_token=${cableToken}`;
+const consumer = createConsumer();
 
-// Create the consumer with the generated URL
-export default createConsumer(cableURL);
+document.addEventListener('turbo:load', () => {
+    const cableTokenMeta = document.querySelector('meta[name="cable-token"]');
+    if (cableTokenMeta && cableTokenMeta.content) {
+        const cableToken = cableTokenMeta.content;
+        const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+        consumer.connection.url = `${protocol}://${window.location.hostname}:${window.location.port}/cable?cable_token=${cableToken}`;
+    } else {
+        console.error("[consumer.js] No cable token found.");
+    }
+});
+
+export default consumer;

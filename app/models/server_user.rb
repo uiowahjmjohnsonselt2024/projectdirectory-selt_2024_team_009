@@ -3,6 +3,8 @@ class ServerUser < ApplicationRecord
   belongs_to :user
   has_many :grid_cells, foreign_key: :owner_id
   has_many :treasures, through: :grid_cells
+  has_many :inventories, dependent: :destroy
+
   #before_create :deduct_entry_fee
   # Validations
   validates :total_ap, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
@@ -10,11 +12,9 @@ class ServerUser < ApplicationRecord
   validates :shard_balance, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
   validates :symbol, inclusion: { in: %w[🟢 🔴 🔵 🟡 🟣 🟤] }, allow_nil: true
   validates :turn_order, numericality: { only_integer: true }, allow_nil: true
-  validates :cable_token, presence: true, uniqueness: true
   validates :role, presence: true
   validates :user_id, presence: true
   validates :server_id, presence: true
-  validates :cable_token, presence: true, uniqueness: true
 
   # Callbacks
   after_initialize :set_default_role, if: :new_record?

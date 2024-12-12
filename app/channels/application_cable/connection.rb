@@ -11,8 +11,9 @@ module ApplicationCable
 
     def find_verified_user
       token = request.params[:cable_token] || request.query_parameters["cable_token"]
+      token2 = cookies.signed[:cable_token]
       Rails.logger.info "ActionCable: Attempting to authenticate with cable_token: #{token.inspect}"
-
+      Rails.logger.info "Sessonstoken: Attempting to authenticate with cable_token: #{token2.inspect}"
       # Find the ServerUser by cable_token
       server_user = ServerUser.find_by(cable_token: token)
 

@@ -115,7 +115,16 @@ body.games::after {
     background: #add8e6;
 }
 
+.game-treasure {
+    background-color: gold; /* Or any other color you prefer */
+    color: darkred; /* Color of the "T" */
+    font-weight: bold;
+}
 
+.game-obstacle {
+    background-color: gray;
+    color: black;
+}
 .game-movement-controls {
     margin-top: 20px;
     padding: 15px;

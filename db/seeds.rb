@@ -53,29 +53,7 @@ user4 = User.create!(
   cable_token: SecureRandom.hex(16)
 )
 
-# Define the creator
-creator = user1
 
-# Create the Server
-server = Server.new(
-  name: 'Test Server',
-  max_players: 4,
-  creator: creator,
-  status: 'pending'
-)
-
-# Add the creator as a ServerUser before saving the server
-server.server_users.build(user: creator, cable_token: SecureRandom.hex(16))
-
-# Save the server
-server.save!
-
-# Add additional ServerUsers (excluding the creator, since they were already added)
-[user2, user3, user4].each do |user|
-  server.server_users.create!(user: user)
-end
-
-puts "Seeding completed successfully!"
 # db/seeds.rb
 # db/seeds.rb
 Item.create!([
