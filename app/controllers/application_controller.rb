@@ -31,6 +31,6 @@ class ApplicationController < ActionController::Base
     new_user_session_path
   end
   def log_flash_messages
-    # Rails.logger.debug "Flash contents: #{flash.to_hash}" if flash.any?
+    # #Rails.logger.debug "Flash contents: #{flash.to_hash}" if flash.any?
   end
 end

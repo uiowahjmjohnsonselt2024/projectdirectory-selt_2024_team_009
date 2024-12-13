@@ -1,6 +1,10 @@
-%h1 Game Over!
-%p The winner is #{winner.user.username}!
-%p Stats:
-%ul
-  %li Cells Owned: #{winner.grid_cells.count}
-  %li Shards: #{winner.shard_balance}
+- if winner && winner.user
+  %h1 Game Over!
+  %p The winner is #{winner.user.username}!
+  %p Stats:
+  %ul
+    %li Cells Owned: #{winner.grid_cells.count}
+    %li Shards: #{winner.shard_balance}
+- else
+  %h1 Game Over!
+  %p.text-danger Could not determine the winner due to an invalid game state.

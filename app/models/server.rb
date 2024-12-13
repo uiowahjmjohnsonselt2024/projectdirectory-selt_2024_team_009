@@ -18,28 +18,28 @@ class Server < ApplicationRecord
   # Start the game and generate the game board background image
   def start_game
     user_names = server_users.includes(:user).map { |su| su.user.username }
-    Rails.logger.info "[Server#start_game] Starting game for server #{id} with users: #{user_names.join(', ')}"
+    #Rails.logger.info "[Server#start_game] Starting game for server #{id} with users: #{user_names.join(', ')}"
 
     if game.present?
-      Rails.logger.warn "[Server#start_game] Game already exists for server #{id}"
+      #Rails.logger.warn "[Server#start_game] Game already exists for server #{id}"
       return # Important: Return if the game already exists to prevent duplicate grid creation
     else
       @game = self.create_game! # Create the game record if it doesn't exist
     end
 
     unless grid_cells.exists?
-      Rails.logger.info "[Server#start_game] Initializing grid"
+      #Rails.logger.info "[Server#start_game] Initializing grid"
       initialize_grid
     else
-      Rails.logger.info "[Server#start_game] Grid already exists, skipping initialization"
+      #Rails.logger.info "[Server#start_game] Grid already exists, skipping initialization"
     end
 
     generate_game_board_image
     assign_symbols_and_turn_order
     assign_starting_positions
     update!(status: 'in_progress', current_turn_server_user: server_users.order(:turn_order).first)
-    Rails.logger.info "[Server#start_game] Server status updated to 'in_progress'"
-    Rails.logger.info "[Server#start_game] Game started successfully"
+    #Rails.logger.info "[Server#start_game] Server status updated to 'in_progress'"
+    #Rails.logger.info "[Server#start_game] Game started successfully"
   end
 
   # Generate the game board imagewsDz  end
@@ -63,23 +63,23 @@ class Server < ApplicationRecord
       image_url = response.dig("data", 0, "url")
       if image_url.present?
         update!(background_image_url: image_url)
-        Rails.logger.info "Generated game board image for server #{id}: #{image_url}"
+        #Rails.logger.info "Generated game board image for server #{id}: #{image_url}"
       else
-        Rails.logger.error "No image URL returned for server #{id}, setting default image"
+        #Rails.logger.error "No image URL returned for server #{id}, setting default image"
         set_default_game_board_image
       end
 
     rescue OpenAI::Error => e
-      Rails.logger.error "OpenAI API error: #{e.message}"
+      #Rails.logger.error "OpenAI API error: #{e.message}"
       set_default_game_board_image
     rescue StandardError => e
-      Rails.logger.error "Unexpected error: #{e.message}"
+      #Rails.logger.error "Unexpected error: #{e.message}"
       set_default_game_board_image
     end
   end
   def set_default_game_board_image
     update!(background_image_url: "/assets/images/game_background.png")
-    Rails.logger.info "Default game board image set for server #{id}: #{background_image_url}"
+    #Rails.logger.info "Default game board image set for server #{id}: #{background_image_url}"
   end
 
   # Initialize the game board grid
@@ -182,7 +182,7 @@ class Server < ApplicationRecord
         symbol: '🟢'
       )
     rescue ActiveRecord::RecordInvalid => e
-      Rails.logger.error "Failed to add creator as ServerUser: #{e.message}"
+      #Rails.logger.error "Failed to add creator as ServerUser: #{e.message}"
       raise e
     end
   end

@@ -1,130 +1,115 @@
-// game_channel.js
 import consumer from "./consumer";
 import * as Turbo from "@hotwired/turbo";
 
 const subscriptions = {};
 
-const handleTurboLoad = () => {
+document.addEventListener("turbo:load", () => {
     const serverElement = document.querySelector("[data-server-id]");
-    if (!serverElement) {
-        console.log("[game_channel.js] No serverElement found, skipping subscription.");
-        return;
-    }
+    if (!serverElement) return;
 
     const serverId = serverElement.dataset.serverId;
 
-    if (subscriptions[serverId]) {
-        console.log(`[game_channel.js] Subscription for server ${serverId} already exists.`);
-        return;
-    }
+    if (subscriptions[serverId]) return;
 
-    const connectToChannel = () => {
-        const cableTokenMeta = document.querySelector('meta[name="cable-token"]');
-        if (cableTokenMeta && cableTokenMeta.content) {
-            const cableToken = cableTokenMeta.content;
-            const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-            consumer.connection.url = `${protocol}://${window.location.hostname}:${window.location.port}/cable?cable_token=${cableToken}`;
-            console.log(`[game_channel.js] Connecting to GameChannel for server ${serverId} with URL:`, consumer.connection.url);
+    subscriptions[serverId] = consumer.subscriptions.create(
+        { channel: "GameChannel", server_id: serverId },
+        {
+            connected() {
+                console.log(`[game_channel.js] Connected to GameChannel for server ${serverId}`);
+            },
+            disconnected() {
+                console.log(`[game_channel.js] Disconnected from GameChannel for server ${serverId}`);
+                delete subscriptions[serverId];
+            },
+            received(data) {
+                console.log(`[game_channel.js] Data received for server ${serverId}:`, data);
 
-            subscriptions[serverId] = consumer.subscriptions.create(
-                { channel: "GameChannel", server_id: serverId },
-                {
-                    connected() {
-                        console.log(`[game_channel.js] Successfully connected to GameChannel for server ${serverId}`);
-                    },
-                    disconnected() {
-                        console.log(`[game_channel.js] Disconnected from GameChannel for server ${serverId}.`);
-                        delete subscriptions[serverId];
-                    },
-                    rejected() {
-                        console.error(`[game_channel.js] Subscription rejected for server ${serverId}!`);
-                        delete subscriptions[serverId];
-                    },
-                    received(data) {
-                        console.log(`[game_channel.js] Received data for server ${serverId}:`, data);
-                        try {
-                            switch (data.type) {
-                                case "turbo_stream":
-                                    Turbo.renderStreamMessage(data.message);
-                                    break;
-                                case "turn_ended":
-                                    // Fetch the updated current_turn partial using Turbo Stream
-                                    fetch(`/games/${serverId}/current_turn`, { headers: { 'Accept': 'text/vnd.turbo-stream.html' } })
-                                        .then(response => response.text())
-                                        .then(html => Turbo.renderStreamMessage(html));
-                                    break;
-                                case "game_started":
-                                    // Handle game start (e.g., redirect to the game page)
-                                    window.location.href = `/games/${serverId}`;
-                                    break;
-                                case "page_reload":
-                                    // Trigger a full page reload
-                                    window.location.reload();
-                                    break;
-                                case "game_over":
-                                    // Handle game over (show modal)
-                                    const gameOverModal = new bootstrap.Modal(document.getElementById('gameOverModal'));
-                                    if (gameOverModal) { // Check if the modal element exists
-                                        if (document.getElementById('winningPlayer')) {
-                                            document.getElementById('winningPlayer').innerText = data.winner;
-                                        }
-                                        if (document.getElementById('cellsOwned')) {
-                                            document.getElementById('cellsOwned').innerText = data.stats.cells_owned;
-                                        }
-                                        if (document.getElementById('finalShards')) {
-                                            document.getElementById('finalShards').innerText = data.stats.shards;
-                                        }
-                                        gameOverModal.show();
-                                    }
-                                    break;
-                                case "waiting_for_players":
-                                    const waitingMessageElement = document.getElementById("waiting-message");
-                                    if (waitingMessageElement) {
-                                        waitingMessageElement.innerHTML = `
-                      <h2>${data.message}</h2>
-                      <p>Current players: ${data.current_count}/${data.max_players}.</p>
-                    `;
-                                    }
-                                    break;
-                                case "all_players_joined":
-                                    const waitingMessageElement2 = document.getElementById("waiting-message");
-                                    if (waitingMessageElement2) {
-                                        waitingMessageElement2.style.display = "none";
-                                    }
-                                    break;
-                                default:
-                                    console.log(`[game_channel.js] Unknown data type received: ${data.type}`);
-                            }
-                        } catch (error) {
-                            console.error("Error handling received data:", error);
+                try {
+                    if (data.turbo_stream) {
+                        const container = document.querySelector("#game-container");
+                        if (container) {
+                            container.innerHTML = ""; // Clear outdated content
                         }
+                        Turbo.renderStreamMessage(data.message);
+                    } else {
+                        handleCustomMessage(data);
                     }
+                } catch (error) {
+                    console.error("[game_channel.js] Error processing data:", error);
                 }
-            );
-        } else {
-            console.error("[game_channel.js] No cable token found. Connection attempt aborted.");
+            },
         }
-    };
+    );
+});
 
-    connectToChannel();
-};
+function handleCustomMessage(data) {
+    switch (data.type) {
+        case "waiting_for_players":
+            updateWaitingMessage(data.message, data.current_count, data.max_players);
+            break;
 
-document.addEventListener("turbo:load", handleTurboLoad);
+        case "all_players_joined":
+            hideWaitingMessage();
+            Turbo.visit(window.location.href);
+            break;
+
+        case "action_performed":
+            Turbo.visit(window.location.href);
+            break;
+
+        case "turn_ended":
+            fetchUpdatedPartial(`/games/${data.server_id}/current_turn`, "current-turn");
+            break;
+
+        case "game_over":
+            displayGameOverModal(data.winner);
+            break;
+
+        default:
+            console.warn(`[game_channel.js] Unknown message type: ${data.type}`);
+    }
+}
+
+function updateWaitingMessage(message, currentCount, maxPlayers) {
+    const waitingMessageElement = document.getElementById("waiting-message");
+    if (waitingMessageElement) {
+        waitingMessageElement.innerHTML = `
+      <h2>${message}</h2>
+      <p>Current players: ${currentCount}/${maxPlayers}.</p>
+    `;
+    }
+}
+
+function hideWaitingMessage() {
+    const waitingMessageElement = document.getElementById("waiting-message");
+    if (waitingMessageElement) {
+        waitingMessageElement.style.display = "none";
+    }
+}
+
+function fetchUpdatedPartial(url, targetId) {
+    fetch(url, { headers: { Accept: "text/vnd.turbo-stream.html" } })
+        .then((response) => response.text())
+        .then((html) => {
+            document.getElementById(targetId).innerHTML = html;
+        })
+        .catch((error) => console.error(`[game_channel.js] Error fetching partial for ${targetId}:`, error));
+}
+
+function displayGameOverModal(winner) {
+    const modalElement = document.getElementById("gameOverModal");
+    if (modalElement) {
+        const winnerElement = modalElement.querySelector("#winner-name");
+        if (winnerElement) winnerElement.textContent = winner;
+
+        const modal = new bootstrap.Modal(modalElement);
+        modal.show();
+    }
+}
 
 document.addEventListener("turbo:before-cache", () => {
     for (const serverId in subscriptions) {
         if (subscriptions.hasOwnProperty(serverId)) {
-            console.log(`[game_channel.js] Removing subscription for server ${serverId} before caching.`);
-            consumer.subscriptions.remove(subscriptions[serverId]);
-            delete subscriptions[serverId];
-        }
-    }
-});
-
-window.addEventListener('beforeunload', () => {
-    for (const serverId in subscriptions) {
-        if (subscriptions.hasOwnProperty(serverId)) {
-            console.log(`[game_channel.js] Removing subscription for server ${serverId} before unload.`);
             consumer.subscriptions.remove(subscriptions[serverId]);
             delete subscriptions[serverId];
         }

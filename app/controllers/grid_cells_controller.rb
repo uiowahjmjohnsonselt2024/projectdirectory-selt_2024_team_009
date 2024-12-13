@@ -13,9 +13,9 @@ class GridCellsController < ApplicationController
       image_url = @server.generate_game_board_image
 
       if image_url
-        Rails.logger.info "Generated and saved background image for server #{@server.id}: #{image_url}"
+        ##Rails.logger.info "Generated and saved background image for server #{@server.id}: #{image_url}"
       else
-        Rails.logger.error "Failed to generate background image for server #{@server.id}"
+        ##Rails.logger.error "Failed to generate background image for server #{@server.id}"
       end
     end
   end

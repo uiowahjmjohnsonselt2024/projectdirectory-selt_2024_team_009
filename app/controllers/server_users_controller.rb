@@ -23,7 +23,7 @@ class ServerUsersController < ApplicationController
       shard_balance: 0
     )
 
-    Rails.logger.info "[ServersController#join_game] User #{current_user.username} joined server #{@server.id} with cable_token: #{@server_user.cable_token}"
+    #Rails.logger.info "[ServersController#join_game] User #{current_user.username} joined server #{@server.id} with cable_token: #{@server_user.cable_token}"
     @server.assign_symbols_and_turn_order
     @server.assign_starting_positions(new_user: @server_user)
 
@@ -91,12 +91,12 @@ class ServerUsersController < ApplicationController
 
   def set_server_user
     @server_user = current_user.server_users.find(params[:id])
-    Rails.logger.info "[ServerUsersController#set_server_user] User ID: #{@server_user.user_id}, Cable Token: #{@server_user.cable_token}"
+    #Rails.logger.info "[ServerUsersController#set_server_user] User ID: #{@server_user.user_id}, Cable Token: #{@server_user.cable_token}"
 
   end
   def set_server
     @server = Server.includes(:game).find(params[:server_id])
     @game = @server.game
-    Rails.logger.info "[ServerUsersController#set_server] Loaded server #{@server.id} for game #{@game.id}"
+    #Rails.logger.info "[ServerUsersController#set_server] Loaded server #{@server.id} for game #{@game.id}"
   end
 end

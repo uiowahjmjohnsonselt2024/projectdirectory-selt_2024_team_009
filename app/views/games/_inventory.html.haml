@@ -1,4 +1,4 @@
-- if items.any?
+- if items && items.any?
   %ul.dropdown-menu
     - items.each do |inventory|
       %li
@@ -8,4 +8,4 @@
           params: { action_type: 'use_item', item_id: inventory.item.id },
           method: :post
 - else
-  %p No items in inventory.
+  %p.text-muted No items in inventory.

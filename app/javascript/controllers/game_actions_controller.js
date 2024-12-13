@@ -1,11 +1,28 @@
 // controllers/game_actions_controller.js
 import { Controller } from "@hotwired/stimulus";
+import consumer from "../channels/consumer";
 
 export default class extends Controller {
     static targets = ["error"];
 
     connect() {
         console.log("GameActionsController connected");
+
+        this.element.addEventListener("click", (event) => {
+            if (event.target.matches("[data-action='move']")) {
+                this.move(event);
+            } else if (event.target.matches("[data-action='occupy']")) {
+                this.occupy();
+            } else if (event.target.matches("[data-action='capture']")) {
+                this.capture();
+            } else if (event.target.matches("[data-action='use_item']")) {
+                this.useItem();
+            } else if (event.target.matches("[data-action='use_treasure']")) {
+                this.useTreasure();
+            } else if (event.target.matches("[data-action='purchase_item']")) {
+                this.purchaseItem();
+            }
+        });
     }
 
     move(event) {

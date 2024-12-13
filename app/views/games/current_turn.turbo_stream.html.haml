@@ -1,2 +1,5 @@
-= turbo_stream.replace "current-turn" do
-  = render partial: "games/current_turn", locals: { current_turn_user: @server.current_turn_server_user }
+- if @server.current_turn_server_user
+  = turbo_stream.replace "current-turn" do
+    = render partial: "games/current_turn", locals: { current_turn_user: @server.current_turn_server_user }
+- else
+  %p.text-danger.text-center Turn information unavailable.
