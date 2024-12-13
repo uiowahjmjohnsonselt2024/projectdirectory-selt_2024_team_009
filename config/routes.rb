@@ -41,6 +41,17 @@ Rails.application.routes.draw do
       member do
         post 'perform_action', to: 'games#perform_action'
         get :current_turn
+        get :update_game_board
+        get :update_current_turn
+        get :update_inventory
+        get :update_treasures
+        get :update_opponent_details
+        get :update_player_stats
+        get :update_game_area
+        get :update_game_right_panel
+        get :update_game_over
+        get :update_show
+        get :update_game_left_panel
       end
     end
   end

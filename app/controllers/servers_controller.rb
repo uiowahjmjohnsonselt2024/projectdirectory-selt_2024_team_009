@@ -94,7 +94,7 @@ class ServersController < ApplicationController
     end
 
     if @server.start_game
-      GameChannel.broadcast_to(@server, { type: "game_started", cable_token: current_user.cable_token })
+      update_show
       #Rails.logger.info "[ServersController#start_game] Game started on server #{@server.id}, Token broadcasted: #{current_user.cable_token}"
       redirect_to server_game_path(@server, @server.game), notice: 'Game started!'
     else
@@ -126,32 +126,23 @@ class ServersController < ApplicationController
     @server.assign_symbols_and_turn_order
     @server.assign_starting_positions(new_user: @server_user)
     # Assign starting position ONLY for the new user
-    broadcast_game_update
+    update_show
 
   end
 
 
 
   private
-  def broadcast_game_update
+  def update_show
     @grid_cells = @server.grid_cells.includes(:owner, :treasure)
     @server_users = @server.server_users.includes(:user) # Do not use `as_json`
     @server_user = @server.server_users.includes(:inventories, :treasures).find_by(user: current_user) # Return full Active Record object
     @current_turn_user = @server.current_turn_server_user || @server.server_users.order(:turn_order).first
     @opponents = @server.server_users.includes(:user, :treasures)
     @waiting_for_players = @server.server_users.count < @server.max_players
+    html = render_to_string(partial: "games/show", formats: [:html])
+    Turbo::StreamsChannel.broadcast_to @server.game, target: "game-show", html: html
 
-    GameChannel.broadcast_to @server, turbo_stream:
-      turbo_stream.replace("game-container", partial: "games/game_area", locals: {
-        server: @server,
-        game: @server.game,
-        server_users: @server_users, # Pass Active Record objects
-        grid_cells: @grid_cells,
-        server_user: @server_user, # Pass Active Record object
-        current_turn_user: @current_turn_user,
-        opponents: @opponents,
-        waiting_for_players: @waiting_for_players
-      })
   end
 
   # Set the @server based on the ID in params

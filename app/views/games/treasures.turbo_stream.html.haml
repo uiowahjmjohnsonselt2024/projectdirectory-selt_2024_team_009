@@ -1,0 +1,12 @@
+- if treasures && treasures.any?
+  = turbo_stream.replace "treasures-container" do
+    %ul.dropdown-menu
+      - treasures.each do |treasure|
+        %li
+          %span= treasure.name
+          = button_to "Use #{treasure.name}", perform_action_game_path(@server),
+            class: 'btn-game-action btn-info',
+            params: { action_type: 'use_treasure', treasure_id: treasure.id },
+            method: :post
+- else
+  %p.text-muted No treasures found.

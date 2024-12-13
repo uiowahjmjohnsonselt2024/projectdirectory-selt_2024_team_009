@@ -1,5 +1,7 @@
-- if @server.current_turn_server_user
+- if current_turn_user && current_turn_user.user
   = turbo_stream.replace "current-turn" do
-    = render partial: "games/current_turn", locals: { current_turn_user: @server.current_turn_server_user }
+    %h3.text-primary Current Player:
+    %p.text-muted= current_turn_user.user.username
 - else
-  %p.text-danger.text-center Turn information unavailable.
+  %h3.text-primary Current Player:
+  %p.text-muted Waiting for first turn...
