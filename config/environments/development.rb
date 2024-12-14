@@ -15,7 +15,13 @@ Rails.application.configure do
   # Enable server timing.
   config.server_timing = true
   config.action_cable.url = "ws://localhost:3000/cable"
-  config.action_cable.allowed_request_origins = ["https://rubyonrails.com", %r{http://ruby.*}]
+  config.action_cable.allowed_request_origins = [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://[::1]:3000',
+    'https://rubyonrails.com',
+    %r{http://ruby.*}
+  ]
 
   # Enable/disable caching. By default caching is disabled.
   if Rails.root.join("tmp/caching-dev.txt").exist?
@@ -68,7 +74,7 @@ Rails.application.configure do
 
   # Debug mode disables concatenation and preprocessing of assets.
   config.assets.debug = true
-
+  config.log_level = :info
   # Asset digests for cache busting.
   config.assets.digest = true
   config.assets.raise_runtime_errors = true

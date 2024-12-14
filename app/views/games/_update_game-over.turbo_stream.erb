@@ -1,0 +1,3 @@
+<%= turbo_stream.replace "game-over" do %>
+  <%= render partial: "games/game_over", locals: { winner: @winner } %>
+<% end %>

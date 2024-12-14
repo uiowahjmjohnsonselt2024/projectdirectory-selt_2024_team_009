@@ -7,8 +7,14 @@ Rails.application.configure do
   config.enable_reloading = false
   config.web_socket_server_url = "wss://shards-of-the-grid-team-09.herokuapp.com/cable"
   # config/environments/production.rb
+  config.action_cable.url = 'wss://shards-of-the-grid-team-09.herokuapp.com/cable'
+  config.action_cable.allowed_request_origins = [
+    'https://shards-of-the-grid-team-09.herokuapp.com',
+    'http://shards-of-the-grid-team-09.herokuapp.com',
+    'https://rubyonrails.com',
+    %r{http://ruby.*}
+  ]
 
-  config.action_cable.allowed_request_origins = ['https://shards-of-the-grid-team-09.herokuapp.com',"https://rubyonrails.com", %r{http://ruby.*}]
   # Eager load code on boot.
   config.eager_load = true
   config.serve_static_assets = true
