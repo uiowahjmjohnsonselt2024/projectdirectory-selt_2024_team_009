@@ -1,0 +1,3 @@
+<%= turbo_stream.replace "player-stats" do %>
+  <%= render partial: "games/player_stats", locals: { server_user: @server_user } %>
+<% end %>

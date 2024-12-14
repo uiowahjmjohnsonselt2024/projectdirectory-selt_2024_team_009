@@ -1,0 +1,3 @@
+<%= turbo_stream.replace "current-turn" do %>
+  <%= render partial: "games/current_turn", locals: { current_turn_user: @current_turn_user } %>
+<% end %>

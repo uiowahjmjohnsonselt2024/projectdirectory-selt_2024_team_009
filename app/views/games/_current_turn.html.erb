@@ -1,0 +1,7 @@
+<% if @current_turn_user %>
+  <h3 class="text-primary">Current Player:</h3>
+  <p class="text-muted"><%= @current_turn_user.user.username %></p>
+<% else %>
+  <h3 class="text-primary">Current Player:</h3>
+  <p class="text-muted">Waiting for first turn...</p>
+<% end %>
