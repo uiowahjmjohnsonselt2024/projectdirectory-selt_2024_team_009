@@ -46,34 +46,32 @@ class GamesController < ApplicationController
   end
 
   def update_game_board
-    @grid_cells = @server.grid_cells.includes(:owner, :treasure)
-    @server_users = @server.server_users.includes(:user)
-    @opponents = @server.server_users.includes(:user, :treasures) || []
+    load_game_data
     broadcast_update("game-board", "games/game_board")
   end
 
   def update_current_turn
-    @current_turn_user = @server.current_turn_server_user
+    load_game_data
     broadcast_update("current-turn", "games/current_turn")
   end
 
   def update_inventory
-    @items = @server_user.inventories.includes(:item)
+    load_game_data
     broadcast_update("inventory-container", "games/inventory")
   end
 
   def update_treasures
-    @treasures = @server_user.treasures
+    load_game_data
     broadcast_update("treasures-container", "games/treasures")
   end
 
   def update_opponent_details
-    @opponents = @server.server_users.includes(:user, :treasures)
+    load_game_data
     broadcast_update("opponent-details", "games/opponent_details")
   end
 
   def update_player_stats
-    @server_user = @server.server_user(current_user)
+    load_game_data
     broadcast_update("player-stats", "games/player_stats")
   end
 
@@ -83,17 +81,17 @@ class GamesController < ApplicationController
   end
 
   def update_game_right_panel
-    @server_user = @server.server_user(current_user)
+    load_game_data
     broadcast_update("game-right-panel", "games/game_right_panel")
   end
 
   def update_game_over
+    load_game_data
     @winner = @game.winner
     broadcast_update("game-over", "games/game_over")
   end
   def update_game_left_panel
-    @server_user = @server.server_user(current_user)# Pass the current_user as an argument
-    @waiting_for_players = @server.waiting_for_players
+    load_game_data
     Rails.logger.debug "Rendering page with  update_game_left_panel server_id: #{@server&.id}"
 
     broadcast_update("game-left-panel", "games/game_left_panel")
@@ -104,14 +102,12 @@ class GamesController < ApplicationController
   end
 
   def ensure_game_in_progress
-    @server = Server.includes(:game).find(params[:server_id]) # Find the server
-    @game = @server.game # Access the associated game
+    load_game_data
     redirect_to servers_path, alert: 'Game is not in progress.' unless @server.status == 'in_progress'
   end
 
   def ensure_current_player_turn
-    @server = Server.includes(:game).find(params[:server_id]) # Find the server
-    @game = @server.game # Access the associated game
+    load_game_data
     unless @server.current_turn_server_user == @server_user
       flash[:alert] = "It's not your turn."
       redirect_to server_game_path(@server, @game) and return
