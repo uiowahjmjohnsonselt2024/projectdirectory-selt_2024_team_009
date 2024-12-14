@@ -48,6 +48,7 @@ class GamesController < ApplicationController
   def update_game_board
     @grid_cells = @server.grid_cells.includes(:owner, :treasure)
     @server_users = @server.server_users.includes(:user)
+    @opponents = @server.server_users.includes(:user, :treasures) || []
     broadcast_update("game-board", "games/game_board")
   end
 
@@ -145,7 +146,7 @@ class GamesController < ApplicationController
       @server,
       target: target,
       partial: partial,
-      locals: { server:@server, game: @game, opponents:@opponents, server_user: @server_user, server_users: @server_users, grid_cells: @grid_cells, current_turn: @current_turn_user, waiting_for_players: @waiting_for_players }
+      locals: { server:@server, game: @game, opponents:@opponents, server_user: @server_user, server_users: @server_users, grid_cells: @grid_cells, current_turn_user: @current_turn_user, waiting_for_players: @waiting_for_players }
     )
   end
   def handle_error(message)

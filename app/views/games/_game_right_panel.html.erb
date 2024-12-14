@@ -1,4 +1,4 @@
-<% if @server.current_turn_server_user == @server_user %>
+<% if @server&.current_turn_server_user == @server_user %>
   <div class="game-action-controls">
     <h3 class="text-primary">Your Turn</h3>
     <div class="game-movement-controls">
