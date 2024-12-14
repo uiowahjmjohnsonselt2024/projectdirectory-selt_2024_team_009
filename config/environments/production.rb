@@ -10,10 +10,9 @@ Rails.application.configure do
   config.action_cable.url = 'wss://shards-of-the-grid-team-09.herokuapp.com/cable'
   config.action_cable.allowed_request_origins = [
     'https://shards-of-the-grid-team-09.herokuapp.com',
-    'http://shards-of-the-grid-team-09.herokuapp.com',
-    'https://rubyonrails.com',
-    %r{http://ruby.*}
+    'http://shards-of-the-grid-team-09.herokuapp.com'
   ]
+
 
   # Eager load code on boot.
   config.eager_load = true

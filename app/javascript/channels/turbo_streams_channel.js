@@ -9,8 +9,10 @@ document.addEventListener("turbo:load", () => {
 
     const serverId = serverElement.dataset.serverId;
 
+    // Prevent duplicate subscriptions
     if (subscriptions[serverId]) return;
 
+    // Create a subscription for TurboStreamsChannel
     subscriptions[serverId] = consumer.subscriptions.create(
         { channel: "TurboStreamsChannel", server_id: serverId },
         {
@@ -18,7 +20,7 @@ document.addEventListener("turbo:load", () => {
                 console.log(`[turbo_streams_channel.js] Connected to TurboStreamsChannel for server ${serverId}`);
             },
             disconnected() {
-                console.log(`[turbo_streams_channel.js] Disconnected from TurboStreamsChannel for server ${serverId}`);
+                console.warn(`[turbo_streams_channel.js] Disconnected from TurboStreamsChannel for server ${serverId}`);
                 delete subscriptions[serverId];
             },
             received(data) {
@@ -34,12 +36,16 @@ document.addEventListener("turbo:load", () => {
                 } catch (error) {
                     console.error("[turbo_streams_channel.js] Error processing data:", error);
                 }
-            },
+            }
         }
     );
+
+    // Handle WebSocket reconnections
+    handleWebSocketReconnection();
 });
 
 document.addEventListener("turbo:before-cache", () => {
+    // Unsubscribe all channels before navigating away
     for (const serverId in subscriptions) {
         if (subscriptions.hasOwnProperty(serverId)) {
             consumer.subscriptions.remove(subscriptions[serverId]);
@@ -48,9 +54,25 @@ document.addEventListener("turbo:before-cache", () => {
     }
 });
 
-document.querySelectorAll('.movement-button').forEach(button => {
-    button.addEventListener('click', (event) => {
-        console.log('Movement button clicked:', event.target.dataset.direction);
-        // Existing logic to handle movement
+/**
+ * Graceful handling of WebSocket reconnections.
+ */
+function handleWebSocketReconnection() {
+    setInterval(() => {
+        if (!consumer.connection.isOpen()) {
+            console.warn("WebSocket disconnected. Attempting to reconnect...");
+            consumer.connection.open();
+        }
+    }, 5000);
+}
+
+/**
+ * Example: Custom event listener for action buttons.
+ * Update or extend this if required for your specific setup.
+ */
+document.querySelectorAll(".btn-game-action, .btn-game-movement").forEach(button => {
+    button.addEventListener("click", (event) => {
+        console.log("Game action button clicked:", event.target.dataset);
+        // Add any custom logic here if needed
     });
 });

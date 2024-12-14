@@ -42,6 +42,11 @@ class GamesController < ApplicationController
       else
         render_error_response
       end
+      respond_to do |format|
+        format.html { redirect_to server_game_path(@server, @game), notice: 'Action completed successfully.' }
+        format.json { head :no_content }
+        format.turbo_stream
+      end
     rescue => e
       Rails.logger.error "Error in perform_action: #{e.message}\n#{e.backtrace.join("\n")}"
     end
