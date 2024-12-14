@@ -19,9 +19,8 @@ class GamesController < ApplicationController
     Rails.logger.info "Game data loaded: server=#{@server.inspect}, game=#{@game.inspect}, server_users=#{@server_users.inspect}, grid_cells=#{@grid_cells.inspect}, server_user=#{@server_user.inspect}, current_turn_user=#{@current_turn_user.inspect}, opponents=#{@opponents.inspect}, waiting_for_players=#{@waiting_for_players.inspect}"
   end
   def perform_action
-    def perform_action
-      begin
-        load_game_data
+    begin
+      load_game_data
 
       success = case params[:action_type]
                 when 'move' then handle_move_action(params[:direction])
