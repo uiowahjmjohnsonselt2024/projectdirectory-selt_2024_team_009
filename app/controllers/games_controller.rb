@@ -33,6 +33,9 @@ class GamesController < ApplicationController
     if success
       advance_turn if @server_user.turn_ap.zero? || @end_turn
       check_game_end_conditions
+      broadcast_game_state
+    else
+      render_error_response
     end
 
     respond_to do |format|
@@ -41,6 +44,7 @@ class GamesController < ApplicationController
       format.turbo_stream
     end
   end
+
   def update_game_board
     @grid_cells = @server.grid_cells.includes(:owner, :treasure)
     @server_users = @server.server_users.includes(:user)
@@ -82,8 +86,8 @@ class GamesController < ApplicationController
     broadcast_update("game-right-panel", "games/game_right_panel")
   end
 
-  def update_game_over(winner)
-    @winner = winner
+  def update_game_over
+    @winner = @game.winner
     broadcast_update("game-over", "games/game_over")
   end
   def update_game_left_panel
@@ -98,14 +102,52 @@ class GamesController < ApplicationController
     broadcast_update("game-show", "games/area")
   end
 
+  def ensure_game_in_progress
+    @server = Server.includes(:game).find(params[:server_id]) # Find the server
+    @game = @server.game # Access the associated game
+    redirect_to servers_path, alert: 'Game is not in progress.' unless @server.status == 'in_progress'
+  end
+
+  def ensure_current_player_turn
+    @server = Server.includes(:game).find(params[:server_id]) # Find the server
+    @game = @server.game # Access the associated game
+    unless @server.current_turn_server_user == @server_user
+      flash[:alert] = "It's not your turn."
+      redirect_to server_game_path(@server, @game) and return
+    end
+  end
+
   private
 
+  def broadcast_game_state
+    update_game_board
+    update_game_right_panel
+    update_game_left_panel
+    update_current_turn
+  end
+  def render_error_response
+    render turbo_stream: turbo_stream.replace("flash", partial: "shared/flash", locals: { message: "Action failed!" })
+  end
 
   def broadcast_update(target, partial)
     html = render_to_string(partial: partial, formats: [:html])
     turbo_stream = render_to_string(partial: "update_#{target}", formats: [:turbo_stream])
+
     Rails.logger.debug "Broadcasting update to #{target} with partial #{partial}"
-    Turbo::StreamsChannel.broadcast_to @server, target: target, html: html, turbo_stream: turbo_stream
+
+    # Turbo::StreamsChannel.broadcast_to(
+    #   @server,
+    #   target: target,
+    #   html: html,
+    #   turbo_stream: turbo_stream
+    # )
+
+    Turbo::StreamsChannel.broadcast_replace_to(
+      @server,
+      target: target,
+      partial: partial,
+      locals: { server_user: @server_user, server_users: @server_users, grid_cells: @grid_cells, current_turn: @current_turn_user, waiting_for_players: @waiting_for_players }
+    )
   end
   def handle_error(message)
     #Rails.logger.error "[GamesController#handle_error] Server \#{@server.id}: \#{message}"
@@ -135,21 +177,6 @@ class GamesController < ApplicationController
     @current_turn_user = @server.current_turn_server_user || @server.server_users.order(:turn_order).first
     @opponents = @server.server_users.includes(:user, :treasures) || []
     @waiting_for_players = @server.server_users.count < @server.max_players
-  end
-
-  def ensure_game_in_progress
-    @server = Server.includes(:game).find(params[:server_id]) # Find the server
-    @game = @server.game # Access the associated game
-    redirect_to servers_path, alert: 'Game is not in progress.' unless @server.status == 'in_progress'
-  end
-
-  def ensure_current_player_turn
-    @server = Server.includes(:game).find(params[:server_id]) # Find the server
-    @game = @server.game # Access the associated game
-    unless @server.current_turn_server_user == @server_user
-      flash[:alert] = "It's not your turn."
-      redirect_to server_game_path(@server, @game) and return
-    end
   end
 
   def advance_turn
@@ -580,9 +607,10 @@ class GamesController < ApplicationController
       winner = determine_winner
       if winner
         @server.update(status: 'finished')
+        @game.update(winner: winner.user.username)
 
         # Broadcast game over and winner information
-        update_game_over(winner)
+        update_game_over
         return
       else
         flash[:alert] = 'Unable to determine a winner due to invalid game state.'

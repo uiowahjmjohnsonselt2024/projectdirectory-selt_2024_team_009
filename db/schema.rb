@@ -80,16 +80,6 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_12_103250) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "messages", force: :cascade do |t|
-    t.text "content"
-    t.integer "user_id", null: false
-    t.integer "game_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["game_id"], name: "index_messages_on_game_id"
-    t.index ["user_id"], name: "index_messages_on_user_id"
-  end
-
   create_table "scores", force: :cascade do |t|
     t.integer "user_id", null: false
     t.integer "server_id", null: false
@@ -199,8 +189,6 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_12_103250) do
   add_foreign_key "leaderboard_entries", "leaderboards"
   add_foreign_key "leaderboard_entries", "users"
   add_foreign_key "leaderboards", "servers"
-  add_foreign_key "messages", "games"
-  add_foreign_key "messages", "users"
   add_foreign_key "scores", "servers"
   add_foreign_key "scores", "users"
   add_foreign_key "server_users", "servers"
