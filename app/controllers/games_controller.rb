@@ -141,12 +141,11 @@ class GamesController < ApplicationController
     #   html: html,
     #   turbo_stream: turbo_stream
     # )
-
     Turbo::StreamsChannel.broadcast_replace_to(
       @server,
       target: target,
       partial: partial,
-      locals: { server_user: @server_user, server_users: @server_users, grid_cells: @grid_cells, current_turn: @current_turn_user, waiting_for_players: @waiting_for_players }
+      locals: { server:@server, game: @game, opponents:@opponents, server_user: @server_user, server_users: @server_users, grid_cells: @grid_cells, current_turn: @current_turn_user, waiting_for_players: @waiting_for_players }
     )
   end
   def handle_error(message)
