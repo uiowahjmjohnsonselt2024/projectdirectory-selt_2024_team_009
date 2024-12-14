@@ -31,8 +31,11 @@ class GamesController < ApplicationController
     return unless success
 
     if success
+      Rails.logger.debug "Action performed successfully"
       advance_turn if @server_user.turn_ap.zero? || @end_turn
+      Rails.logger.debug "Checking game end conditions"
       check_game_end_conditions
+      Rails.logger.debug "Broadcasting game state"
       broadcast_game_state
     else
       render_error_response
