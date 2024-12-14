@@ -11,12 +11,12 @@ Rails.application.configure do
   config.enable_reloading = false
 
   # WebSocket server URL
-  config.web_socket_server_url = "wss://shards-of-the-grid-team-09.herokuapp.com/cable"
+  config.web_socket_server_url = "wss://shards-of-the-grid-team-09-ad424e75e121.herokuapp.com/cable"
 
   # Action Cable URL and allowed request origins
-  config.action_cable.url = 'wss://shards-of-the-grid-team-09.herokuapp.com/cable'
+  config.action_cable.url = 'wss://shards-of-the-grid-team-09-ad424e75e121.herokuapp.com/cable'
   config.action_cable.allowed_request_origins = [
-    'https://shards-of-the-grid-team-09.herokuapp.com',
+    'https://shards-of-the-grid-team-09-ad424e75e121.herokuapp.com',
     'https://rubyonrails.com',
     %r{http://ruby.*}
   ]
@@ -45,7 +45,7 @@ Rails.application.configure do
   config.force_ssl = true
 
   # Host and protocol
-  host = ENV["DEFAULT_URL_HOST"] || "shards-of-the-grid-team-09.herokuapp.com"
+  host = ENV["DEFAULT_URL_HOST"] || "shards-of-the-grid-team-09-ad424e75e121.herokuapp.com"
   protocol = config.force_ssl ? "https" : "http"
   config.action_controller.default_url_options = { host: host, protocol: protocol }
 

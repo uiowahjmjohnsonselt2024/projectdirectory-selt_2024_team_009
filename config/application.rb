@@ -27,7 +27,7 @@ module ProjectdirectorySelt2024Team009
     # **Production-Specific Configurations**
     if Rails.env.production?
       # Use Redis adapter for Action Cable in production
-      config.action_cable.url = ENV['ACTION_CABLE_URL'] || "wss://shards-of-the-grid-team-09.herokuapp.com/cable"
+      config.action_cable.url = ENV['ACTION_CABLE_URL'] || "wss://shards-of-the-grid-team-09-ad424e75e121.herokuapp.com/cable"
       config.action_cable.allowed_request_origins = [
         'https://shards-of-the-grid-team-09.herokuapp.com',
         'https://rubyonrails.com',
