@@ -6,7 +6,7 @@ Rails.application.configure do
     policy.object_src  :none
     policy.script_src  :self, :https, :unsafe_inline
     policy.style_src   :self, :https, :unsafe_inline
-    policy.connect_src :self, :https, "ws://localhost:3000", "wss://localhost:3000", "wss://shards-of-the-grid-team-09.herokuapp.com", "wss://shards-of-the-grid-team-09-ad424e75e121.herokuapp.com"
+    policy.connect_src :self, :https, "ws://localhost:3000", "wss://localhost:3000",  "wss://shards-of-the-grid-team-09-ad424e75e121.herokuapp.com"
   end
 
   config.content_security_policy_nonce_generator = ->(request) { SecureRandom.base64(16) }
