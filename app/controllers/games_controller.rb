@@ -175,6 +175,7 @@ class GamesController < ApplicationController
     @current_turn_user = @server.current_turn_server_user || @server.server_users.order(:turn_order).first
     @opponents = @server.server_users.includes(:user, :treasures) || []
     @waiting_for_players = @server.server_users.count < @server.max_players
+    @treasures =  @server_user.treasures
   end
 
   def advance_turn
