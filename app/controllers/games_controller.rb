@@ -138,6 +138,8 @@ class GamesController < ApplicationController
     #   html: html,
     #   turbo_stream: turbo_stream
     # )
+    load_game_data
+    Rails.logger.debug "Broadcasting update GAME  #{@game} with SERVER #{@server}"
     Turbo::StreamsChannel.broadcast_replace_to(
       @server,
       target: target,
