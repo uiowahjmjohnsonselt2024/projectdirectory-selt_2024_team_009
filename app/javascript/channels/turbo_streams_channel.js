@@ -22,6 +22,7 @@ document.addEventListener("turbo:load", () => {
             disconnected() {
                 console.warn(`[turbo_streams_channel.js] Disconnected from TurboStreamsChannel for server ${serverId}`);
                 delete subscriptions[serverId];
+                reconnectSubscription(serverId);
             },
             received(data) {
                 console.log(`[turbo_streams_channel.js] Data received for server ${serverId}:`, data);
@@ -76,3 +77,34 @@ document.querySelectorAll(".btn-game-action, .btn-game-movement").forEach(button
         // Add any custom logic here if needed
     });
 });
+function reconnectSubscription(serverId) {
+    setTimeout(() => {
+        console.log(`[turbo_streams_channel.js] Attempting to reconnect to server ${serverId}`);
+        const serverElement = document.querySelector(`[data-server-id="${serverId}"]`);
+        if (serverElement) {
+            subscriptions[serverId] = consumer.subscriptions.create(
+                { channel: "TurboStreamsChannel", server_id: serverId },
+                {
+                    connected() {
+                        console.log(`[turbo_streams_channel.js] Reconnected to TurboStreamsChannel for server ${serverId}`);
+                    },
+                    disconnected() {
+                        console.warn(`[turbo_streams_channel.js] Disconnected again from TurboStreamsChannel for server ${serverId}`);
+                        delete subscriptions[serverId];
+                        reconnectSubscription(serverId);
+                    },
+                    received(data) {
+                        console.log(`[turbo_streams_channel.js] Data received after reconnection for server ${serverId}:`, data);
+                        try {
+                            if (data.turbo_stream) {
+                                Turbo.renderStreamMessage(data.turbo_stream);
+                            }
+                        } catch (error) {
+                            console.error("[turbo_streams_channel.js] Error processing data after reconnection:", error);
+                        }
+                    }
+                }
+            );
+        }
+    }, 5000); // Retry after 5 seconds
+}
