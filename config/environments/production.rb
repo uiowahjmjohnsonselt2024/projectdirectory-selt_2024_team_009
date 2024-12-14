@@ -2,7 +2,7 @@ require "active_support/core_ext/integer/time"
 
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
-
+  config.action_cable.mount_path = '/cable'
   # Code is not reloaded between requests.
   config.enable_reloading = false
   config.web_socket_server_url = "wss://shards-of-the-grid-team-09.herokuapp.com/cable"
