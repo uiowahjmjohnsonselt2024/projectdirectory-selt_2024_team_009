@@ -1,4 +1,7 @@
 - provide(:title, "Edit Profile")
+= action_cable_meta_tag
+= content_tag(:meta, nil, name: "cable-token", content: "#{current_user&.cable_token}")
+
 %h1 Edit Profile
 
 = form_with(model: @user, url: profile_path, method: :patch) do |f|

@@ -1,0 +1,28 @@
+<div id="game-container" data-controller="game-actions" data-server-id="<%= @server.id %>" >
+  <div class="game-container">
+    <div class="game-left-panel">
+      <%= render partial: "games/game_left_panel", locals: { server: @server, server_user: @server_user, waiting_for_players: @waiting_for_players } %>
+    </div>
+
+    <div class="game-center-panel">
+      <h2 class="text-center text-secondary">Game Board</h2>
+      <div id="game-board">
+        <%= render partial: "games/game_board", locals: { grid_cells: @grid_cells, server_user: @server_user, server_users: @server_users } %>
+      </div>
+      <div id="opponent-details">
+        <%= render partial: "games/opponent_details", locals: { opponents: @opponents, server: @server } %>
+      </div>
+    </div>
+
+    <div class="game-right-panel">
+      <%= render partial: "games/game_right_panel", locals: { server: @server, server_user: @server_user, current_turn_user: @current_turn_user } %>
+    </div>
+  </div>
+  <div class="chatbox" id="chatbox" data-game-id="<%= @server.id %>">
+    <div id="messages" class="messages-container"></div>
+    <form id="chat-form">
+      <input id="chat-input" type="text" placeholder="Type a message...">
+      <button type="submit">Send</button>
+    </form>
+  </div>
+</div>

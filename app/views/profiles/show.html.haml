@@ -1,4 +1,7 @@
 - provide(:title, "Profile")
+= action_cable_meta_tag
+= content_tag(:meta, nil, name: "cable-token", content: "#{current_user&.cable_token}")
+
 %section.profile-container.d-flex.justify-content-between.align-items-start
   %div.profile-left.w-50
     %div.profile-header

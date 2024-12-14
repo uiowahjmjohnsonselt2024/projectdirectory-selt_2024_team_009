@@ -1,4 +1,7 @@
 - provide(:title, "Edit Server Info")
+= action_cable_meta_tag
+= content_tag(:meta, nil, name: "cable-token", content: "#{current_user&.cable_token}")
+
 %div.d-flex.justify-content-center
   %div.row
     %div.col-md-12

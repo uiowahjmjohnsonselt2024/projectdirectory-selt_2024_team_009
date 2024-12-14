@@ -1,4 +1,4 @@
-import consumer from "./cable";
+import consumer from "./consumer";
 
 const createChatChannel = (gameId) => {
     return consumer.subscriptions.create(

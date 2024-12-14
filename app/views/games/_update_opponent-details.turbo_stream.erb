@@ -1,0 +1,3 @@
+<%= turbo_stream.replace "opponent-details" do %>
+  <%= render partial: "games/opponent_details", locals: { opponents: @opponents, server: @server } %>
+<% end %>

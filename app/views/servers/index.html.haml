@@ -1,4 +1,7 @@
 - provide(:title, "My Servers")
+= action_cable_meta_tag
+= content_tag(:meta, nil, name: "cable-token", content: "#{current_user&.cable_token}")
+
 %div#servers-page.d-flex.justify-content-center
   %div.row
     %div.col-md-12.text-center
