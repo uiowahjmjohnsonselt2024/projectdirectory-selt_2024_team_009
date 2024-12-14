@@ -1,0 +1,12 @@
+<% if @items && @items.any? %>
+  <ul class="dropdown-menu">
+    <% @items.each do |inventory| %>
+      <li>
+        <span><%= inventory.item.name %></span>
+        <%= button_to "Use #{inventory.item.name}", perform_action_server_game_path(@server), class: 'btn-game-action btn-info', params: { action_type: 'use_item', item_id: inventory.item.id }, method: :post %>
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <p class="text-muted">No items in inventory.</p>
+<% end %>

@@ -94,7 +94,6 @@ class ServersController < ApplicationController
     end
 
     if @server.start_game
-      update_show
       #Rails.logger.info "[ServersController#start_game] Game started on server #{@server.id}, Token broadcasted: #{current_user.cable_token}"
       redirect_to server_game_path(@server, @server.game), notice: 'Game started!'
     else
@@ -126,32 +125,19 @@ class ServersController < ApplicationController
     @server.assign_symbols_and_turn_order
     @server.assign_starting_positions(new_user: @server_user)
     # Assign starting position ONLY for the new user
-    update_show
+    redirect_to server_game_path(@server, @server.game), notice: 'Joined the game!'
 
   end
 
 
 
   private
-  def update_show
-    @grid_cells = @server.grid_cells.includes(:owner, :treasure)
-    @server_users = @server.server_users.includes(:user) # Do not use `as_json`
-    @server_user = @server.server_users.includes(:inventories, :treasures).find_by(user: current_user) # Return full Active Record object
-    @current_turn_user = @server.current_turn_server_user || @server.server_users.order(:turn_order).first
-    @opponents = @server.server_users.includes(:user, :treasures)
-    @waiting_for_players = @server.server_users.count < @server.max_players
-    html = render_to_string(partial: "games/show", formats: [:html])
-    Turbo::StreamsChannel.broadcast_to @server.game, target: "game-show", html: html
-
-  end
 
   # Set the @server based on the ID in params
   def set_server
     @server = Server.includes(:game).find(params[:id])
-    @game = @server.game
     #Rails.logger.info "[ServersController#set_server] Loaded server #{@server.id} with users: #{@server.users.pluck(:username).join(', ')}"
   end
-
   def check_creator
     unless @server.creator == current_user
       #Rails.logger.warn "[ServersController#check_creator] User #{current_user.username} is not the creator of server #{@server.id}"

@@ -155,7 +155,9 @@ class Server < ApplicationRecord
     cell.update!(owner: server_user)
     server_user.update!(current_position_x: cell.x, current_position_y: cell.y)
   end
-
+  def server_user(user)
+    server_users.find_by(user: user)
+  end
   private
 
   # Check if a cell is a valid starting position

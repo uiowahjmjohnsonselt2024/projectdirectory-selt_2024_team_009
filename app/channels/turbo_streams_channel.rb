@@ -1,6 +1,7 @@
 class TurboStreamsChannel < ApplicationCable::Channel
   def subscribed
-    stream_from "turbo_streams_#{params[:server_id]}"
+    @server = Server.find(params[:server_id])
+    stream_for @server
   end
 
   def unsubscribed

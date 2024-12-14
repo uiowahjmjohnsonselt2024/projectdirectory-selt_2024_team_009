@@ -74,7 +74,7 @@ Rails.application.configure do
 
   # Debug mode disables concatenation and preprocessing of assets.
   config.assets.debug = true
-  config.log_level = :debug
+  config.log_level = :info
   # Asset digests for cache busting.
   config.assets.digest = true
   config.assets.raise_runtime_errors = true

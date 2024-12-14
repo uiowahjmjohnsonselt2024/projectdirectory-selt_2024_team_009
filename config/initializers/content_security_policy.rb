@@ -2,19 +2,15 @@ Rails.application.configure do
   config.content_security_policy do |policy|
     policy.default_src :self, :https
     policy.font_src    :self, :https, :data
-    # Add the Azure Blob Storage domain to img_src
     policy.img_src     :self, :https, :data, "https://oaidalleapiprodscus.blob.core.windows.net"
     policy.object_src  :none
     policy.script_src  :self, :https, :unsafe_inline
     policy.style_src   :self, :https, :unsafe_inline
-    # Allow external CDNs for Bootstrap
-    policy.connect_src :self, :https, "ws://localhost:3000", "wss://localhost:3000",  "wss://shards-of-the-grid-team-09.herokuapp.com"
+    policy.connect_src :self, :https, "ws://localhost:3000", "wss://localhost:3000", "wss://shards-of-the-grid-team-09.herokuapp.com"
   end
 
-  # Allow nonces for inline styles and scripts
   config.content_security_policy_nonce_generator = ->(request) { SecureRandom.base64(16) }
   config.content_security_policy_nonce_directives = %w[script-src style-src]
 
-  # Enable CSP violation reporting for debugging
   # config.content_security_policy_report_only = Rails.env.development?
 end

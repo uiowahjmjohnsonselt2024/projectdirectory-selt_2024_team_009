@@ -5,37 +5,21 @@ class GamesController < ApplicationController
   before_action :ensure_game_in_progress
   before_action :ensure_current_player_turn, only: %i[perform_action]
   before_action :set_game, only: [:show, :update_game_area, :update_game_right_panel, :update_game_over, :update_show, :update_game_board, :update_current_turn, :update_inventory, :update_treasures, :update_opponent_details, :update_player_stats,  :update_game_left_panel]
-
+  respond_to :html, :erb, :turbo_stream, :turbostream
   # GET /games/:id
+  # app/controllers/games_controller.rb
+  # app/controllers/games_controller.rb
   def show
-    begin
-
-      @server = Server.includes(:game).find(params[:server_id])
-      @game = @server.game
-
-      @grid_cells = @server.grid_cells.includes(:owner, :treasure) || []
-      @server_users = @server.server_users.includes(:user)
-      @server_user = @server.server_users.includes(:inventories, :treasures).find_by(user: current_user)
-      @current_turn_user = @server.current_turn_server_user || @server.server_users.order(:turn_order).first
-      @opponents = @server.server_users.includes(:user, :treasures) || []
-      @waiting_for_players = @server.server_users.count < @server.max_players
-
-      if @waiting_for_players
-        update_game_left_panel
-      else
-        update_show
-      end
-    rescue ActiveRecord::RecordNotFound => e
-      #Rails.logger.error("[GamesController#show] #{e.message}")
-      flash[:alert] = "Game not found."
-      redirect_to root_path and return
-    rescue => e
-      #Rails.logger.error("[GamesController#show] Unexpected error: #{e.message}")
-      flash[:alert] = "Something went wrong. Please try again later."
-      redirect_to root_path and return
-    end
+    @server = Server.find(params[:server_id])
+    @game = @server.game
+    Rails.logger.info "Loading game data for server #{params[:server_id]}"
+    # @server = Server.find(params[:server_id]) # Ensure @server is set
+    load_game_data
+    Rails.logger.info "[GamesController#show] Current user token: #{current_user.cable_token}"
+    Rails.logger.info "Game data loaded: server=#{@server.inspect}, game=#{@game.inspect}, server_users=#{@server_users.inspect}, grid_cells=#{@grid_cells.inspect}, server_user=#{@server_user.inspect}, current_turn_user=#{@current_turn_user.inspect}, opponents=#{@opponents.inspect}, waiting_for_players=#{@waiting_for_players.inspect}"
   end
   def perform_action
+    load_game_data
     success = case params[:action_type]
               when 'move' then handle_move_action(params[:direction])
               when 'occupy' then handle_occupy_action
@@ -46,81 +30,72 @@ class GamesController < ApplicationController
               end
     return unless success
 
-    if @server_user.turn_ap <= 0 || @end_turn
-      advance_turn
+    if success
+      advance_turn if @server_user.turn_ap.zero? || @end_turn
+      check_game_end_conditions
     end
 
-    check_game_end_conditions
-
     respond_to do |format|
-      format.html { redirect_to server_game_path(@server, @server.game), notice: 'Action performed successfully.' }
+      format.html { redirect_to server_game_path(@server, @game), notice: 'Action performed successfully.' }
       format.json { head :no_content }
+      format.turbo_stream
     end
   end
   def update_game_board
-    @grid_cells = @game.grid_cells
-    @server_users = @game.server_users
+    @grid_cells = @server.grid_cells.includes(:owner, :treasure)
+    @server_users = @server.server_users.includes(:user)
     broadcast_update("game-board", "games/game_board")
   end
 
   def update_current_turn
-    @current_turn_user = @game.current_turn_server_user
+    @current_turn_user = @server.current_turn_server_user
     broadcast_update("current-turn", "games/current_turn")
   end
 
   def update_inventory
-    @items = @game.server_user.inventories.includes(:item)
+    @items = @server_user.inventories.includes(:item)
     broadcast_update("inventory-container", "games/inventory")
   end
 
   def update_treasures
-    @treasures = @game.server_user.treasures
+    @treasures = @server_user.treasures
     broadcast_update("treasures-container", "games/treasures")
   end
 
   def update_opponent_details
-    @opponents = @game.opponents
+    @opponents = @server.server_users.includes(:user, :treasures)
     broadcast_update("opponent-details", "games/opponent_details")
   end
 
   def update_player_stats
-    @server_user = @game.server_user
+    @server_user = @server.server_user(current_user)
     broadcast_update("player-stats", "games/player_stats")
   end
 
   def update_game_area
-    @server_users = @game.server_users
-    @grid_cells = @game.grid_cells
-    @server_user = @game.server_user
-    @current_turn_user = @game.current_turn_server_user
-    @opponents = @game.opponents
-    @waiting_for_players = @game.waiting_for_players
-    broadcast_update("game-container", "games/game_area")
+    load_game_data
+    broadcast_update("game-show", "games/game_area")
   end
 
   def update_game_right_panel
-    @server_user = @game.server_user
+    @server_user = @server.server_user(current_user)
     broadcast_update("game-right-panel", "games/game_right_panel")
   end
 
-  def update_game_over
-    @winner = @game.winner
+  def update_game_over(winner)
+    @winner = winner
     broadcast_update("game-over", "games/game_over")
   end
-
   def update_game_left_panel
-    @server_user = @game.server_user
-    @waiting_for_players = @game.waiting_for_players
+    @server_user = @server.server_user(current_user)# Pass the current_user as an argument
+    @waiting_for_players = @server.waiting_for_players
+    Rails.logger.debug "Rendering page with  update_game_left_panel server_id: #{@server&.id}"
+
     broadcast_update("game-left-panel", "games/game_left_panel")
   end
   def update_show
-    @server_users = @game.server_users
-    @grid_cells = @game.grid_cells
-    @server_user = @game.server_user
-    @current_turn_user = @game.current_turn_server_user
-    @opponents = @game.opponents
-    @waiting_for_players = @game.waiting_for_players
-    broadcast_update("game-show", "games/show")
+    load_game_data
+    broadcast_update("game-show", "games/area")
   end
 
   private
@@ -128,7 +103,9 @@ class GamesController < ApplicationController
 
   def broadcast_update(target, partial)
     html = render_to_string(partial: partial, formats: [:html])
-    Turbo::StreamsChannel.broadcast_to @game.server, target: target, html: html
+    turbo_stream = render_to_string(partial: "update_#{target}", formats: [:turbo_stream])
+    Rails.logger.debug "Broadcasting update to #{target} with partial #{partial}"
+    Turbo::StreamsChannel.broadcast_to @server, target: target, html: html, turbo_stream: turbo_stream
   end
   def handle_error(message)
     #Rails.logger.error "[GamesController#handle_error] Server \#{@server.id}: \#{message}"
@@ -139,7 +116,6 @@ class GamesController < ApplicationController
 
   def set_server
     @server = Server.includes(:game).find(params[:server_id]) # Find the server
-    @game = @server.game
     #Rails.logger.info "[GamesController#set_server] Loaded server #{@server.id} for game display"
 
   end
@@ -147,33 +123,39 @@ class GamesController < ApplicationController
   def set_server_user
     @server_user = @server.server_users.find_by(user: current_user)
     if @server_user.nil?
-      #Rails.logger.warn "[GamesController#set_server_user] User #{current_user.username} is not part of server #{@server.id}"
       redirect_to servers_path, alert: 'You are not part of this game.'
-    else
-      #Rails.logger.info "[GamesController#set_server_user] ServerUser found for #{current_user.username} on server #{@server.id}"
     end
+  end
+  def load_game_data
+    @server = Server.includes(:game).find(params[:server_id]) # Find the server
+    @game = @server.game # Access the associated game
+    @grid_cells = @server.grid_cells.includes(:owner, :treasure) || []
+    @server_users = @server.server_users.includes(:user) # This should return AR objects
+    @server_user = @server.server_users.includes(:inventories, :treasures).find_by(user: current_user)
+    @current_turn_user = @server.current_turn_server_user || @server.server_users.order(:turn_order).first
+    @opponents = @server.server_users.includes(:user, :treasures) || []
+    @waiting_for_players = @server.server_users.count < @server.max_players
   end
 
   def ensure_game_in_progress
+    @server = Server.includes(:game).find(params[:server_id]) # Find the server
+    @game = @server.game # Access the associated game
     redirect_to servers_path, alert: 'Game is not in progress.' unless @server.status == 'in_progress'
   end
 
-
   def ensure_current_player_turn
+    @server = Server.includes(:game).find(params[:server_id]) # Find the server
+    @game = @server.game # Access the associated game
     unless @server.current_turn_server_user == @server_user
-      respond_to do |format|
-        format.html { redirect_to server_game_path(@server, @server.game), alert: 'It is not your turn.' }
-        format.json { render json: { success: false, message: 'It is not your turn.' }, status: :forbidden }
-      end
+      flash[:alert] = "It's not your turn."
+      redirect_to server_game_path(@server, @game) and return
     end
   end
 
   def advance_turn
-    @server.increment!(:turn_count) # Increment the turn count
-    # Decrement temporary effects for current player
+    @server.increment!(:turn_count)
     @server_user.decrement_temporary_effects
 
-    # Decrement fortification counters
     @server.grid_cells.where(owner: current_user).each do |cell|
       if cell.fortified && cell.fortified > 0
         cell.fortified -= 1
@@ -181,13 +163,11 @@ class GamesController < ApplicationController
       end
     end
 
-    # Skip turns if necessary
     loop do
       next_server_user = find_next_server_user(@server.current_turn_server_user.turn_order)
       if next_server_user.nil?
-        #Rails.logger.warn "No valid next player found. Resetting turn order."
         @server.update(current_turn_server_user: @server.server_users.order(:turn_order).first)
-        return # Important: Exit the method after resetting
+        return
       end
       if next_server_user.turns_skipped && next_server_user.turns_skipped > 0
         next_server_user.decrement_temporary_effects
@@ -234,11 +214,10 @@ class GamesController < ApplicationController
         else
           @server_user.update(current_position_x: target_x, current_position_y: target_y)
           check_for_treasure(target_cell)
-          flash[:notice] = 'Moved successfully.'
           update_game_board
           update_player_stats
           update_opponent_details
-          return true
+          flash[:notice] = 'Moved successfully.'
         end
       else
         flash[:alert] = 'Invalid move.'
@@ -283,14 +262,14 @@ class GamesController < ApplicationController
         update_player_stats
         update_opponent_details
         update_treasures
-        true
+        return true
       else
         handle_error('Treasure not found.')
-        false
+        return false
       end
     else
       handle_error("It's not your turn.")
-      false
+      return false
     end
   end
 
@@ -603,7 +582,8 @@ class GamesController < ApplicationController
         @server.update(status: 'finished')
 
         # Broadcast game over and winner information
-        update_game_over
+        update_game_over(winner)
+        return
       else
         flash[:alert] = 'Unable to determine a winner due to invalid game state.'
       end
@@ -645,8 +625,9 @@ class GamesController < ApplicationController
   end
 
   def set_game
+    @server = Server.includes(:game).find(params[:server_id]) # Find the server
+    @game = @server.game # Access the associated game
     #Rails.logger.info "Finding game with ID: #{params[:id]} for server ID: #{@server.id}"
-    @game = @server.games.find(params[:id])
   end
   def distribute_bounty(winner)
     # Distributes a game-ending bounty to the winner

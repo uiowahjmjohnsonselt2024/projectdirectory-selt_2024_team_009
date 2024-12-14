@@ -1,0 +1,3 @@
+<%= turbo_stream.replace "treasures-container" do %>
+  <%= render partial: "games/treasures", locals: { treasures: @treasures } %>
+<% end %>
