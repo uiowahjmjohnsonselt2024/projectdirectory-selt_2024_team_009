@@ -9,6 +9,7 @@ Bundler.require(*Rails.groups)
 
 module ProjectdirectorySelt2024Team009
   class Application < Rails::Application
+    config.action_cable.mount_path = nil
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 7.2
 

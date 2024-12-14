@@ -12,6 +12,7 @@ Rails.application.configure do
     'https://shards-of-the-grid-team-09.herokuapp.com',
     'http://shards-of-the-grid-team-09.herokuapp.com'
   ]
+  config.action_cable.worker_pool_size = 10
 
 
   # Eager load code on boot.
