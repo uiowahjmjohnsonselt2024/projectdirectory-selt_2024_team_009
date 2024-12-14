@@ -19,33 +19,34 @@ class GamesController < ApplicationController
     Rails.logger.info "Game data loaded: server=#{@server.inspect}, game=#{@game.inspect}, server_users=#{@server_users.inspect}, grid_cells=#{@grid_cells.inspect}, server_user=#{@server_user.inspect}, current_turn_user=#{@current_turn_user.inspect}, opponents=#{@opponents.inspect}, waiting_for_players=#{@waiting_for_players.inspect}"
   end
   def perform_action
-    load_game_data
-    success = case params[:action_type]
-              when 'move' then handle_move_action(params[:direction])
-              when 'occupy' then handle_occupy_action
-              when 'capture' then handle_capture_action(params[:direction])
-              when 'use_treasure' then handle_use_treasure_action(params[:treasure_id])
-              when 'use_item' then handle_use_item_action(params[:item_id])
-              else handle_error('Invalid action type.')
-              end
-    return unless success
+    def perform_action
+      begin
+        load_game_data
 
-    if success
-      Rails.logger.debug "Action performed successfully"
-      Rails.logger.debug "Checking game end conditions"
-      check_game_end_conditions
-      advance_turn if @server_user.turn_ap.zero? || @end_turn
-      Rails.logger.debug "Broadcasting game state"
-      broadcast_game_state
-    else
-      render_error_response
+      success = case params[:action_type]
+                when 'move' then handle_move_action(params[:direction])
+                when 'occupy' then handle_occupy_action
+                when 'capture' then handle_capture_action(params[:direction])
+                when 'use_treasure' then handle_use_treasure_action(params[:treasure_id])
+                when 'use_item' then handle_use_item_action(params[:item_id])
+                else handle_error('Invalid action type.')
+                end
+      return unless success
+
+      if success
+        Rails.logger.debug "Action performed successfully"
+        Rails.logger.debug "Checking game end conditions"
+        check_game_end_conditions
+        advance_turn if @server_user.turn_ap.zero? || @end_turn
+        Rails.logger.debug "Broadcasting game state"
+        broadcast_game_state
+      else
+        render_error_response
+      end
+    rescue => e
+      Rails.logger.error "Error in perform_action: #{e.message}\n#{e.backtrace.join("\n")}"
     end
 
-    respond_to do |format|
-      format.html { redirect_to server_game_path(@server, @game), notice: 'Action performed successfully.' }
-      format.json { head :no_content }
-      format.turbo_stream
-    end
   end
 
   def update_game_board
@@ -246,6 +247,7 @@ class GamesController < ApplicationController
           update_game_board
           update_player_stats
           update_opponent_details
+          Rails.logger.debug "server_user: #{@server_user.user_id}"
           flash[:notice] = 'Moved successfully.'
         end
       else
