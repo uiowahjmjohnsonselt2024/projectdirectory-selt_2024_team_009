@@ -1,0 +1,31 @@
+<% if @server.current_turn_server_user == @server_user %>
+  <div class="game-action-controls">
+    <h3 class="text-primary">Your Turn</h3>
+    <div class="game-movement-controls">
+      <h4 class="text-secondary">Movement:</h4>
+      <%= button_to '↑', perform_action_server_game_path(@server, @game), class: 'btn-game-movement up', params: { action_type: 'move', direction: 'up' }, method: :post %>
+      <%= button_to '←', perform_action_server_game_path(@server, @game), class: 'btn-game-movement left', params: { action_type: 'move', direction: 'left' }, method: :post %>
+      <%= button_to '→', perform_action_server_game_path(@server, @game), class: 'btn-game-movement right', params: { action_type: 'move', direction: 'right' }, method: :post %>
+      <%= button_to '↓', perform_action_server_game_path(@server, @game), class: 'btn-game-movement down', params: { action_type: 'move', direction: 'down' }, method: :post %>
+    </div>
+    <div class="game-actions">
+      <h4 class="text-secondary">Other Actions:</h4>
+      <%= button_to 'Occupy Cell', perform_action_server_game_path(@server, @game), class: 'btn-game-action btn-primary', params: { action_type: 'occupy' }, method: :post %>
+      <%= button_to 'Capture Cell', perform_action_server_game_path(@server, @game), class: 'btn-game-action btn-danger', params: { action_type: 'capture', direction: 'right' }, method: :post %>
+    </div>
+  </div>
+<% else %>
+  <div class="d-flex justify-content-center">
+    <div class="game-legend">
+      <h3 class="text-primary">Player Symbol:</h3>
+      <ul>
+        <% @server.server_users.each do |su| %>
+          <li>
+            <span class="game-symbol game-symbol-<%= su.symbol %>"><%= su.symbol %></span>
+            <%= "#{su.user.username} (AP: #{su.total_ap})" %>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  </div>
+<% end %>

@@ -3,15 +3,22 @@ class ServerUser < ApplicationRecord
   belongs_to :user
   has_many :grid_cells, foreign_key: :owner_id
   has_many :treasures, through: :grid_cells
+  has_many :inventories, dependent: :destroy
+
   #before_create :deduct_entry_fee
   # Validations
   validates :total_ap, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
   validates :turn_ap, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
   validates :shard_balance, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
-  validates :symbol, presence: true, allow_nil: true
+  validates :symbol, inclusion: { in: %w[🟢 🔴 🔵 🟡 🟣 🟤] }, allow_nil: true
   validates :turn_order, numericality: { only_integer: true }, allow_nil: true
+  validates :role, presence: true
+  validates :user_id, presence: true
+  validates :server_id, presence: true
 
-
+  # Callbacks
+  after_initialize :set_default_role, if: :new_record?
+  after_initialize :set_defaults, if: :new_record?
   # Methods to manage AP and Shards
   def spend_turn_ap(amount)
     if turn_ap >= amount
@@ -62,5 +69,15 @@ class ServerUser < ApplicationRecord
     end
 
     save
+  end
+
+  private
+  def set_default_role
+    self.role ||= 'player'
+  end
+  def set_defaults
+    self.total_ap ||= 200
+    self.turn_ap ||= 2
+    self.shard_balance ||= 0
   end
 end

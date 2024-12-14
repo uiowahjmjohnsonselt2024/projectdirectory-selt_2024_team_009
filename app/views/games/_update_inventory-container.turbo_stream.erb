@@ -1,0 +1,3 @@
+<%= turbo_stream.replace "inventory-container" do %>
+  <%= render partial: "games/inventory", locals: { items: @items } %>
+<% end %>

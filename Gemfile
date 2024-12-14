@@ -7,6 +7,8 @@ gem "bundler", "~> 2.5"
 gem 'hotwire-rails'
 gem "rails", "~> 7.2.2"
 gem 'redis'
+gem 'uuid'
+
 # Database adapters
 gem "pg", "~> 1.5", group: :production # PostgreSQL for production
 gem "sqlite3", "~> 2.2", groups: [ :development, :test ] # SQLite for development and test
@@ -16,6 +18,7 @@ group :development, :test do
 end
 # Web server interface for Ruby/Rack applications
 gem "puma", "~> 6"
+gem 'bond'
 
 #open ai
 gem 'ruby-openai', '~> 4.0'

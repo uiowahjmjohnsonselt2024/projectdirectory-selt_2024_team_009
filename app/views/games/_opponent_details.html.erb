@@ -1,0 +1,30 @@
+<% if @opponents.present? %>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        <th>Username</th>
+        <th>Symbol</th>
+        <th>Remaining AP</th>
+        <th>Cells Occupied</th>
+        <th>Treasures</th>
+        <th>Items</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @opponents.each do |opponent| %>
+        <tr>
+          <td><%= opponent.user.username %></td>
+          <td class="game-symbol game-symbol-<%= opponent.symbol %>"><%= opponent.symbol %></td>
+          <td><%= opponent.total_ap %></td>
+          <td><%= @server.grid_cells.select(&:occupied?).count { |cell| cell.owner == opponent } %></td>
+          <td><%= opponent.treasures.pluck(:name).join(", ") %></td>
+          <td><%= opponent.user.items.pluck(:name).join(", ") %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <tr>
+    <td colspan="6">No opponents found.</td>
+  </tr>
+<% end %>

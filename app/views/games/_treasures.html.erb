@@ -1,0 +1,15 @@
+<% if @treasures && @treasures.any? %>
+  <ul class="dropdown-menu">
+    <% @treasures.each do |treasure| %>
+      <li>
+        <span><%= treasure.name %></span>
+        <%= button_to "Use #{treasure.name}", perform_action_server_game_path(@server),
+          class: 'btn-game-action btn-info',
+          params: { action_type: 'use_treasure', treasure_id: treasure.id },
+          method: :post %>
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <p class="text-muted">No treasures found.</p>
+<% end %>
