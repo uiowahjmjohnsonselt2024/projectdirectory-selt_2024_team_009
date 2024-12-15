@@ -1,3 +1,5 @@
+# config/routes.rb
+
 Rails.application.routes.draw do
   root "static_pages#home"
   get "/about", to: "static_pages#about"
@@ -55,7 +57,8 @@ Rails.application.routes.draw do
       end
     end
   end
-  resources :grid_cells # Consider nesting under servers if appropriate
+
+  resources :grid_cells
   resources :transactions
   resources :inventories
   resources :contents

@@ -1,21 +1,21 @@
 <%= turbo_stream.replace "game-board" do %>
-  <%= render partial: "games/game_board" %>
+  <%= render partial: "games/game_board", locals: {server: @server, game: @game, server_users: @server_users, grid_cells: @grid_cells, server_user: @server_user, current_turn_user: @current_turn_user, opponents: @opponents, waiting_for_players: @waiting_for_players } %>
 <% end %>
 
 <%= turbo_stream.replace "current-turn" do %>
-  <%= render partial: "games/current_turn" %>
+  <%= render partial: "games/current_turn", locals: { server: @server, game: @game, server_users: @server_users, grid_cells: @grid_cells, server_user: @server_user, current_turn_user: @current_turn_user, opponents: @opponents, waiting_for_players: @waiting_for_players } %>
 <% end %>
 
 <%= turbo_stream.replace "inventory-container" do %>
-  <%= render partial: "games/inventory" %>
+  <%= render partial: "games/inventory", locals: { server: @server, game: @game, server_users: @server_users, grid_cells: @grid_cells, server_user: @server_user, current_turn_user: @current_turn_user, opponents: @opponents, waiting_for_players: @waiting_for_players} %>
 <% end %>
 
 <%= turbo_stream.replace "opponent-details" do %>
-  <%= render partial: "games/opponent_details" %>
+  <%= render partial: "games/opponent_details", locals: {server: @server, game: @game, server_users: @server_users, grid_cells: @grid_cells, server_user: @server_user, current_turn_user: @current_turn_user, opponents: @opponents, waiting_for_players: @waiting_for_players } %>
 <% end %>
 
 <%= turbo_stream.replace "player-stats" do %>
-  <%= render partial: "games/player_stats" %>
+  <%= render partial: "games/player_stats", locals: {server: @server, game: @game, server_users: @server_users, grid_cells: @grid_cells, server_user: @server_user, current_turn_user: @current_turn_user, opponents: @opponents, waiting_for_players: @waiting_for_players } %>
 <% end %>
 
 <%= turbo_stream.replace "game-show" do %>
@@ -23,17 +23,20 @@
 <% end %>
 
 <%= turbo_stream.replace "game-left-panel" do %>
-  <%= render partial: "games/game_left_panel" %>
+  <%= render partial: "games/game_left_panel", locals: { server: @server, game: @game, server_users: @server_users, grid_cells: @grid_cells, server_user: @server_user, current_turn_user: @current_turn_user, opponents: @opponents, waiting_for_players: @waiting_for_players} %>
 <% end %>
 
 <%= turbo_stream.replace "game-right-panel" do %>
-  <%= render partial: "games/game_right_panel" %>
+  <%= render partial: "games/game_right_panel", locals: { server: @server, game: @game, server_users: @server_users, grid_cells: @grid_cells, server_user: @server_user, current_turn_user: @current_turn_user, opponents: @opponents, waiting_for_players: @waiting_for_players } %>
 <% end %>
 
 <%= turbo_stream.replace "game-over" do %>
-  <%= render partial: "games/game_over", locals: { winner: @winner } %>
+  <%= render partial: "games/game_over", locals: {server: @server, game: @game, server_users: @server_users, grid_cells: @grid_cells, server_user: @server_user, current_turn_user: @current_turn_user, opponents: @opponents, waiting_for_players: @waiting_for_players, winner: @winner } %>
 <% end %>
 
 <%= turbo_stream.replace "treasures-container" do %>
-  <%= render partial: "games/treasures" %>
+  <%= render partial: "games/treasures", locals: { server: @server, game: @game, server_users: @server_users, grid_cells: @grid_cells, server_user: @server_user, current_turn_user: @current_turn_user, opponents: @opponents, waiting_for_players: @waiting_for_players, treasures: @server_user.treasures } %>
+<% end %>
+<%= turbo_stream.replace "flash" do %>
+  <%= render partial: "games/shared/flash" %>
 <% end %>
