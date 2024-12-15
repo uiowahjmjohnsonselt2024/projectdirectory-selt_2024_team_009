@@ -9,12 +9,20 @@
 // This program may be extended to ALL attributes on the page, however, this will likely result in performance issues.
 
 helpBoss = document.getElementById('helphead');
+helpBox = document.getElementById('helpbox');
 helperText = document.getElementById('helptext')
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("I think I am working")
     // Select all buttons on the page
     const types =  ['a', 'input', 'select', 'button', 'h2', 'h3']
+    let helpstr = "If you are unsure how to use this application, hover over a button. (or maybe the button doesn\'t have a description)'; // Clear the helper text"
+    helphead.addEventListener('mouseenter', () => {
+      helperText.textContent = helpstr;
+    })
+
+    helphead.addEventListener('mouseleave', () => {
+      helperText.textContent = "";
+    })
 
     types.forEach(type => {
         console.log(type);
@@ -32,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
             elem.addEventListener('mouseleave', () => {
               helpBoss.textContent = "Help"
-              helperText.textContent = 'If you are unsure how to use this application, hover over a button. (or maybe the button doesn\'t have a description)'; // Clear the helper text
+              helperText.textContent = ""
             });
           });        
     })
