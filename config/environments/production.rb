@@ -16,9 +16,7 @@ Rails.application.configure do
   # Action Cable URL and allowed request origins
   config.action_cable.url = 'wss://shards-of-the-grid-team-09-ad424e75e121.herokuapp.com/cable'
   config.action_cable.allowed_request_origins = [
-    'https://shards-of-the-grid-team-09-ad424e75e121.herokuapp.com',
-    'https://rubyonrails.com',
-    %r{http://ruby.*}
+    'https://shards-of-the-grid-team-09-ad424e75e121.herokuapp.com'
   ]
   config.action_cable.worker_pool_size = 10
 
