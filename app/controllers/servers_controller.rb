@@ -15,8 +15,6 @@ class ServersController < ApplicationController
   # GET /servers/:id
   def show
     @server = Server.includes(:game).find(params[:id])
-    #Rails.logger.info "[ServersController#show] Server ID: #{@server.id}, Current user: #{current_user.username}"
-    #Rails.logger.info "[ServersController#show] Server ID: #{@server.id}, Current user: #{current_user.username}, Token: #{current_user.cable_token}"
     @server_users = @server.server_users.includes(:user).map do |server_user|
       server_user.as_json(methods: [:cable_token])
     end
@@ -124,6 +122,12 @@ class ServersController < ApplicationController
     # Assign symbol and turn order
     @server.assign_symbols_and_turn_order
     @server.assign_starting_positions(new_user: @server_user)
+    Turbo::StreamsChannel.broadcast_replace_to(
+      @server,
+      target: "game-left-panel",
+      partial: "games/game_left_panel",
+      locals: { server: @server, server_users: @server.server_users, server_user: @server_user, waiting_for_players: @server.server_users.count < @server.max_players }
+    )
     # Assign starting position ONLY for the new user
     redirect_to server_game_path(@server, @server.game), notice: 'Joined the game!'
 
