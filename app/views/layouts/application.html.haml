@@ -4,8 +4,8 @@
     %title
       = full_title(yield(:title))
     = csrf_meta_tags
+    = javascript_include_tag "channels/helperbox", :defer => "true"
     = action_cable_meta_tag
-    = javascript_include_tag "channels/helperbox.js", :defer => "true"
 
     = content_tag(:meta, nil, name: "cable-token", content: "#{current_user&.cable_token}")
 

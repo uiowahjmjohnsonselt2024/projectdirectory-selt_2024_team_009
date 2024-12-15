@@ -89,10 +89,6 @@ When('I click {string}') do |button|
   click_button button
 end
 
-Then('I should see {string}') do |message|
-  expect(page).to have_content(message)
-end
-
 Then('I should see {string} in the list of items') do |item_name|
   expect(page).to have_content(item_name)
 end

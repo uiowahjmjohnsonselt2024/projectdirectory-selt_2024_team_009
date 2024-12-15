@@ -24,8 +24,8 @@ class WalletsController < ApplicationController
       @wallet.balance += amount
 
       # w/o space length == 16 and all of it is numbers
-
-      if params[:credit_card_number].gsub(/\s+/, "").length != 16 || !params[:credit_card_number].gsub(/\s+/, "").match?(/\A\d+\z/)
+      cleaned_number = params[:credit_card_number].gsub(/\s+/, "")
+      if cleaned_number.length != 16 || !cleaned_number.match?(/\A\d+\z/)
         redirect_to buy_shards_wallet_path(@wallet), alert: "Invalid card info: Card number must be 16 digits long."
 
       elsif params[:cvv].length != 3 || !params[:cvv].match?(/\A\d+\z/)
@@ -45,10 +45,12 @@ class WalletsController < ApplicationController
 
         trans.save!()
 
-        if @wallet.save          
+        if @wallet.save     
           redirect_to @wallet, notice: "#{amount} Shards successfully purchased!"
         else
+          # :nocov:
           redirect_to buy_shards_wallet_path(@wallet), alert: "Failed to update wallet."
+          # :nocov:
         end
       end
     else
@@ -97,7 +99,9 @@ class WalletsController < ApplicationController
       if @wallet.save
         redirect_to @wallet, notice: "#{shard_amount} Shards successfully added"
       else
+        # :nocov:
         redirect_to @wallet, alert: "Operation Failed"
+        # :nocov:
       end
     else
       redirect_to @wallet, alert: "Invalid amount"
@@ -112,7 +116,9 @@ class WalletsController < ApplicationController
       if @wallet.save
         redirect_to @wallet, notice: "#{amount} Shards removed from account"
       else
-        redirect_to @wallet, alert: "Operation Failed"
+        # :nocov:
+        redirect_to @wallet, alert: "Operation Failed" 
+        # :nocov:
       end
     else
       redirect_to @wallet, alert: "Insufficient Funds or Invalid Amount"

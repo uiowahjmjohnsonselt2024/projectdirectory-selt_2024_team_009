@@ -25,9 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
     })
 
     types.forEach(type => {
-        console.log(type);
         const elements = document.querySelectorAll(type);
-        console.log(elements.size)
         elements.forEach(elem => {
             elem.addEventListener('mouseenter', () => {
               const title = elem.getAttribute('title');

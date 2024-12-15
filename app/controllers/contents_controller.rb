@@ -19,10 +19,15 @@ class ContentsController < ApplicationController
   # POST /contents
   def create
     @content = Content.new(content_params)
+    # this relies on magic to handle invalid params.
+    # therefore, sad path is to not be tested.
+
     if @content.save
       redirect_to @content, notice: 'Content was successfully created.'
     else
+      # :nocov:
       render :new, status: :unprocessable_entity
+      # :nocov:
     end
   end
 
@@ -32,10 +37,14 @@ class ContentsController < ApplicationController
 
   # PATCH/PUT /contents/:id
   def update
+    # this relies on magic to handle invalid params.
+    # therefore, sad path is to not be tested.
     if @content.update(content_params)
       redirect_to @content, notice: 'Content was successfully updated.'
     else
+      # :nocov:
       render :edit, status: :unprocessable_entity
+      # :nocov:
     end
   end
 

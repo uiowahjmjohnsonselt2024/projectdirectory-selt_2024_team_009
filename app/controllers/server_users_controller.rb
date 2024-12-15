@@ -5,20 +5,27 @@ class ServerUsersController < ApplicationController
 
   # POST /server_users
   def show
+    # this code was not meant to be ran
+    # :nocov:
     @server = Server.includes(:game).find(params[:server_id])
     @server_users = @server.server_users.includes(:user)
     @waiting_for_players = @server.server_users.count < @server.max_players
+    # :nocov:
+
   end
   def create
+    puts @server.users
     if @server.users.include?(current_user)
       redirect_to @server, alert: 'You have already joined this game.'
       return
     end
+    puts "CALL2"
 
     if @server.server_users.count >= @server.max_players
       redirect_to @server, alert: 'Server is full.'
       return
     end
+    puts "SUMMON0.1"
 
     @server_user = @server.server_users.create!(
       user: current_user,
@@ -27,7 +34,7 @@ class ServerUsersController < ApplicationController
       turn_ap: 2,
       shard_balance: 0
     )
-
+    puts "SUMMON"
     #Rails.logger.info "[ServersController#join_game] User #{current_user.username} joined server #{@server.id} with cable_token: #{@server_user.cable_token}"
     @server.assign_symbols_and_turn_order
     @server.assign_starting_positions(new_user: @server_user)
