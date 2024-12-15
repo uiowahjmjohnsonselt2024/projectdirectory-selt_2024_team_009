@@ -91,7 +91,7 @@ function reconnectSubscription(serverId) {
                     disconnected() {
                         console.warn(`[turbo_streams_channel.js] Disconnected again from TurboStreamsChannel for server ${serverId}`);
                         delete subscriptions[serverId];
-                        reconnectSubscription(serverId);
+                        // reconnectSubscription(serverId);
                     },
                     received(data) {
                         console.log(`[turbo_streams_channel.js] Data received after reconnection for server ${serverId}:`, data);
