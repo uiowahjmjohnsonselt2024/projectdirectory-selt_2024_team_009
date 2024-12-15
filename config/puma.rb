@@ -1,7 +1,7 @@
 # Puma configuration file
 
 # Default threads configuration
-threads_count = ENV.fetch("RAILS_MAX_THREADS", 5)
+threads_count = ENV.fetch("RAILS_MAX_THREADS", 5).to_i
 threads threads_count, threads_count
 
 # Determine environment
@@ -23,8 +23,18 @@ when "production"
   # Production-specific settings
   workers ENV.fetch("WEB_CONCURRENCY", 2)
   preload_app!
-  port ENV.fetch("PORT", 3002)
+
+  # Heroku requires binding to 0.0.0.0
+  bind "tcp://0.0.0.0:#{ENV.fetch('PORT', 3002)}"
   pidfile ENV.fetch("PIDFILE", "tmp/pids/server_prod.pid")
+
+  # Enable cluster mode for performance
+  on_worker_boot do
+    ActiveRecord::Base.establish_connection if defined?(ActiveRecord)
+  end
+
+  # Explicitly allow tmp_restart for Heroku compatibility
+  plugin :tmp_restart
 else
   raise "Unknown environment: #{ENV['RAILS_ENV']}"
 end

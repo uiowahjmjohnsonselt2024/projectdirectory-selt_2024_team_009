@@ -25,7 +25,7 @@ class ScoresController < ApplicationController
     # Update server status
     @server.update(status: 'in_progress', current_turn_server_user_id: @server.server_users.order(:turn_order).first.id)
 
-    redirect_to game_path(@server), notice: 'Game started successfully.'
+    redirect_to server_game_path(@server, @server.game), notice: 'Game started successfully.'
   end
   # GET /scores
   def index

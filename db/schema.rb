@@ -10,12 +10,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_12_03_091053) do
+ActiveRecord::Schema[7.2].define(version: 2024_12_14_181107) do
   create_table "contents", force: :cascade do |t|
     t.text "story_text"
     t.string "image_url"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "games", force: :cascade do |t|
+    t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "server_id", null: false
+    t.index ["server_id"], name: "index_games_on_server_id"
   end
 
   create_table "grid_cells", force: :cascade do |t|
@@ -29,6 +37,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_03_091053) do
     t.integer "owner_id"
     t.boolean "obstacle", default: false
     t.integer "fortified"
+    t.index ["server_id", "x", "y"], name: "index_grid_cells_on_server_id_and_x_and_y", unique: true
   end
 
   create_table "inventories", force: :cascade do |t|
@@ -38,6 +47,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_03_091053) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "item_name"
+    t.integer "server_user_id"
   end
 
   create_table "items", force: :cascade do |t|
@@ -70,6 +80,12 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_03_091053) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "messages", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "game_id"
+  end
+
   create_table "scores", force: :cascade do |t|
     t.integer "user_id", null: false
     t.integer "server_id", null: false
@@ -95,6 +111,9 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_03_091053) do
     t.integer "diagonal_moves_left"
     t.boolean "mirror_shield"
     t.integer "turns_skipped"
+    t.string "cable_token"
+    t.integer "role", null: false
+    t.index ["role"], name: "index_server_users_on_role"
   end
 
   create_table "servers", force: :cascade do |t|
@@ -105,6 +124,10 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_03_091053) do
     t.datetime "updated_at", null: false
     t.string "status", default: "pending"
     t.integer "current_turn_server_user_id"
+    t.string "background_image_url"
+    t.string "role"
+    t.integer "turn_count"
+    t.index ["created_by"], name: "index_servers_on_created_by"
   end
 
   create_table "transactions", force: :cascade do |t|
@@ -113,7 +136,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_03_091053) do
     t.decimal "amount", precision: 10, scale: 2
     t.string "currency"
     t.string "payment_method"
-    t.integer "item_id", null: false
+    t.integer "item_id"
     t.integer "quantity"
     t.text "description"
     t.datetime "created_at", null: false
@@ -149,6 +172,8 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_03_091053) do
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
     t.string "role", default: "player", null: false
+    t.string "cable_token"
+    t.index ["cable_token"], name: "index_users_on_cable_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["username"], name: "index_users_on_username", unique: true
@@ -161,6 +186,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_03_091053) do
     t.datetime "updated_at", null: false
   end
 
+  add_foreign_key "games", "servers"
   add_foreign_key "grid_cells", "contents"
   add_foreign_key "grid_cells", "servers"
   add_foreign_key "grid_cells", "treasures"
@@ -173,6 +199,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_03_091053) do
   add_foreign_key "scores", "users"
   add_foreign_key "server_users", "servers"
   add_foreign_key "server_users", "users"
+  add_foreign_key "servers", "users", column: "created_by"
   add_foreign_key "transactions", "items"
   add_foreign_key "transactions", "users"
   add_foreign_key "treasure_finds", "servers"

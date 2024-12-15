@@ -1,4 +1,7 @@
 - provide(:title, "Edit Profile")
+= action_cable_meta_tag
+= content_tag(:meta, nil, name: "cable-token", content: "#{current_user&.cable_token}")
+
 %h1 Edit Profile
 
 = form_with(model: @user, url: profile_path, method: :patch) do |f|
@@ -13,26 +16,26 @@
 
   .form-group
     = f.label :username
-    = f.text_field :username, class: "form-control"
+    = f.text_field :username, class: "form-control", title:"This field is how others will see your name."
 
   .form-group
     = f.label :email
-    = f.email_field :email, class: "form-control"
+    = f.email_field :email, class: "form-control", title:"This field is how you login and where system mail will go."
 
   .form-group
     = f.label :password
-    = f.password_field :password, class: "form-control", autocomplete: "off"
+    = f.password_field :password, class: "form-control", autocomplete: "off", title:"Standard password stuff. It needs to be >8 chars in length."
 
   .form-group
     = f.label :password_confirmation
-    = f.password_field :password_confirmation, class: "form-control", autocomplete: "off"
+    = f.password_field :password_confirmation, class: "form-control", autocomplete: "off", title:"Retype in your password to make sure there is no typos."
 
   .form-group
     = f.label :role
-    = f.select :role, options_for_select([['Player', 'player'], ['Admin', 'admin']], selected: @user.role), class: "form-control"
+    = f.select :role, options_for_select([['Player', 'player'], ['Admin', 'admin']], selected: @user.role), class: "form-control", title:"The only difference is that one can add items..."
 
   .form-group
-    = f.submit "Save Changes", class: "btn btn-primary"
+    = f.submit "Save Changes", class: "btn btn-primary", title:"This will write to your account. Are you sure you want to do this?"
 
 %p
-  = link_to 'Back to Profile', user_root_path(current_user.id), class: "btn btn-secondary"
+  = link_to 'Back to Profile', user_root_path(current_user.id), class: "btn btn-secondary", title:"Don't save, return back to stats. This is identical to the header button."

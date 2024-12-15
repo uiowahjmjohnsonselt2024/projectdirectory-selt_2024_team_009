@@ -1,27 +1,38 @@
-%h1 Buy Shards
+%head
+  = javascript_include_tag "channels/purchase_shards.js"
 
-%p
-  %strong 1 Shard = $0.01 USD.
-  Enter the number of shards you want to purchase and your payment details:
+%div.row.d-flex.justify-content-center
+  %div.col-md-8
+    %div.card.text-color-secondary.bg-dark.bg-opacity-75.my-3
+      %div.card-body
+        %h4.card-title.text-center Buy Shards
+        <hr />
+        %p
+          %h6.text-center.font-monospace.my-2 1 Shard = $0.01 USD.
+          %h6 Enter the number of shards you want to purchase and your payment details:
 
-= form_with url: purchase_shards_wallet_path(@wallet), method: :post, local: true do |f|
-  .form-group
-    = f.label :amount, "Number of Shards:"
-    = f.number_field :amount, min: 1, class: 'form-control'
+        = form_with url: purchase_shards_wallet_path(@wallet), method: :post, local: true, id: "shard-purchase-form" do |f|
+          .form-group
+            = f.label :amount, "Number of Shards:"
+            = f.number_field :amount, min: 1, class: 'form-control', id: "shard-amount"
 
-  %h2 Payment Details
-  .form-group
-    = f.label :credit_card_number, "Credit Card Number:"
-    = f.text_field :credit_card_number, placeholder: "1234 5678 9012 3456", class: 'form-control'
-  .form-group
-    = f.label :expiry_date, "Expiry Date (MM/YY):"
-    = f.text_field :expiry_date, placeholder: "MM/YY", class: 'form-control'
-  .form-group
-    = f.label :cvv, "CVV:"
-    = f.text_field :cvv, placeholder: "123", maxlength: 3, class: 'form-control'
+          %h5 Payment Details:
+          <hr />
+          .form-group
+            = f.label :credit_card_number, "Credit Card Number:"
+            = f.text_field :credit_card_number, placeholder: "1234 5678 9012 3456", class: 'form-control'
+          .form-group
+            = f.label :expiry_date, "Expiry Date (MM/YY):"
+            = f.text_field :expiry_date, placeholder: "MM/YY", class: 'form-control'
+          .form-group
+            = f.label :cvv, "CVV:"
+            = f.text_field :cvv, placeholder: "123", maxlength: 3, class: 'form-control'
+          .form-group
+            = f.label :currency, "Currency:"
+            = f.select :currency, options_for_select([['USD', 'USD'], ['JPY', 'JPY'], ['EUR', 'EUR']], 'USD'), class: 'form-control', id: "curr-select"
 
-  .actions.mt-3
-    = f.submit 'Purchase Shards', class: 'btn btn-success'
+          .actions
+            = f.submit 'Purchase Shards - $0.00', class: 'btn btn-success text-color-secondary w-100', id: "purchase-button"
 
-.actions.mt-3
-  = link_to 'Back to Wallet', wallet_path(@wallet), class: 'btn btn-secondary'
+        .actions.mt-2
+          = link_to 'Back to Wallet', wallet_path(@wallet), class: 'btn btn-secondary w-100'

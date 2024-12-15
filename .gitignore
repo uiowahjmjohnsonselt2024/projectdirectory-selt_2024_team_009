@@ -11,6 +11,7 @@
 /test/tmp/
 /test/version_tmp/
 /tmp/
+/public/assets/
 
 # Used by dotenv library to load environment variables.
 # .env
@@ -179,3 +180,4 @@ fabric.properties
 
 .DS_Store
 .DS_Store/
+/app/assets/images/default-item-image.jpg
