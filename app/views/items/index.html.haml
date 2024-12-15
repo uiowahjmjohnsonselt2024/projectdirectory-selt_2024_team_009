@@ -1,0 +1,29 @@
+%h1.text-center.my-4.text-uppercase.text-primary Shop Page
+
+.container.bg-light.rounded.p-4.shadow-lg
+  .d-flex.justify-content-between.mb-4
+    - if current_user.admin?
+      = link_to 'Add New Item', new_item_path, class: 'btn btn-success'
+      = link_to 'Manage Items', items_path, class: 'btn btn-info'
+
+  .row.row-cols-1.row-cols-md-3.g-4
+    - @items.each do |item|
+      .col
+        .card.h-100.shadow-lg.rounded
+          .card-img-top
+            - if item.image_url.present?
+              = image_tag item.image_url, alt: item.name, class: 'img-fluid rounded-top'
+            - else
+              = image_tag 'default-item-image.jpg', alt: item.name, class: 'img-fluid rounded-top'
+          .card-body.text-center
+            %h5.card-title.text-dark.fw-bold= item.name.presence || 'No Name'
+            %p.card-text.text-muted= item.description.presence || 'No description available'
+          .card-footer.bg-transparent
+            .d-flex.justify-content-between.align-items-center
+              %span.badge.bg-success.text-white Price: #{item.price} Shards
+              %span.badge.bg-info.text-dark Level: #{item.required_level}
+          .card-footer.text-center
+            = button_to "Buy #{item.name}", purchase_item_path(item), method: :post, class: 'btn btn-primary w-100 mt-2', id: "buy_item_#{item.id}"
+            - if current_user.admin?
+              = link_to 'Edit', edit_item_path(item), class: 'btn btn-warning w-100 mt-2'
+              = link_to 'Delete', item_path(item), method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-danger w-100 mt-2'

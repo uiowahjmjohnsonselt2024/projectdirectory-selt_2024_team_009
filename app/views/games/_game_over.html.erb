@@ -1,0 +1,14 @@
+<% if @winner && @winner.user %>
+  <%= turbo_stream.replace "game-over" do %>
+    <h1>Game Over!</h1>
+    <p>The winner is <%= @winner.user.username %>!</p>
+    <p>Stats:</p>
+    <ul>
+      <li>Cells Owned: <%= @winner.grid_cells.count %></li>
+      <li>Shards: <%= @winner.shard_balance %></li>
+    </ul>
+  <% end %>
+<% else %>
+  <h1>Game Over!</h1>
+  <p class="text-danger">Could not determine the winner due to an invalid game state.</p>
+<% end %>

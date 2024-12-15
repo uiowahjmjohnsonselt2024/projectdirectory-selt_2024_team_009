@@ -1,0 +1,41 @@
+<div id="game-container" data-controller="game-actions" data-server-id="<%= @server.id %>">
+  <div class="game-container">
+    <div class="game-left-panel">
+      <%= render partial: "games/game_left_panel", locals: { server: @server, server_user: @server_user, waiting_for_players: @waiting_for_players } %>
+    </div>
+
+    <div class="game-center-panel">
+      <h2 class="text-center text-secondary">Game Board</h2>
+      <div id="game-board">
+        <%= render partial: "games/game_board", locals: { grid_cells: @grid_cells, server_user: @server_user, server_users: @server_users } %>
+      </div>
+      <div id="opponent-details">
+        <%= render partial: "games/opponent_details", locals: { opponents: @opponents, server: @server } %>
+      </div>
+    </div>
+
+    <div class="game-right-panel">
+      <%= render partial: "games/game_right_panel", locals: { server: @server, server_user: @server_user, current_turn_user: @current_turn_user } %>
+    </div>
+  </div>
+
+  <!-- Chatbox Section -->
+  <div class="chatbox" id="chatbox" data-game-id="<%= @server.id %>">
+    <!-- Messages container wrapped in a Turbo Frame -->
+    <%= turbo_frame_tag "messages" do %>
+      <div id="messages" class="messages-container">
+        <%= render @chat_messages %>
+      </div>
+    <% end %>
+
+    <!-- Turbo Stream-enabled form for creating messages -->
+    <%= form_with model: [@server, ChatMessage.new], data: { turbo_stream: true, turbo_frame: "messages" } do |f| %>
+      <div class="form-group">
+        <%= f.text_field :content, id: "chat-input", placeholder: "Type a message...", class: "form-control" %>
+      </div>
+      <div class="form-group mt-2">
+        <%= f.submit "Send", class: "btn btn-primary" %>
+      </div>
+    <% end %>
+  </div>
+</div>

@@ -1,0 +1,41 @@
+- provide(:title, "Edit Profile")
+= action_cable_meta_tag
+= content_tag(:meta, nil, name: "cable-token", content: "#{current_user&.cable_token}")
+
+%h1 Edit Profile
+
+= form_with(model: @user, url: profile_path, method: :patch) do |f|
+  - if @user.errors.any?
+    #error_explanation
+      %h2
+        = pluralize(@user.errors.count, "error")
+        prohibited this user from being saved:
+      %ul
+        - @user.errors.full_messages.each do |message|
+          %li= message
+
+  .form-group
+    = f.label :username
+    = f.text_field :username, class: "form-control"
+
+  .form-group
+    = f.label :email
+    = f.email_field :email, class: "form-control"
+
+  .form-group
+    = f.label :password
+    = f.password_field :password, class: "form-control", autocomplete: "off"
+
+  .form-group
+    = f.label :password_confirmation
+    = f.password_field :password_confirmation, class: "form-control", autocomplete: "off"
+
+  .form-group
+    = f.label :role
+    = f.select :role, options_for_select([['Player', 'player'], ['Admin', 'admin']], selected: @user.role), class: "form-control"
+
+  .form-group
+    = f.submit "Save Changes", class: "btn btn-primary"
+
+%p
+  = link_to 'Back to Profile', user_root_path(current_user.id), class: "btn btn-secondary"

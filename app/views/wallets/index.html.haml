@@ -1,0 +1,31 @@
+%div.row.d-flex.justify-content-center
+  %div.col-md-6
+    %div.card.text-color-secondary.bg-dark.bg-opacity-75
+      %div.card-body
+        %h4.card-title.text-center Your Wallet
+        - if @wallet.present?
+          %p
+            %h5 
+            Balance: 
+            = @wallet.balance 
+            Shards
+
+          %p
+            %h5 
+            Wallet Created At:
+            = @wallet.created_at.strftime('%B %d, %Y %H:%M:%S')
+
+          %div.d-flex.justify-content-center
+            .actions
+            = button_to 'Delete Wallet', wallet_path(@wallet), method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-danger text-color-secondary me-2'
+            = link_to 'Buy Shards', buy_shards_wallet_path(@wallet), class: 'btn btn-success text-color-secondary me-2'
+            = link_to 'Back to Servers', servers_path, class: 'btn btn-dark text-color-secondary'
+
+        - else
+          %p.text-color-secondary You do not have a wallet yet.
+          %div.d-flex.justify-content-center
+            = link_to 'Create Wallet', new_wallet_path, class: 'btn btn-success text-color-secondary me-2'
+            = link_to 'Back to Servers', servers_path, class: 'btn btn-secondary'
+
+
+

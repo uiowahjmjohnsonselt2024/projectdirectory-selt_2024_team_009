@@ -1,0 +1,25 @@
+default: &default
+  pool: 5
+  timeout: 5000
+
+development:
+  <<: *default
+  adapter: sqlite3
+  database: db/development.sqlite3
+
+test:
+  <<: *default
+  adapter: sqlite3
+  database: db/test.sqlite3
+
+production:
+  <<: *default
+  adapter: postgresql
+  encoding: unicode
+  pool: <%= ENV["RAILS_MAX_THREADS"] || 5 %>
+  database: <%= ENV["PGDATABASE"] %>
+  username: <%= ENV["PGUSER"] %>
+  password: <%= ENV["PGPASSWORD"] %>
+  host: <%= ENV["PGHOST"] || "localhost" %>
+  port: <%= ENV["PGPORT"] || 5432 %>
+

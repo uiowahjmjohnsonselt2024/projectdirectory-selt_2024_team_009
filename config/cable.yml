@@ -1,0 +1,19 @@
+development:
+  adapter: async
+  mount_path: /cable
+  allowed_request_origins:
+    - http://localhost:3000
+    - http://127.0.0.1:3000
+    - http://[::1]:3000
+
+test:
+  adapter: test
+
+production:
+  adapter: redis
+  url: <%= ENV['REDIS_URL'] %>
+  channel_prefix:  shards-of-the-grid-team-09_production
+  allowed_request_origins:
+    - https://shards-of-the-grid-team-09-ad424e75e121.herokuapp.com
+  ssl_params:
+    verify_mode: <%= OpenSSL::SSL::VERIFY_NONE %>

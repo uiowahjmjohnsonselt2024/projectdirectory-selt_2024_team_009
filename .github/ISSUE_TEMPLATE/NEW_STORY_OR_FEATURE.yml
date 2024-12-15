@@ -1,0 +1,24 @@
+name: New story or feature
+description: Request for a new feature to be added through a user story.
+
+body:  
+  - type: textarea
+    attributes:
+      label: Story
+      description: |
+       **As a** [role]  
+       **I want** [feature or function]  
+       **So that** [benefit or value]  
+
+       *Example:*  
+       _As a user, I want to be able to filter search results by date, so that I can quickly find the latest content.
+      placeholder: |
+       As a ____, I want ______________, so that ______________.
+  - type: textarea
+    attributes:
+      label: Acceptance Criteria
+      description: |
+       What are the requirements for this feature to be considered completed?
+
+    validations:
+      required: true

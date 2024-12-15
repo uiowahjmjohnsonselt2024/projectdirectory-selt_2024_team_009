@@ -1,0 +1,27 @@
+%h1.text-center.my-4.text-uppercase.text-primary Inventory Page
+
+.container.bg-light.rounded.p-4.shadow-lg
+  .d-flex.justify-content-between.mb-4
+    - if current_user.admin?
+      = link_to 'Add New Inventory Item', new_inventory_path, class: 'btn btn-success'
+      = link_to 'Manage Items', inventories_path, class: 'btn btn-info'
+
+  .row.row-cols-1.row-cols-md-3.g-4
+    - @inventories.each do |inventory|
+      .col
+        .card.h-100.shadow-lg.rounded
+          .card-img-top
+            - if inventory.item.image_url.present?
+              = image_tag inventory.item.image_url, alt: inventory.item.name, class: 'img-fluid rounded-top'
+            - else
+              = image_tag 'default-inventory-image.jpg', alt: inventory.item.name, class: 'img-fluid rounded-top'
+          .card-body.text-center
+            %h5.card-title.text-dark.fw-bold= inventory.item.name.presence || 'No Name'
+            %p.card-text.text-muted= inventory.item.description.presence || 'No description available'
+          .card-footer.bg-transparent
+            .d-flex.justify-content-between.align-items-center
+              %span.badge.bg-success.text-white Price: #{inventory.item.price} Shards
+              %span.badge.bg-info.text-dark Category: #{inventory.item.category}
+              %span.badge.bg-info.text-dark Level: #{inventory.item.required_level}
+          .card-footer.text-center
+            = button_to "Discard #{inventory.item.name}", inventory_path(inventory), method: :delete, class: 'btn btn-danger w-100 mt-2', id: "discard_item_#{inventory.id}"

@@ -1,0 +1,17 @@
+%div.row.bg-dark.bg-opacity-75.my-2
+    %div.col-md-12
+        %h3.text-color-secondary.text-center Transactions History
+        %table.table
+            %thead.table-dark
+                %tr
+                    %th Item Name 
+                    %th Amount
+                    %th Payment
+                    %th Date
+            %tbody
+                - @transactions.each do |transaction|
+                    %tr 
+                        %td= "#{transaction.description} (x#{transaction.quantity})"
+                        %td= transaction.amount
+                        %td= "#{transaction.payment_method} (#{transaction.currency})"
+                        %td= transaction.created_at

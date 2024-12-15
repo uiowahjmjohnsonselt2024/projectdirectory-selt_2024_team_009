@@ -1,0 +1,21 @@
+<div id="game-left-panel">
+  <% if @waiting_for_players %>
+    <div id="waiting-message">
+      <h2 class="text-center text-warning">Waiting for players to join. Required: <%= @server.max_players %>.</h2>
+      <p class="text-center text-muted">Current players: <%= @server.server_users.count %>/<%= @server.max_players %>.</p>
+    </div>
+  <% else %>
+    <div id="player-stats">
+      <%= render partial: "games/player_stats", locals: { server_user: @server_user } %>
+    </div>
+    <div id="inventory-container">
+      <h3 class="text-primary">Inventory:</h3>
+      <%= render partial: "games/inventory", locals: { items: @server_user.inventories.includes(:item) } %>
+    </div>
+    <div id="treasures-container">
+      <h3 class="text-primary">Treasures:</h3>
+      <%= render partial: "games/treasures", locals: { treasures: @server_user.treasures } %>
+    </div>
+    <%= button_to "Leave Game", leave_server_server_users_path(@server), method: :delete, data: { confirm: 'Are you sure?' } %>
+  <% end %>
+</div>

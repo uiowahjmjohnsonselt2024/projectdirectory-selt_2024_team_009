@@ -1,0 +1,20 @@
+%div.row.justify-content-center
+  %div.col-md-5
+    %div.card.my-5
+      %div.card-body
+        %h3.card-title.text-center.text-color-secondary Forgot Your Password?
+
+        = form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :post, class: 'forgot-password-form' }) do |f|
+          = render "devise/shared/error_messages", resource: resource
+
+          .field
+            = f.label :email, class: "form-label"
+            = f.email_field :email, autofocus: true, autocomplete: "email", class: "form-control"
+
+          .actions.d-grid.my-2
+            = f.submit "Send Reset Instructions", class: "btn btn-primary"
+
+          .help-text
+            %p.text-color-secondary.text-center Enter the email address associated with your account, and we'll send you instructions to reset your password.
+
+        -# = render "devise/shared/links"

@@ -1,0 +1,39 @@
+%h1.text-center Edit Item
+
+= form_with model: @item, local: true do |f|
+  - if @item.errors.any?
+    #error_explanation
+      %h2= "#{pluralize(@item.errors.count, "error")} prohibited this item from being saved:"
+      %ul
+        - @item.errors.full_messages.each do |message|
+          %li= message
+
+  .form-group
+    = f.label :name, class: 'form-label'
+    = f.text_field :name, class: 'form-control', value: @item.name
+
+  .form-group
+    = f.label :description, class: 'form-label'
+    = f.text_area :description, class: 'form-control', value: @item.description
+
+  .form-group
+    = f.label :price, class: 'form-label'
+    = f.number_field :price, class: 'form-control', value: @item.price
+
+  .form-group
+    = f.label :category, class: 'form-label'
+    = f.text_field :category, class: 'form-control', value: @item.category
+
+  .form-group
+    = f.label :required_level, class: 'form-label'
+    = f.number_field :required_level, class: 'form-control', value: @item.required_level
+
+  .form-group
+    = f.label :image_url, class: 'form-label'
+    = f.text_field :image_url, class: 'form-control', value: @item.image_url
+
+  .actions
+    = f.submit "Update Item", class: "btn btn-primary"
+
+%p
+  = link_to 'Back to Items', items_path, class: "btn btn-secondary"

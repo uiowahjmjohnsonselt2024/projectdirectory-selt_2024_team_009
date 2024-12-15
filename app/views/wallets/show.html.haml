@@ -1,0 +1,24 @@
+%div.row.d-flex.justify-content-center
+  %div.col-md-6
+    %div.card.text-color-secondary.bg-dark.bg-opacity-75
+      %div.card-body
+        %h4.card-title.text-center Wallet Details
+        - if @wallet.present?
+          %p
+            %strong Balance:
+            = @wallet.balance
+            %span Shards
+          %p
+            %strong Wallet Created At:
+            = @wallet.created_at.strftime('%B %d, %Y %H:%M:%S')
+
+          %div.d-flex.justify-content-center    
+            .actions
+              = link_to 'Edit Wallet', edit_wallet_path(@wallet), class: 'btn btn-primary me-2'
+              = link_to 'Back to Wallets', wallets_path, class: 'btn btn-secondary'
+
+        - else
+          %h6.text-secondary No wallet found.
+          .actions
+            = link_to 'Back to Wallets', wallets_path, class: 'btn btn-secondary'
+
