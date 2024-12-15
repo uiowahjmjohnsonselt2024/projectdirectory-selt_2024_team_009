@@ -114,11 +114,19 @@ class Server < ApplicationRecord
 
   # Place obstacles on the grid
   def place_obstacles
-    obstacle_cells = grid_cells.where(treasure: nil).sample(5)
+    # Find grid cells that do not have a treasure placed
+    grid_cells_without_treasures = grid_cells.where.not(id: Treasure.select(:grid_cell_id))
+
+    # Select 5 random cells from the available cells
+    obstacle_cells = grid_cells_without_treasures.sample(5)
+
+    # Place obstacles in these cells
     obstacle_cells.each do |cell|
       cell.update!(obstacle: true)
     end
   end
+
+
 
   # Assign symbols to players and determine turn order
   def assign_symbols_and_turn_order
