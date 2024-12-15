@@ -50,31 +50,8 @@
 
       %hr
 
-      %h2.text-color-secondary Purchase Shards
-      %p.text-color-secondary Enter the number of shards you want to purchase and your payment details:
-
-      = form_with url: purchase_shards_wallet_path(current_user.wallet), method: :post, local: true do |f|
-        .form-group
-          = f.label :amount, "Number of Shards:"
-          = f.number_field :amount, min: 1, class: 'form-control'
-
-        %h2 Payment Details
-        .form-group
-          = f.label :credit_card_number, "Credit Card Number:"
-          = f.text_field :credit_card_number, placeholder: "1234 5678 9012 3456", class: 'form-control'
-        .form-group
-          = f.label :expiry_date, "Expiry Date (MM/YY):"
-          = f.text_field :expiry_date, placeholder: "MM/YY", class: 'form-control'
-        .form-group
-          = f.label :cvv, "CVV:"
-          = f.text_field :cvv, placeholder: "123", maxlength: 3, class: 'form-control'
-
-        .actions.mt-3
-          = f.submit 'Purchase Shards', class: 'btn btn-success'
-
-      .actions.mt-3
-        = link_to 'Back to Servers', servers_path, class: 'btn btn-secondary'
-
+      %h2.text-color-secondary Need more shards?
+      = link_to 'Purchase Shards', buy_shards_wallet_path, class: 'btn btn-danger', title:"This takes you to the purchase shards page. If you don't have enough funds, you will need to buy more."
 
       %hr
 
