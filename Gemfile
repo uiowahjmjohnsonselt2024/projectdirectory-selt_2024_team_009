@@ -83,6 +83,8 @@ group :development, :test do
   gem "rspec-expectations" # Express expected outcomes in examples
   gem "cucumber-rails", require: false # BDD for Rails applications
   gem "rubocop-rails-omakase", require: false
+  gem 'faker' # Fake emails
+  gem 'rails-controller-testing' # more ability (assigns) 
 end
 
 group :development do

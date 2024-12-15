@@ -1,29 +1,36 @@
 require 'rails_helper'
 
-RSpec.describe "Games", type: :request do
-  let(:user) { create(:user) }
-  let(:server) { create(:server, created_by: user.id) }
-  let(:game) { create(:game, server: server) }
+RSpec.describe GamesController, type: :controller do
+  let!(:user) { create(:user) }
+  let!(:server) { create(:server, created_by: user.id, max_players: 2, status:"in_progress", current_turn_server_user: user) }
+  let!(:game) { create(:game, server: server) }
   let(:server_user) { create(:server_user, user: user, server: server) }
-
   before do
     sign_in user
-    server_user
   end
 
   describe "GET /games/:id" do
-    it "renders the game show page with Turbo Streams" do
-      get server_game_path(server, game), headers: { "Accept" => "text/vnd.turbo-stream.html" }
+    it 'loads the game data and responds successfully' do
+      get :show, params: { server_id: server.id, id: game.id }
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include("turbo-stream")
+      expect(assigns(:server)).to eq(server)
+      expect(assigns(:game)).to eq(game)
     end
   end
 
-  describe "PATCH /games/:id/update_game_board" do
-    it "updates the game board with Turbo Streams" do
-      patch update_game_board_server_game_path(server, game), headers: { "Accept" => "text/vnd.turbo-stream.html" }
-      expect(response).to have_http_status(:ok)
-      expect(response.body).to include("turbo-stream")
+  describe 'POST #perform_action' do
+    context 'when the action is valid' do
+      it 'performs the move action successfully' do
+        post :perform_action, params: {
+          server_id: server.id,
+          id: game.id,
+          action_type: 'move',
+          direction: 'up'
+        }
+
+        expect(response).to redirect_to(server_game_path(server, game))
+        expect(flash[:notice]).to eq('Action completed successfully.')
+      end
     end
   end
 end
