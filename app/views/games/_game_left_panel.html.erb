@@ -10,12 +10,11 @@
     </div>
     <div id="inventory-container">
       <h3 class="text-primary">Inventory:</h3>
-      <%= render partial: "games/inventory", locals: { items: @server_user.inventories.includes(:item) } %>
+      <%= render partial: "games/inventory", locals: { items: @items} %>
     </div>
     <div id="treasures-container">
       <h3 class="text-primary">Treasures:</h3>
-      <%= render partial: "games/treasures", locals: { treasures: @server_user.treasures } %>
+      <%= render partial: "games/treasures", locals: { treasures: @treasures } %>
     </div>
-    <%= button_to "Leave Game", leave_server_server_users_path(@server), method: :delete, data: { confirm: 'Are you sure?' } %>
   <% end %>
 </div>

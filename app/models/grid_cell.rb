@@ -1,7 +1,7 @@
 class GridCell < ApplicationRecord
   belongs_to :server
   belongs_to :content, optional: true
-  belongs_to :treasure, optional: true
+  has_one :treasure, dependent: :destroy
   belongs_to :owner, class_name: 'ServerUser', optional: true
 
   # Validations

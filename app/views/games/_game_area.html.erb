@@ -1,7 +1,7 @@
 <div id="game-container" data-controller="game-actions" data-server-id="<%= @server.id %>" >
   <div class="game-container">
     <div class="game-left-panel">
-      <%= render partial: "games/game_left_panel", locals: { server: @server, server_user: @server_user, waiting_for_players: @waiting_for_players } %>
+      <%= render partial: "games/game_left_panel", locals: { server: @server, server_user: @server_user, waiting_for_players: @waiting_for_players, treasures: @treasures, items: @items } %>
     </div>
 
     <div class="game-center-panel">

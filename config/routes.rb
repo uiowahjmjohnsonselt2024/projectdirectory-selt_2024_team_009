@@ -41,7 +41,7 @@ Rails.application.routes.draw do
     end
     resources :games do
       member do
-        post 'perform_action', to: 'games#perform_action'
+        post'perform_action'
         get :current_turn
         get :update_game_board
         get :update_current_turn

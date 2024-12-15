@@ -1,5 +1,6 @@
 class Leaderboard < ApplicationRecord
   belongs_to :server
+  belongs_to :game
 
   def update()
     #this function is added so the test cases work correctly

@@ -96,19 +96,37 @@ class Server < ApplicationRecord
 
   # Place treasures on the grid
   def place_treasures
+    random_items = Item.all.sample(5)
     treasure_cells = grid_cells.sample(5)
-    treasure_cells.each do |cell|
-      cell.update!(treasure: Treasure.all.sample)
+    treasure_cells.zip(random_items).each do |cell, item|
+      # Create a treasure specifically for this cell and game
+      treasure = Treasure.create!(
+        item: item,
+        game: game,
+        grid_cell: cell,
+        name: item.name,
+        description: item.description
+      )
+      # No cell.update needed if we rely on Treasure belonging to cell
     end
   end
 
+
   # Place obstacles on the grid
   def place_obstacles
-    obstacle_cells = grid_cells.where(treasure: nil).sample(5)
+    # Find grid cells that do not have a treasure placed
+    grid_cells_without_treasures = grid_cells.where.not(id: Treasure.select(:grid_cell_id))
+
+    # Select 5 random cells from the available cells
+    obstacle_cells = grid_cells_without_treasures.sample(5)
+
+    # Place obstacles in these cells
     obstacle_cells.each do |cell|
       cell.update!(obstacle: true)
     end
   end
+
+
 
   # Assign symbols to players and determine turn order
   def assign_symbols_and_turn_order

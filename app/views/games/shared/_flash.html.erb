@@ -1,9 +1,5 @@
-<% if flash.any? %>
-  <div id="flash-messages">
-    <% flash.each do |type, message| %>
-      <div class="flash <%= type %>">
-        <%= message %>
-      </div>
-    <% end %>
+<% flash.each do |key, value| %>
+  <div class="alert alert-<%= key == 'notice' ? 'success' : 'danger' %>">
+    <%= value %>
   </div>
 <% end %>

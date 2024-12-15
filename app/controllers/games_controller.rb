@@ -12,46 +12,87 @@ class GamesController < ApplicationController
   def show
     @server = Server.find(params[:server_id])
     @game = @server.game
-    Rails.logger.info "Loading game data for server #{params[:server_id]}"
+    @waiting_for_players = @server.server_users.count < @server.max_players
+    Rails.logger.info "waiting_for_players: #{@waiting_for_players}"
+    # Rails.logger.info "Loading game data for server #{params[:server_id]}"
     # @server = Server.find(params[:server_id]) # Ensure @server is set
     load_game_data
-    Rails.logger.info "[GamesController#show] Current user token: #{current_user.cable_token}"
-    Rails.logger.info "Game data loaded: server=#{@server.inspect}, game=#{@game.inspect}, server_users=#{@server_users.inspect}, grid_cells=#{@grid_cells.inspect}, server_user=#{@server_user.inspect}, current_turn_user=#{@current_turn_user.inspect}, opponents=#{@opponents.inspect}, waiting_for_players=#{@waiting_for_players.inspect}"
+    # Rails.logger.info "[GamesController#show] Current user token: #{current_user.cable_token}"
+    # Rails.logger.info "Game data loaded: server=#{@server.inspect}, game=#{@game.inspect}, server_users=#{@server_users.inspect}, grid_cells=#{@grid_cells.inspect}, server_user=#{@server_user.inspect}, current_turn_user=#{@current_turn_user.inspect}, opponents=#{@opponents.inspect}, waiting_for_players=#{@waiting_for_players.inspect}"
   end
   def perform_action
+    @server = Server.find(params[:server_id])
+    @game = @server.game
+    Rails.logger.info "Performing action: #{params.inspect}"
+    Rails.logger.info "Loading game data for server #{params[:server_id]}"
+    Rails.logger.info "Action type: #{params[:action_type]}"
+    Rails.logger.info "Action direction: #{params[:direction]}"
+    Rails.logger.info "@game: #{@game}"
+    Rails.logger.info "@server: #{@server}"
     begin
       load_game_data
+      success = false
 
-      success = case params[:action_type]
-                when 'move' then handle_move_action(params[:direction])
-                when 'occupy' then handle_occupy_action
-                when 'capture' then handle_capture_action(params[:direction])
-                when 'use_treasure' then handle_use_treasure_action(params[:treasure_id])
-                when 'use_item' then handle_use_item_action(params[:item_id])
-                else handle_error('Invalid action type.')
-                end
-      return unless success
-
-      if success
-        Rails.logger.debug "Action performed successfully"
-        Rails.logger.debug "Checking game end conditions"
-        check_game_end_conditions
-        advance_turn if @server_user.turn_ap.zero? || @end_turn
-        Rails.logger.debug "Broadcasting game state"
-        broadcast_game_state
+      # ### CHANGED: Ensure action handlers return true on success.
+      case params[:action_type]
+      when 'move'
+        success = handle_move_action(params[:direction])
+      when 'occupy'
+        success = handle_occupy_action
+      when 'capture'
+        success = handle_capture_action(params[:direction])
+      when 'use_treasure'
+        success = handle_use_treasure_action(params[:treasure_id])
+      when 'use_item'
+        success = handle_use_item_action(params[:item_id])
+      when 'purchase_item'
+        success = handle_purchase_item_action(params[:item_id])
       else
-        render_error_response
+        handle_error('Invalid action type.')
       end
+
+      # If action wasn't successful, stop here.
+      unless success
+        # ### CHANGED: Render error turbo_stream if available
+        Rails.logger.debug "Action not successful."
+        respond_to do |format|
+          format.turbo_stream { render partial: "shared/flash", locals: { message: flash[:alert] } }
+          format.html { redirect_to server_game_path(@server, @game), alert: flash[:alert] }
+        end
+        return
+      end
+
+      Rails.logger.debug "Action performed successfully"
+      Rails.logger.debug "Checking game end conditions"
+      check_game_end_conditions
+      if @server_user.turn_ap.zero? || @end_turn
+        advance_turn
+      end
+      Rails.logger.debug "Broadcasting game state"
+      broadcast_game_state
+
       respond_to do |format|
-        format.html { redirect_to server_game_path(@server, @game), notice: 'Action completed successfully.' }
-        format.json { head :no_content }
-        format.turbo_stream
+        format.html do
+          redirect_to server_game_path(@server, @game), notice: 'Action completed successfully.'
+        end
+        format.json { render json: { message: 'Action completed successfully.' } }
+        format.turbo_stream do
+          # ### CHANGED: Ensure we render perform_action.turbo_stream.erb fully
+          render "perform_action"
+        end
       end
+
     rescue => e
       Rails.logger.error "Error in perform_action: #{e.message}\n#{e.backtrace.join("\n")}"
+      flash[:alert] = "An error occurred: #{e.message}"
+      respond_to do |format|
+        format.html { redirect_to server_game_path(@server, @game), alert: flash[:alert] }
+        format.json { render json: { error: e.message }, status: :unprocessable_entity }
+        format.turbo_stream { render partial: "shared/flash", locals: { message: flash[:alert] } }
+      end
     end
-
   end
+
 
   def update_game_board
     load_game_data
@@ -100,7 +141,10 @@ class GamesController < ApplicationController
   end
   def update_game_left_panel
     load_game_data
-    Rails.logger.debug "Rendering page with  update_game_left_panel server_id: #{@server&.id}"
+    Rails.logger.info "@server.server_users.count: #{@server.server_users.count}"
+    Rails.logger.info "@server.max_players: #{@server.max_players}"
+
+    Rails.logger.info "Rendering update_game_left_panel with waiting_for_players: #{@waiting_for_players.inspect}"
 
     broadcast_update("game-left-panel", "games/game_left_panel")
   end
@@ -121,51 +165,295 @@ class GamesController < ApplicationController
       redirect_to server_game_path(@server, @game) and return
     end
   end
-
   private
+  def load_game_data
+    @grid_cells = @server.grid_cells.includes(:owner, :treasure) || []
+    @server_users = @server.server_users.includes(:user)
+
+    @server_user = @server.server_users.find_by(user: current_user)
+    @current_turn_user = @server.current_turn_server_user || @server.server_users.order(:turn_order).first
+    @opponents = @server.server_users.includes(:user, :treasures) || []
+    @waiting_for_players = @server.server_users.count < @server.max_players
+    @items = @server_user.game_items
+                         .joins(:server_user_items)
+                         .where(server_user_items: { used: false })
+    @treasures = @server_user&.treasures
+    @winner = @game&.winner
+  end
+  def locals_hash
+    {
+      server: @server,
+      game: @game,
+      server_users: @server_users,
+      grid_cells: @grid_cells,
+      server_user: @server_user,
+      current_turn_user: @current_turn_user,
+      opponents: @opponents,
+      waiting_for_players: @waiting_for_players,
+      items:@items,
+      treasures: @treasures,
+      winner: @winner
+    }
+  end
+  def handle_move_action(direction)
+    if @server_user == @server.current_turn_server_user && @server_user.spend_turn_ap(1)
+      dx, dy = movement_delta(direction)
+      target_x = @server_user.current_position_x + dx
+      target_y = @server_user.current_position_y + dy
+
+      if valid_position?(target_x, target_y)
+        is_diagonal = dx.abs == 1 && dy.abs == 1
+        if is_diagonal && !@server_user.can_move_diagonally
+          flash[:alert] = 'Diagonal movement is not allowed.'
+          return false
+        end
+
+        target_cell = @server.grid_cells.find_by(x: target_x, y: target_y)
+        if target_cell.obstacle?
+          flash[:alert] = 'Cannot move to an obstacle.'
+          return false
+        elsif @server.server_users.any? { |su| su.current_position_x == target_x && su.current_position_y == target_y }
+          flash[:alert] = 'Cell is occupied by another player.'
+          return false
+        else
+          @server_user.update(current_position_x: target_x, current_position_y: target_y)
+          check_for_treasure(target_cell)
+          flash[:notice] = 'Moved successfully.'
+          return true
+        end
+      else
+        flash[:alert] = 'Invalid move.'
+        return false
+      end
+    else
+      flash[:alert] = 'Not enough AP to move.'
+      return false
+    end
+  end
+
+
+
+  def handle_occupy_action
+    if @server_user == @server.current_turn_server_user && @server_user.spend_turn_ap(1)
+      current_cell = @server.grid_cells.find_by(x: @server_user.current_position_x, y: @server_user.current_position_y)
+      if current_cell.owner.nil?
+        current_cell.update(owner: @server_user)
+        flash[:notice] = 'Cell occupied successfully.'
+        return true
+      else
+        flash[:alert] = 'Cell is already occupied.'
+        return false
+      end
+    else
+      flash[:alert] = 'Not enough AP to occupy or not your turn.'
+      return false
+    end
+  end
+
+
+  # New method to handle treasure usage
+  # In GamesController
+  def handle_use_treasure_action(treasure_id)
+    if @server_user == @server.current_turn_user
+      treasure = @server_user.treasures.find_by(id: treasure_id)
+      if treasure
+        apply_treasure_effect(treasure)
+        @server_user.treasures.delete(treasure) # Remove after applying effect
+        flash[:notice] = "Used treasure: #{treasure.name}"
+        return true
+      else
+        handle_error('Treasure not found.')
+        return false
+      end
+    else
+      handle_error("It's not your turn.")
+      return false
+    end
+  end
+
+  def apply_treasure_effect(treasure)
+    target_user_id = params[:target_user_id]
+    target_server_user = @server.server_users.find_by(user_id: target_user_id)
+
+    # Mirror Shield logic
+    if target_server_user&.mirror_shield
+      target_server_user.update(mirror_shield: false)
+      flash[:notice] = 'Your action was reflected back by Mirror Shield!'
+
+      case treasure.name
+      when 'Energy Siphon'
+        amount_to_steal = 5
+        if @server_user.total_ap >= amount_to_steal
+          @server_user.update(total_ap: @server_user.total_ap - amount_to_steal)
+          target_server_user.update(total_ap: target_server_user.total_ap + amount_to_steal)
+          flash[:notice] = 'Your AP was stolen due to Mirror Shield.'
+        else
+          flash[:alert] = 'You do not have enough AP to be stolen.'
+        end
+      else
+        flash[:alert] = 'Treasure effect reflected, but no logic implemented for this treasure.'
+      end
+      return
+    end
+
+    # Apply treasure effects if no mirror reflection or after handling it
+    case treasure.name
+    when 'Winged Amulet'
+      @server_user.update(can_move_diagonally: true, diagonal_moves_left: 1)
+      flash[:notice] = 'You can make one diagonal move without AP cost.'
+
+    when 'Golden Key'
+      target_x = params[:target_x].to_i
+      target_y = params[:target_y].to_i
+      handle_occupy_cell(target_x, target_y)
+
+    when 'Shard Cache'
+      @server_user.adjust_shard_balance(30)
+      flash[:notice] = 'Gained 30 Shards.'
+
+    when 'Mirror Shield'
+      @server_user.update(mirror_shield: true)
+      flash[:notice] = 'Mirror Shield activated. The next action against you will be reflected.'
+
+    when 'Time Crystal'
+      @server_user.update(turn_ap: @server_user.turn_ap + 2)
+      flash[:notice] = 'Gained 2 extra AP for this turn.'
+
+    when 'Energy Siphon'
+      siphon_ap_from_opponent(target_user_id, 5)
+
+    when 'Mystery Box'
+      random_treasure = Treasure.where.not(id: treasure.id).sample
+      apply_treasure_effect(random_treasure)
+      flash[:notice] = "Mystery Box activated: #{random_treasure.name}"
+
+    when 'Barrier Stone'
+      target_x = params[:target_x].to_i
+      target_y = params[:target_y].to_i
+      handle_place_obstacle(target_x, target_y)
+
+    when 'Teleport Crystal'
+      target_x = params[:target_x].to_i
+      target_y = params[:target_y].to_i
+      handle_teleport_to_cell(target_x, target_y)
+
+    when 'Capture Charm'
+      direction = params[:direction]
+      dx, dy = movement_delta(direction)
+      handle_capture_cell(dx, dy)
+
+    else
+      flash[:alert] = 'Treasure effect not implemented.'
+    end
+  end
+  def handle_capture_action(direction)
+    # Adjust costs if needed, or logic. Ensure return true on success.
+    if @server_user == @server.current_turn_server_user && @server_user.spend_total_ap(4) && @server_user.spend_turn_ap(1)
+      dx, dy = movement_delta(direction)
+      target_x = @server_user.current_position_x + dx
+      target_y = @server_user.current_position_y + dy
+
+      if valid_position?(target_x, target_y)
+        target_cell = @server.grid_cells.find_by(x: target_x, y: target_y)
+        if target_cell&.owner && target_cell.owner != @server_user
+          if target_cell.fortified? || target_cell.obstacle?
+            flash[:alert] = 'Cannot capture a Fortified cell or an Obstacle.'
+            return false
+          else
+            target_cell.update(owner: @server_user)
+            flash[:notice] = "Captured opponent's cell."
+            return true
+          end
+        else
+          flash[:alert] = 'No opponent cell to capture.'
+          return false
+        end
+      else
+        flash[:alert] = 'Invalid capture action.'
+        return false
+      end
+    else
+      flash[:alert] = 'Not enough AP to capture or not your turn.'
+      return false
+    end
+  end
+
+
+  def handle_use_item_action(item_id)
+    if @server_user == @server.current_turn_user
+      server_user_item = @server_user.server_user_items.find_by(item_id: item_id, used: false)
+      if server_user_item
+        item = server_user_item.item
+        usage_cost = item.usage_ap_cost || 10
+        if @server_user.spend_total_ap(usage_cost)
+          apply_item_effect(item)
+          server_user_item.update!(used: true)
+          flash[:notice] = "Used item: #{item.name}"
+          return true
+        else
+          flash[:alert] = 'Not enough AP to use this item.'
+          return false
+        end
+      else
+        flash[:alert] = 'Item not found in your game inventory or already used.'
+        return false
+      end
+    else
+      flash[:alert] = 'It is not your turn.'
+      return false
+    end
+  end
+
+  def handle_purchase_item_action(item_id)
+    item = Item.find_by(id: item_id)
+    if item && @server_user.shard_balance >= item.price
+      @server_user.adjust_shard_balance(-item.price)
+      # Add to user's global inventory (not server_user)
+      current_user.inventories.create!(item_id: item.id, quantity: 1)
+      flash[:notice] = "Purchased item: #{item.name}"
+      return true
+    else
+      flash[:alert] = 'Unable to purchase item.'
+      return false
+    end
+  end
+
+
 
   def broadcast_game_state
+    # Update all relevant parts of the UI
     update_game_board
     update_game_right_panel
     update_game_left_panel
     update_current_turn
+    update_opponent_details
+    update_player_stats
+    update_treasures
+    update_inventory
   end
+
   def render_error_response
     render turbo_stream: turbo_stream.replace("flash", partial: "shared/flash", locals: { message: "Action failed!" })
   end
 
   def broadcast_update(target, partial)
-    html = render_to_string(partial: partial, formats: [:html])
-    turbo_stream = render_to_string(partial: "update_#{target}", formats: [:turbo_stream])
-
-    Rails.logger.debug "Broadcasting update to #{target} with partial #{partial}"
-
-    # Turbo::StreamsChannel.broadcast_to(
-    #   @server,
-    #   target: target,
-    #   html: html,
-    #   turbo_stream: turbo_stream
-    # )
     load_game_data
-    Rails.logger.debug "Broadcasting update GAME  #{@game} with SERVER #{@server}"
     Turbo::StreamsChannel.broadcast_replace_to(
       @server,
       target: target,
       partial: partial,
-      locals: { server:@server, game: @game, opponents:@opponents, server_user: @server_user, server_users: @server_users, grid_cells: @grid_cells, current_turn_user: @current_turn_user, waiting_for_players: @waiting_for_players }
+      locals: locals_hash
     )
   end
+
   def handle_error(message)
-    #Rails.logger.error "[GamesController#handle_error] Server \#{@server.id}: \#{message}"
     flash[:alert] = message
     false
   end
 
 
   def set_server
-    @server = Server.includes(:game).find(params[:server_id]) # Find the server
-    #Rails.logger.info "[GamesController#set_server] Loaded server #{@server.id} for game display"
-
+    @server = Server.includes(:game).find(params[:server_id])
   end
 
   def set_server_user
@@ -174,17 +462,8 @@ class GamesController < ApplicationController
       redirect_to servers_path, alert: 'You are not part of this game.'
     end
   end
-  def load_game_data
-    @server = Server.includes(:game).find(params[:server_id]) # Find the server
-    @game = @server.game # Access the associated game
-    @grid_cells = @server.grid_cells.includes(:owner, :treasure) || []
-    @server_users = @server.server_users.includes(:user) # This should return AR objects
-    @server_user = @server.server_users.includes(:inventories, :treasures).find_by(user: current_user)
-    @current_turn_user = @server.current_turn_server_user || @server.server_users.order(:turn_order).first
-    @opponents = @server.server_users.includes(:user, :treasures) || []
-    @waiting_for_players = @server.server_users.count < @server.max_players
-    @treasures =  @server_user.treasures
-  end
+
+
 
   def advance_turn
     @server.increment!(:turn_count)
@@ -192,8 +471,7 @@ class GamesController < ApplicationController
 
     @server.grid_cells.where(owner: current_user).each do |cell|
       if cell.fortified && cell.fortified > 0
-        cell.fortified -= 1
-        cell.save
+        cell.update(fortified: cell.fortified - 1)
       end
     end
 
@@ -227,150 +505,6 @@ class GamesController < ApplicationController
   end
 
   # Action Handlers
-  def handle_move_action(direction)
-    if @server_user == @server.current_turn_server_user && @server_user.spend_turn_ap(1)
-      dx, dy = movement_delta(direction)
-      target_x = @server_user.current_position_x + dx
-      target_y = @server_user.current_position_y + dy
-
-      if valid_position?(target_x, target_y)
-        is_diagonal = dx.abs == 1 && dy.abs == 1
-        if is_diagonal && !@server_user.can_move_diagonally
-          flash[:alert] = 'Diagonal movement is not allowed.'
-          return false
-        end
-
-        target_cell = @server.grid_cells.find_by(x: target_x, y: target_y)
-        if target_cell.obstacle?
-          flash[:alert] = 'Cannot move to an obstacle.'
-        elsif @server.server_users.any? { |su| su.current_position_x == target_x && su.current_position_y == target_y }
-          flash[:alert] = 'Cell is occupied by another player.'
-        else
-          @server_user.update(current_position_x: target_x, current_position_y: target_y)
-          check_for_treasure(target_cell)
-          update_game_board
-          update_player_stats
-          update_opponent_details
-          Rails.logger.debug "server_user: #{@server_user.user_id}"
-          flash[:notice] = 'Moved successfully.'
-        end
-      else
-        flash[:alert] = 'Invalid move.'
-      end
-    else
-      flash[:alert] = 'Not enough AP to move.'
-    end
-    false
-  end
-
-
-  def handle_occupy_action
-    if @server_user == @server.current_turn_server_user && @server_user.spend_turn_ap(1)
-      current_cell = @server.grid_cells.find_by(x: @server_user.current_position_x, y: @server_user.current_position_y)
-      if current_cell.owner.nil?
-        current_cell.update(owner: @server_user)
-        flash[:notice] = 'Cell occupied successfully.'
-        update_game_board
-        update_player_stats
-        update_opponent_details
-        return true
-      else
-        flash[:alert] = 'Cell is already occupied.'
-      end
-    else
-      flash[:alert] = 'Not enough AP to occupy or it is not your turn.'
-    end
-    false
-  end
-
-
-  # New method to handle treasure usage
-  # In GamesController
-  def handle_use_treasure_action(treasure_id)
-    if @server_user == @server.current_turn_server_user
-      treasure = @server_user.treasures.find_by(id: treasure_id)
-      if treasure
-        process_treasure(treasure) # Use the existing process_treasure method
-        @server_user.treasures.delete(treasure)
-        flash[:notice] = "Used treasure: #{treasure.name}"
-        update_game_board
-        update_player_stats
-        update_opponent_details
-        update_treasures
-        return true
-      else
-        handle_error('Treasure not found.')
-        return false
-      end
-    else
-      handle_error("It's not your turn.")
-      return false
-    end
-  end
-
-
-  def handle_capture_action(direction)
-    if @server_user == @server.current_turn_server_user && @server_user.spend_total_ap(4)&& @server_user.spend_turn_ap(1)
-      dx, dy = movement_delta(direction)
-      target_x = @server_user.current_position_x + dx
-      target_y = @server_user.current_position_y + dy
-
-      if valid_position?(target_x, target_y)
-        target_cell = @server.grid_cells.find_by(x: target_x, y: target_y)
-        if target_cell.owner && target_cell.owner != @server_user
-          if target_cell.fortified? || target_cell.obstacle?
-            flash[:alert] = 'Cannot capture a Fortified cell or an Obstacle.'
-          else
-            target_cell.update(owner: @server_user)
-            flash[:notice] = 'Captured opponent\'s cell.'
-            update_game_board
-            update_player_stats
-            update_opponent_details
-
-            return true
-          end
-        else
-          flash[:alert] = 'No opponent cell to capture.'
-        end
-      else
-        flash[:alert] = 'Invalid capture action.'
-      end
-    else
-      flash[:alert] = 'Not enough AP to capture or it is not your turn.'
-    end
-    false
-  end
-
-
-  def handle_use_item_action(item_id)
-    if @server_user == @server.current_turn_server_user
-      inventory = current_user.inventories.find_by(item_id: item_id)
-      if inventory
-        item = inventory.item
-        usage_cost = item.usage_ap_cost || 10
-        if @server_user.spend_total_ap(usage_cost)
-          apply_item_effect(item)
-          inventory.destroy
-          flash[:notice] = "Used item: #{item.name}"
-          update_game_board
-          update_player_stats
-          update_opponent_details
-          update_inventory
-          return true
-        else
-          flash[:alert] = 'Not enough AP to use this item.'
-        end
-      else
-        flash[:alert] = 'Item not found in inventory.'
-      end
-    else
-      flash[:alert] = 'It is not your turn.'
-    end
-    false
-  end
-
-
-
 
   # Helper Methods
   def movement_delta(direction)
@@ -394,8 +528,11 @@ class GamesController < ApplicationController
   def check_for_treasure(cell)
     if cell.treasure
       flash[:notice] = "You found a treasure: #{cell.treasure.name}!"
-      process_treasure(cell.treasure)
-      cell.update(treasure: nil)
+      treasure = cell.treasure
+      # Transfer ownership to the player, but do not apply effect now
+      treasure.update!(owner: @server_user, grid_cell: nil)
+      cell.update!(treasure: nil)
+      # Now the treasure will appear in @server_user.treasures for later use.
     end
   end
 
@@ -609,67 +746,50 @@ class GamesController < ApplicationController
   end
 
   def check_game_end_conditions
-    return if @server.server_users.count < @server.max_players # Ensure all players have joined
+    return if @server.server_users.count < @server.max_players
 
     if all_cells_occupied? || single_player_remaining?
       winner = determine_winner
       if winner
         @server.update(status: 'finished')
         @game.update(winner: winner.user.username)
-
-        # Broadcast game over and winner information
         update_game_over
-        return
       else
-        flash[:alert] = 'Unable to determine a winner due to invalid game state.'
+        flash[:alert] = 'Unable to determine a winner.'
       end
     end
   end
-
 
   def all_cells_occupied?
     @server.grid_cells.where(owner_id: nil).count.zero?
   end
 
-  def max_turns_reached?
-    # Implement logic if tracking turn counts
-    false
-  end
-
   def single_player_remaining?
-    # Check if only one player remains in the game
     @server.server_users.where.not(total_ap: 0).count == 1
   end
 
-
-  # In GamesController#determine_winner
   def determine_winner
     sorted_users = @server.server_users.sort_by do |user|
       [-@server.grid_cells.where(owner: user).count, -user.shard_balance]
     end
-
     winner = sorted_users.first
-
     if winner
       distribute_bounty(winner)
       flash[:notice] = "#{winner.user.username} wins the game!"
-    else
-      flash[:alert] = 'Could not determine a winner due to an invalid state.'
     end
-
     winner
   end
 
+  def distribute_bounty(winner)
+    game_pot = @server.server_users.count * 200
+    winner.adjust_shard_balance(game_pot)
+    flash[:notice] = "Winner awarded with #{game_pot} Shards!"
+  end
   def set_game
     @server = Server.includes(:game).find(params[:server_id]) # Find the server
     @game = @server.game # Access the associated game
     #Rails.logger.info "Finding game with ID: #{params[:id]} for server ID: #{@server.id}"
   end
-  def distribute_bounty(winner)
-    # Distributes a game-ending bounty to the winner
-    game_pot = @server.server_users.count * 200
-    winner.adjust_shard_balance(game_pot)
-    flash[:notice] = "Winner awarded with #{game_pot} Shards!"
-  end
+
 
 end
