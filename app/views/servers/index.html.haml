@@ -20,9 +20,10 @@
               %td= server.max_players
               %td
                 .actions
-                  = link_to 'Show', server_path(server), class: 'btn btn-primary', title: "Visit [#{server.name}]"
-                  = link_to 'Edit', edit_server_path(server), class: 'btn btn-secondary', title:"Adjust max user count/name"
-                  = button_to 'Delete', server_path(server), method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-danger', title: 'Delete server: this will remove all players in it and make it permanently inaccessible. Do you want to do this?'
+                  = link_to 'Show', server_path(server), class: 'btn btn-primary'
+                  = link_to 'Edit', edit_server_path(server), class: 'btn btn-secondary'
+                  = button_to 'Delete', server_path(server), method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-danger'
+
       = link_to 'New Server', new_server_path, class: 'btn btn-success my-2'
 
       %h1.text-color-secondary Servers You Have Joined
