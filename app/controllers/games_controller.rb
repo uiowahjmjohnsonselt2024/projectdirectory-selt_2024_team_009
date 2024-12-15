@@ -19,56 +19,67 @@ class GamesController < ApplicationController
     Rails.logger.info "Game data loaded: server=#{@server.inspect}, game=#{@game.inspect}, server_users=#{@server_users.inspect}, grid_cells=#{@grid_cells.inspect}, server_user=#{@server_user.inspect}, current_turn_user=#{@current_turn_user.inspect}, opponents=#{@opponents.inspect}, waiting_for_players=#{@waiting_for_players.inspect}"
   end
   def perform_action
-    load_game_data
-    success = case params[:action_type]
-              when 'move' then handle_move_action(params[:direction])
-              when 'occupy' then handle_occupy_action
-              when 'capture' then handle_capture_action(params[:direction])
-              when 'use_treasure' then handle_use_treasure_action(params[:treasure_id])
-              when 'use_item' then handle_use_item_action(params[:item_id])
-              else handle_error('Invalid action type.')
-              end
-    return unless success
+    begin
+      load_game_data
 
-    if success
-      advance_turn if @server_user.turn_ap.zero? || @end_turn
-      check_game_end_conditions
+      success = case params[:action_type]
+                when 'move' then handle_move_action(params[:direction])
+                when 'occupy' then handle_occupy_action
+                when 'capture' then handle_capture_action(params[:direction])
+                when 'use_treasure' then handle_use_treasure_action(params[:treasure_id])
+                when 'use_item' then handle_use_item_action(params[:item_id])
+                else handle_error('Invalid action type.')
+                end
+      return unless success
+
+      if success
+        Rails.logger.debug "Action performed successfully"
+        Rails.logger.debug "Checking game end conditions"
+        check_game_end_conditions
+        advance_turn if @server_user.turn_ap.zero? || @end_turn
+        Rails.logger.debug "Broadcasting game state"
+        broadcast_game_state
+      else
+        render_error_response
+      end
+      respond_to do |format|
+        format.html { redirect_to server_game_path(@server, @game), notice: 'Action completed successfully.' }
+        format.json { head :no_content }
+        format.turbo_stream
+      end
+    rescue => e
+      Rails.logger.error "Error in perform_action: #{e.message}\n#{e.backtrace.join("\n")}"
     end
 
-    respond_to do |format|
-      format.html { redirect_to server_game_path(@server, @game), notice: 'Action performed successfully.' }
-      format.json { head :no_content }
-      format.turbo_stream
-    end
   end
+
   def update_game_board
-    @grid_cells = @server.grid_cells.includes(:owner, :treasure)
-    @server_users = @server.server_users.includes(:user)
+    load_game_data
     broadcast_update("game-board", "games/game_board")
   end
 
   def update_current_turn
-    @current_turn_user = @server.current_turn_server_user
+    load_game_data
     broadcast_update("current-turn", "games/current_turn")
   end
 
   def update_inventory
-    @items = @server_user.inventories.includes(:item)
+    load_game_data
     broadcast_update("inventory-container", "games/inventory")
   end
 
   def update_treasures
-    @treasures = @server_user.treasures
+    load_game_data
     broadcast_update("treasures-container", "games/treasures")
   end
 
   def update_opponent_details
-    @opponents = @server.server_users.includes(:user, :treasures)
+    load_game_data
     broadcast_update("opponent-details", "games/opponent_details")
   end
 
   def update_player_stats
-    @server_user = @server.server_user(current_user)
+    load_game_data
     broadcast_update("player-stats", "games/player_stats")
   end
 
@@ -78,17 +89,17 @@ class GamesController < ApplicationController
   end
 
   def update_game_right_panel
-    @server_user = @server.server_user(current_user)
+    load_game_data
     broadcast_update("game-right-panel", "games/game_right_panel")
   end
 
-  def update_game_over(winner)
-    @winner = winner
+  def update_game_over
+    load_game_data
+    @winner = @game.winner
     broadcast_update("game-over", "games/game_over")
   end
   def update_game_left_panel
-    @server_user = @server.server_user(current_user)# Pass the current_user as an argument
-    @waiting_for_players = @server.waiting_for_players
+    load_game_data
     Rails.logger.debug "Rendering page with  update_game_left_panel server_id: #{@server&.id}"
 
     broadcast_update("game-left-panel", "games/game_left_panel")
@@ -98,14 +109,51 @@ class GamesController < ApplicationController
     broadcast_update("game-show", "games/area")
   end
 
+  def ensure_game_in_progress
+    load_game_data
+    redirect_to servers_path, alert: 'Game is not in progress.' unless @server.status == 'in_progress'
+  end
+
+  def ensure_current_player_turn
+    load_game_data
+    unless @server.current_turn_server_user == @server_user
+      flash[:alert] = "It's not your turn."
+      redirect_to server_game_path(@server, @game) and return
+    end
+  end
+
   private
 
+  def broadcast_game_state
+    update_game_board
+    update_game_right_panel
+    update_game_left_panel
+    update_current_turn
+  end
+  def render_error_response
+    render turbo_stream: turbo_stream.replace("flash", partial: "shared/flash", locals: { message: "Action failed!" })
+  end
 
   def broadcast_update(target, partial)
     html = render_to_string(partial: partial, formats: [:html])
     turbo_stream = render_to_string(partial: "update_#{target}", formats: [:turbo_stream])
+
     Rails.logger.debug "Broadcasting update to #{target} with partial #{partial}"
-    Turbo::StreamsChannel.broadcast_to @server, target: target, html: html, turbo_stream: turbo_stream
+
+    # Turbo::StreamsChannel.broadcast_to(
+    #   @server,
+    #   target: target,
+    #   html: html,
+    #   turbo_stream: turbo_stream
+    # )
+    load_game_data
+    Rails.logger.debug "Broadcasting update GAME  #{@game} with SERVER #{@server}"
+    Turbo::StreamsChannel.broadcast_replace_to(
+      @server,
+      target: target,
+      partial: partial,
+      locals: { server:@server, game: @game, opponents:@opponents, server_user: @server_user, server_users: @server_users, grid_cells: @grid_cells, current_turn_user: @current_turn_user, waiting_for_players: @waiting_for_players }
+    )
   end
   def handle_error(message)
     #Rails.logger.error "[GamesController#handle_error] Server \#{@server.id}: \#{message}"
@@ -135,21 +183,7 @@ class GamesController < ApplicationController
     @current_turn_user = @server.current_turn_server_user || @server.server_users.order(:turn_order).first
     @opponents = @server.server_users.includes(:user, :treasures) || []
     @waiting_for_players = @server.server_users.count < @server.max_players
-  end
-
-  def ensure_game_in_progress
-    @server = Server.includes(:game).find(params[:server_id]) # Find the server
-    @game = @server.game # Access the associated game
-    redirect_to servers_path, alert: 'Game is not in progress.' unless @server.status == 'in_progress'
-  end
-
-  def ensure_current_player_turn
-    @server = Server.includes(:game).find(params[:server_id]) # Find the server
-    @game = @server.game # Access the associated game
-    unless @server.current_turn_server_user == @server_user
-      flash[:alert] = "It's not your turn."
-      redirect_to server_game_path(@server, @game) and return
-    end
+    @treasures =  @server_user.treasures
   end
 
   def advance_turn
@@ -217,6 +251,7 @@ class GamesController < ApplicationController
           update_game_board
           update_player_stats
           update_opponent_details
+          Rails.logger.debug "server_user: #{@server_user.user_id}"
           flash[:notice] = 'Moved successfully.'
         end
       else
@@ -580,9 +615,10 @@ class GamesController < ApplicationController
       winner = determine_winner
       if winner
         @server.update(status: 'finished')
+        @game.update(winner: winner.user.username)
 
         # Broadcast game over and winner information
-        update_game_over(winner)
+        update_game_over
         return
       else
         flash[:alert] = 'Unable to determine a winner due to invalid game state.'

@@ -1,5 +1,7 @@
 class RemoveUnusedKeysFromServers < ActiveRecord::Migration[7.2]
   def change
-    remove_column :servers, :cable_token, :string
+    if column_exists?(:servers, :cable_token)
+      remove_column :servers, :cable_token, :string
+    end
   end
 end
