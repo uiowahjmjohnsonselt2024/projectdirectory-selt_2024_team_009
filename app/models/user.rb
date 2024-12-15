@@ -9,6 +9,7 @@ class User < ApplicationRecord
   has_many :created_servers, class_name: 'Server', foreign_key: 'created_by', dependent: :destroy
   has_many :server_users, dependent: :destroy
   has_many :servers, through: :server_users
+  has_many :chat_messages, dependent: :destroy
 
   has_many :transactions, dependent: :destroy
   has_many :inventories, dependent: :destroy

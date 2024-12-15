@@ -10,7 +10,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_12_14_181107) do
+ActiveRecord::Schema[7.2].define(version: 2024_12_15_005909) do
+  create_table "chat_messages", force: :cascade do |t|
+    t.text "content"
+    t.integer "server_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["server_id"], name: "index_chat_messages_on_server_id"
+    t.index ["user_id"], name: "index_chat_messages_on_user_id"
+  end
+
   create_table "contents", force: :cascade do |t|
     t.text "story_text"
     t.string "image_url"
@@ -186,6 +196,8 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_14_181107) do
     t.datetime "updated_at", null: false
   end
 
+  add_foreign_key "chat_messages", "servers"
+  add_foreign_key "chat_messages", "users"
   add_foreign_key "games", "servers"
   add_foreign_key "grid_cells", "contents"
   add_foreign_key "grid_cells", "servers"

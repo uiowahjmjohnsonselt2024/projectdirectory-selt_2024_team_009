@@ -29,6 +29,7 @@ Rails.application.routes.draw do
   end
 
   resources :servers do
+    resources :chat_messages, only: [:create]
     member do
       post :start_game
       post :join_game
@@ -40,6 +41,7 @@ Rails.application.routes.draw do
       end
     end
     resources :games do
+      resources :chat_messages, only: [:create]
       member do
         post 'perform_action', to: 'games#perform_action'
         get :current_turn

@@ -12,6 +12,8 @@ class GamesController < ApplicationController
   def show
     @server = Server.find(params[:server_id])
     @game = @server.game
+    @chat_messages = @server.chat_messages.includes(:user)
+
     Rails.logger.info "Loading game data for server #{params[:server_id]}"
     # @server = Server.find(params[:server_id]) # Ensure @server is set
     load_game_data

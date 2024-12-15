@@ -10,11 +10,11 @@
       = form_with(model: @server, local: true) do |f|
         .form-group.text-color-secondary
           = f.label :name
-          = f.text_field :name, class: 'form-control'
+          = f.text_field :name, class: 'form-control', title:'This is what will show up to other players'
 
         .form-group.text-color-secondary
           = f.label :max_players
-          = f.number_field :max_players, class: 'form-control'
+          = f.number_field :max_players, class: 'form-control', title:'This controls how much players are needed to start the game (and no more can join after that.)'
 
         = f.submit 'Create Server', class: 'btn btn-primary my-2'
 

@@ -8,6 +8,7 @@ class Server < ApplicationRecord
   has_one :game, dependent: :destroy
   belongs_to :creator, class_name: 'User', foreign_key: 'created_by'
   belongs_to :current_turn_server_user, class_name: 'ServerUser', optional: true
+  has_many :chat_messages, dependent: :destroy
 
   # Validations
   validates :status, inclusion: { in: %w[pending in_progress finished] }
