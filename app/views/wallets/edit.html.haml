@@ -1,12 +1,17 @@
-%h1 Edit Wallet
+%div.row.d-flex.justify-content-center
+  %div.col-md-6
+    %div.card.text-color-secondary.bg-dark.bg-opacity-75
+      %div.card-body
+        %h4.card-title.text-center Edit Wallet
+        = form_with model: @wallet, local: true do |f|
+          .form-group
+            = f.label :balance, "Current Balance:"
+            = f.number_field :balance, class: 'form-control'
 
-= form_with model: @wallet, local: true do |f|
-  .form-group
-    = f.label :balance, "Current Balance:"
-    = f.number_field :balance, class: 'form-control'
+          %div
+            .actions
+              = f.submit 'Update Wallet', class: 'btn btn-primary w-100'
 
-  .actions.mt-3
-    = f.submit 'Update Wallet', class: 'btn btn-warning'
+            .actions.mt-2
+              = link_to 'Back to Wallets', wallets_path, class: 'btn btn-secondary w-100'
 
-.actions.mt-3
-  = link_to 'Back to Wallets', wallets_path, class: 'btn btn-secondary'
