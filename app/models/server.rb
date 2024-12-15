@@ -96,11 +96,21 @@ class Server < ApplicationRecord
 
   # Place treasures on the grid
   def place_treasures
+    random_items = Item.all.sample(5)
     treasure_cells = grid_cells.sample(5)
-    treasure_cells.each do |cell|
-      cell.update!(treasure: Treasure.all.sample)
+    treasure_cells.zip(random_items).each do |cell, item|
+      # Create a treasure specifically for this cell and game
+      treasure = Treasure.create!(
+        item: item,
+        game: game,
+        grid_cell: cell,
+        name: item.name,
+        description: item.description
+      )
+      # No cell.update needed if we rely on Treasure belonging to cell
     end
   end
+
 
   # Place obstacles on the grid
   def place_obstacles

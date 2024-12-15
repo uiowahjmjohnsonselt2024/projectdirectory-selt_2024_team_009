@@ -2,8 +2,9 @@ class ServerUser < ApplicationRecord
   belongs_to :server
   belongs_to :user
   has_many :grid_cells, foreign_key: :owner_id
-  has_many :treasures, through: :grid_cells
-  has_many :inventories, dependent: :destroy
+  has_many :treasures, foreign_key: :owner_id
+  has_many :server_user_items, dependent: :destroy
+  has_many :game_items, through: :server_user_items, source: :item
 
   #before_create :deduct_entry_fee
   # Validations
@@ -45,6 +46,26 @@ class ServerUser < ApplicationRecord
       errors.add(:base, 'Not enough total AP')
       false
     end
+  end
+  def choose_game_items(item_ids)
+    # Ensure user owns these items in their global inventory
+    # Check in the Inventory model
+    user_items = user.inventories.where(item_id: item_ids)
+    if user_items.size < item_ids.size
+      errors.add(:base, "You don't own all of these items.")
+      return false
+    end
+
+    if item_ids.size > 5
+      errors.add(:base, "You can only bring up to 5 items into the game.")
+      return false
+    end
+
+    # Create ServerUserItem records
+    item_ids.each do |id|
+      server_user_items.create!(item_id: id)
+    end
+    true
   end
 
   def adjust_shard_balance(amount)

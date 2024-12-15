@@ -15,9 +15,8 @@ class ServersController < ApplicationController
   # GET /servers/:id
   def show
     @server = Server.includes(:game).find(params[:id])
-    @server_users = @server.server_users.includes(:user).map do |server_user|
-      server_user.as_json(methods: [:cable_token])
-    end
+    @server_users = @server.server_users.includes(:user)
+
   end
 
   # GET /servers/new
@@ -103,6 +102,11 @@ class ServersController < ApplicationController
   # POST /servers/:id/join_game
   # POST /servers/:id/join_game
   def join_game
+    @server = Server.includes(:game).find(params[:id])
+    if @server.game.nil?
+      redirect_to @server, alert: 'Game has not been started yet.'
+      return
+    end
     #Rails.logger.info "[ServersController#join_game] User #{current_user.username} attempting to join server #{@server.id}, Token: #{current_user.cable_token}"
     if @server.users.include?(current_user)
       redirect_to server_game_path(@server, @server.game), alert: 'You have already joined this game.'
@@ -122,12 +126,7 @@ class ServersController < ApplicationController
     # Assign symbol and turn order
     @server.assign_symbols_and_turn_order
     @server.assign_starting_positions(new_user: @server_user)
-    Turbo::StreamsChannel.broadcast_replace_to(
-      @server,
-      target: "game-left-panel",
-      partial: "games/game_left_panel",
-      locals: { server: @server, server_users: @server.server_users, server_user: @server_user, waiting_for_players: @server.server_users.count < @server.max_players }
-    )
+
     # Assign starting position ONLY for the new user
     redirect_to server_game_path(@server, @server.game), notice: 'Joined the game!'
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_12_14_181107) do
+ActiveRecord::Schema[7.2].define(version: 2024_12_15_070744) do
   create_table "contents", force: :cascade do |t|
     t.text "story_text"
     t.string "image_url"
@@ -23,6 +23,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_14_181107) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "server_id", null: false
+    t.string "winner"
     t.index ["server_id"], name: "index_games_on_server_id"
   end
 
@@ -31,7 +32,6 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_14_181107) do
     t.integer "x"
     t.integer "y"
     t.integer "content_id"
-    t.integer "treasure_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "owner_id"
@@ -47,7 +47,6 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_14_181107) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "item_name"
-    t.integer "server_user_id"
   end
 
   create_table "items", force: :cascade do |t|
@@ -93,6 +92,16 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_14_181107) do
     t.integer "level"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "server_user_items", force: :cascade do |t|
+    t.integer "server_user_id", null: false
+    t.integer "item_id", null: false
+    t.boolean "used", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["item_id"], name: "index_server_user_items_on_item_id"
+    t.index ["server_user_id"], name: "index_server_user_items_on_server_user_id"
   end
 
   create_table "server_users", force: :cascade do |t|
@@ -160,6 +169,12 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_14_181107) do
     t.string "unlock_criteria"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "game_id", null: false
+    t.integer "grid_cell_id", null: false
+    t.integer "owner_id"
+    t.index ["game_id"], name: "index_treasures_on_game_id"
+    t.index ["grid_cell_id"], name: "index_treasures_on_grid_cell_id"
+    t.index ["owner_id"], name: "index_treasures_on_owner_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -189,7 +204,6 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_14_181107) do
   add_foreign_key "games", "servers"
   add_foreign_key "grid_cells", "contents"
   add_foreign_key "grid_cells", "servers"
-  add_foreign_key "grid_cells", "treasures"
   add_foreign_key "inventories", "items"
   add_foreign_key "inventories", "users"
   add_foreign_key "leaderboard_entries", "leaderboards"
@@ -197,6 +211,8 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_14_181107) do
   add_foreign_key "leaderboards", "servers"
   add_foreign_key "scores", "servers"
   add_foreign_key "scores", "users"
+  add_foreign_key "server_user_items", "items"
+  add_foreign_key "server_user_items", "server_users"
   add_foreign_key "server_users", "servers"
   add_foreign_key "server_users", "users"
   add_foreign_key "servers", "users", column: "created_by"
@@ -205,6 +221,9 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_14_181107) do
   add_foreign_key "treasure_finds", "servers"
   add_foreign_key "treasure_finds", "treasures"
   add_foreign_key "treasure_finds", "users"
+  add_foreign_key "treasures", "games"
+  add_foreign_key "treasures", "grid_cells"
   add_foreign_key "treasures", "items"
+  add_foreign_key "treasures", "server_users", column: "owner_id"
   add_foreign_key "wallets", "users"
 end
